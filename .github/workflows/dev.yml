@@ -31,14 +31,11 @@ jobs:
     - name: 安裝 node 套件
       run: npm i
 
-    # - name: 給予環境變數
-    #   run: |
-    #     cp .env.ci .env
-    #     echo "REACT_APP_GA=G-3N74P0MY0E" >> .env
-    #     echo "REACT_APP_API_URL=${{ secrets.API }}" >> .env
-    #     echo "REACT_APP_URL=https://tsb.sexyoung.tw" >> .env
-    #     echo "REACT_APP_LRID=jk2u/tsbsexyoung" >> .env
-    #     cat .env
+    - name: 給予環境變數
+      run: |
+        touch .env
+        echo {{secrets.DATABASE_URL}} >> .env
+        cat .env
 
     # - name: 跑個測試唄
     #   run: npm test -- --coverage --watchAll=false -u
