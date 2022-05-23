@@ -11,10 +11,71 @@ datasource db {
 }
 
 model Project {
-  id         String   @id @default(uuid())
-  name       String @db.VarChar(100)
-  code       String @db.VarChar(50)
-  isActive   Boolean @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        Int       @id @default(autoincrement())
+  name      String    @db.VarChar(100)
+  code      String?   @unique @db.VarChar(50)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  users  ProjectsOnUsers[]
+  meters Meter[]
+}
+
+enum Role {
+  ENG // Engineer         (工程師)
+  ENM // Engineer Manager (工程師主管)
+  OFW // Office Worker    (文書)
+  ADM // Admin            (管理者)
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique @db.VarChar(50)
+  password    String    @db.VarChar(255)
+  fullname    String?   @db.VarChar(20)
+  title       Role
+  email       String?   @unique @db.VarChar(100)
+  phone       String?   @db.VarChar(20)
+  avatar      String?   @db.VarChar(100)
+  isActive    Boolean   @default(true)
+  isDailyLink Boolean   @default(true)
+  lineID      String?   @unique @db.VarChar(40)
+  note        String?   @db.Text
+  token       String?   @db.VarChar(100)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+
+  projects ProjectsOnUsers[]
+}
+
+model ProjectsOnUsers {
+  user      User      @relation(fields: [userId], references: [id])
+  userId    Int
+  project   Project   @relation(fields: [projectId], references: [id])
+  projectId Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@id([userId, projectId])
+}
+
+model Meter {
+  id        BigInt    @id @default(autoincrement())
+  area      String?   @db.VarChar(30)
+  waterId   String    @unique @db.VarChar(20)
+  meterId   String    @unique @db.VarChar(30)
+  address   String?   @db.VarChar(100)
+  lat       Float?    @db.Double
+  lng       Float?    @db.Double
+  note      String?   @db.Text
+  type      Int?      @db.TinyInt // 0~2
+  location  String?   @db.VarChar(20)
+  suppy     Int?      @db.TinyInt // 1~5
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  project   Project @relation(fields: [projectId], references: [id])
+  projectId Int
 }
