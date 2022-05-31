@@ -47,6 +47,7 @@ model User {
   updatedAt   DateTime? @updatedAt
 
   projects ProjectsOnUsers[]
+  Record   Record[]
 }
 
 model ProjectsOnUsers {
@@ -61,21 +62,39 @@ model ProjectsOnUsers {
 }
 
 model Meter {
-  id        BigInt    @id @default(autoincrement())
-  area      String?   @db.VarChar(30)
-  waterId   String    @unique @db.VarChar(20)
-  meterId   String    @unique @db.VarChar(30)
-  address   String?   @db.VarChar(100)
-  lat       Float?    @db.Double
-  lng       Float?    @db.Double
-  note      String?   @db.Text
-  type      Int?      @db.TinyInt // 0~2
-  location  String?   @db.VarChar(20)
-  suppy     Int?      @db.TinyInt // 1~5
-  isActive  Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
-
+  id        BigInt  @id @default(autoincrement())
   project   Project @relation(fields: [projectId], references: [id])
   projectId Int
+  area      String? @db.VarChar(30)
+  waterId   String  @unique @db.VarChar(20)
+  meterId   String  @unique @db.VarChar(30)
+  address   String? @db.VarChar(100)
+  lat       Float?  @db.Double
+  lng       Float?  @db.Double
+  note      String? @db.Text
+  type      Int?    @db.TinyInt // 0~2 直接錶0、總錶1、分錶2
+  location  String? @db.VarChar(20)
+  suppy     Int?    @db.TinyInt // 1~5 正常1、中止3、停水5
+  isActive  Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  Record    Record[]
+}
+
+enum Status {
+  success
+  notRecord
+}
+
+model Record {
+  id        BigInt    @id @default(autoincrement())
+  user      User      @relation(fields: [userId], references: [id])
+  userId    Int
+  meter     Meter     @relation(fields: [meterId], references: [id])
+  meterId   BigInt
+  status    Status
+  content   String    @db.VarChar(50)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
 }
