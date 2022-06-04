@@ -1,4 +1,5 @@
 import { PrismaClient, User, Project, Meter } from "@prisma/client";
+import { Role } from "~/consts/role";
 const db = new PrismaClient();
 
 async function seed() {
@@ -22,13 +23,6 @@ function getProjects() {
     { name: "proj-6", code: `6666` }, // user-1, user-2
     { name: "proj-7", code: `7777` }, // user-1, user-2
   ];
-}
-
-enum Role {
-  ENG = "ENG",
-  ENM = "ENM",
-  OFW = "OFW",
-  ADM = "ADM",
 }
 
 function getUsers() {
