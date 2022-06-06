@@ -37,6 +37,7 @@ export default function DashBoard() {
         <li><Link to="/d/user/new">新增使用者</Link></li>
         <li><Link to="/d/area">小區查詢</Link></li>
         <li><Link to="/d/project">標案管理</Link></li>
+        <li><Link to="/d/project/export">標案匯出</Link></li>
         <li><Link to="/d/meter/upload">上傳水錶</Link></li>
         <li><Link to="/d/meter">水錶查詢</Link></li>
         <li><Link to="/d/record">水錶登錄</Link></li>
