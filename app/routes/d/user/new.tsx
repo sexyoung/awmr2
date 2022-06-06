@@ -1,10 +1,11 @@
-import { json } from "@remix-run/node";
-import type { ActionFunction, LinksFunction } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
+import type { ActionFunction } from "@remix-run/node";
 
-import { useActionData, useSearchParams, Link } from "@remix-run/react";
+import { useActionData, useSearchParams } from "@remix-run/react";
 
+import { Role } from "~/consts/role";
 import { db } from "~/utils/db.server";
-import { createUserSession, login, register } from "~/api/user";
+import { register } from "~/api/user";
 
 type ActionData = {
   formError?: string;
@@ -13,15 +14,14 @@ type ActionData = {
     password: string | undefined;
   };
   fields?: {
-    // loginType: string;
     name: string;
     password: string;
   };
 };
 
-function validateName(username: unknown) {
-  if (typeof username !== "string" || username.length < 3) {
-    return `Usernames must be at least 3 characters long`;
+function validateName(name: unknown) {
+  if (typeof name !== "string" || name.length < 3) {
+    return `names must be at least 3 characters long`;
   }
 }
 
@@ -31,31 +31,21 @@ function validatePassword(password: unknown) {
   }
 }
 
-function validateUrl(url: any) {
-  let urls = ["/jokes", "/", "https://remix.run"];
-  if (urls.includes(url)) {
-    return url;
-  }
-  return "/jokes";
-}
-
 const badRequest = (data: ActionData) =>
   json(data, { status: 400 });
 
-export const action: ActionFunction = async ({
-  request,
-}) => {
+export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData();
-  // const loginType = form.get("loginType");
+  
   const name = form.get("name");
   const password = form.get("password");
-  const redirectTo = validateUrl(
-    form.get("redirectTo") || "/jokes"
-  );
+  const title = form.get("title") as Role;
+
+  const redirectTo = form.get("redirectTo") || "/d/user";
   if (
-    // typeof loginType !== "string" ||
     typeof name !== "string" ||
     typeof password !== "string" ||
+    typeof title !== "string" ||
     typeof redirectTo !== "string"
   ) {
     return badRequest({
@@ -71,64 +61,44 @@ export const action: ActionFunction = async ({
   if (Object.values(fieldErrors).some(Boolean))
     return badRequest({ fieldErrors, fields });
 
-  switch (loginType) {
-    case "login": {
-      const user = await login({ username, password });
-      if (!user) {
-        return badRequest({
-          fields,
-          formError: `Username/Password combination is incorrect`,
-        });
-      }
-      return createUserSession(user.id, redirectTo);
-    }
-    case "register": {
-      const userExists = await db.user.findFirst({
-        where: { username },
-      });
-      if (userExists) {
-        return badRequest({
-          fields,
-          formError: `User with username ${username} already exists`,
-        });
-      }
-      const user = await register({ username, password });
-      if (!user) {
-        return badRequest({
-          fields,
-          formError: `Something went wrong trying to create a new user.`,
-        });
-      }
-      return createUserSession(user.id, redirectTo);
-    }
-    default: {
-      return badRequest({
-        fields,
-        formError: `Login type invalid`,
-      });
-    }
+  const userExists = await db.user.findFirst({ where: { name }});
+  if (userExists) {
+    return badRequest({
+      fields,
+      formError: `User with name ${name} already exists`,
+    });
   }
+  const user = await register({ name, password, title });
+  if (!user) {
+    return badRequest({
+      fields,
+      formError: `Something went wrong trying to create a new user.`,
+    });
+  }
+  return redirect('/d/user');
 };
 
 const NewUserPage = () => {
-  console.log('newPage');
   const [searchParams] = useSearchParams();
   const actionData = useActionData<ActionData>();
   return (
     <div>
       <h2>NewUserPage</h2>
       <form method="post">
-          <input
-            type="hidden"
-            name="redirectTo"
-            value={searchParams.get("redirectTo") ?? undefined}
-          />
-
+          <input type="hidden" name="redirectTo" value={searchParams.get("redirectTo") ?? undefined} />
           <input type="text" id="name-input" name="name" />
+          {actionData?.fieldErrors?.name && <p>{actionData.fieldErrors.name}</p>}
           <input id="password-input" name="password" defaultValue={actionData?.fields?.password} type="password" />
-          <button type="submit" className="button">
-            Submit
-          </button>
+          {actionData?.fieldErrors?.password && <p>{actionData.fieldErrors.name}</p>}
+          <select name="title" id="title">
+            {Object.values(Role).map(role =>
+              <option key={role}>{role}</option>
+            )}
+          </select>
+          <div id="form-error-message">
+            {actionData?.formError && <p>{actionData.formError}</p>}
+          </div>
+          <button type="submit" className="button">Submit</button>
       </form>
     </div>
   )

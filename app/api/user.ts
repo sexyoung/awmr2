@@ -14,25 +14,16 @@ type RegisterForm = LoginForm & {
   title: Role;
 };
 
-export async function register({
-  name,
-  password,
-  title,
-}: RegisterForm) {
+export async function register({ name, password, title }: RegisterForm) {
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await db.user.create({
     data: { name, password: passwordHash, title },
   });
-  return { id: user.id, name };
+  return { id: user.id, name, title };
 }
 
-export async function login({
-  name,
-  password,
-}: LoginForm) {
-  const user = await db.user.findUnique({
-    where: { name },
-  });
+export async function login({ name, password }: LoginForm) {
+  const user = await db.user.findUnique({ where: { name }});
   if (!user) return null;
   const isCorrectPassword = await bcrypt.compare(
     password,
@@ -82,7 +73,7 @@ export async function getUser(request: Request) {
   try {
     const user = await db.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true },
+      select: { id: true, name: true, title: true },
     });
     return user;
   } catch {
