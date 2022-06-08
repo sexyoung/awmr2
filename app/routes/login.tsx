@@ -1,7 +1,7 @@
 import { ActionFunction, json, LinksFunction, LoaderFunction, MetaFunction, redirect } from "@remix-run/node";
 import { Form, useActionData, useLoaderData, useSearchParams } from "@remix-run/react"
 import { createUserSession, getUser, login } from "~/api/user";
-import stylesUrl from "~/style/login.css";
+import stylesUrl from "~/styles/login.css";
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
@@ -94,7 +94,7 @@ export default () => {
   const { user } = useLoaderData();
   
   return (
-    <div>
+    <div className="LoginPage">
       <h2>LoginPage</h2>
       <Form method="post">
         <input
@@ -112,7 +112,7 @@ export default () => {
           aria-errormessage={actionData?.fieldErrors?.name ? "name-error": undefined}
         />
         {actionData?.fieldErrors?.name && <p>{actionData.fieldErrors.name}</p>}
-
+        <br />
         <input
           id="password-input"
           name="password"

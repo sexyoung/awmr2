@@ -27,8 +27,8 @@ function getProjects() {
 
 function getUsers() {
   return [
-    { name: "user-1", password: "abc123", title: Role.ENG },
-    { name: "user-2", password: "abc123", title: Role.ENM },
+    { name: "user-1", password: "$2a$10$kTwQ7CeU5w2KQoSfnTUOLu29jSzFAH.Tz6QXgs3SXbOrel22n4tYO", title: Role.ENG },
+    { name: "user-2", password: "$2a$10$kTwQ7CeU5w2KQoSfnTUOLu29jSzFAH.Tz6QXgs3SXbOrel22n4tYO", title: Role.ENM },
   ];
 }
 

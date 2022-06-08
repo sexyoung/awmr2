@@ -19,7 +19,7 @@ export default function DashBoard() {
   const { user } = useLoaderData<LoaderData>();
   
   return (
-    <div>
+    <div className="abc">
       {user &&
         <div className="user-info">
           <span>{`Hi ${user.name}`}</span>

@@ -2,7 +2,6 @@ import { json, LoaderFunction } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { db } from "~/utils/db.server";
 
-
 type LoaderData = {
   userListItems: Array<{ id: number; name: string }>;
 };
@@ -18,7 +17,7 @@ export const loader: LoaderFunction = async () => {
   return json(data);
 };
 
-const UserPage = () => {
+export default () => {
   const { userListItems } = useLoaderData<LoaderData>();
   return (
     <div>
@@ -31,5 +30,3 @@ const UserPage = () => {
     </div>
   )
 }
-
-export default UserPage
