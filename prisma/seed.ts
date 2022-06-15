@@ -66,7 +66,7 @@ enum Status {
 }
 
 async function addRecords(u: User[], m: Meter[]) {
-  await db.record.create({ data: {userId: u[0].id, meterId: m[0].id, status: Status.success, content: '123'}});
-  await db.record.create({ data: {userId: u[1].id, meterId: m[0].id, status: Status.success, content: '456'}});
+  await db.record.create({ data: {userId: u[0].id, meterId: m[1].id, status: Status.success, content: '123'}});
+  await db.record.create({ data: {userId: u[1].id, meterId: m[0].id, status: Status.notRecord, content: '456'}});
   await db.record.create({ data: {userId: u[0].id, meterId: m[0].id, status: Status.success, content: '789'}});
 }
