@@ -1,0 +1,8 @@
+.aside .menu {
+  padding: 0;
+}
+.aside .menu li {
+  margin: 0 2px;
+  font-size: .9rem;
+  display: inline;
+}

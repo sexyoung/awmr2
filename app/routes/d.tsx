@@ -1,7 +1,13 @@
-import { LoaderFunction, json } from "@remix-run/node";
+import { LoaderFunction, json, LinksFunction } from "@remix-run/node";
 import { Outlet, Link, useLoaderData, Form } from "@remix-run/react";
 
 import { getUser, requireUserId } from "~/api/user";
+
+import stylesUrl from "~/styles/d.css";
+
+export const links: LinksFunction = () => {
+  return [{ rel: "stylesheet", href: stylesUrl }];
+};
 
 type LoaderData = {
   user: Awaited<ReturnType<typeof getUser>>;
@@ -19,7 +25,7 @@ export default function DashBoard() {
   const { user } = useLoaderData<LoaderData>();
   
   return (
-    <div className="abc">
+    <aside className="aside abc">
       {user &&
         <div className="user-info">
           <span>{`Hi ${user.name}`}</span>
@@ -30,7 +36,7 @@ export default function DashBoard() {
           </Form>
         </div>
       }
-      <ul>
+      <ul className="menu">
         <li><Link to="/login">登入</Link></li>
         <li><Link to="/d">首頁</Link></li>
         <li><Link to="/d/user">使用者頁</Link></li>
@@ -45,6 +51,6 @@ export default function DashBoard() {
         <li><Link to="/d/record/out">區外要求</Link></li>
       </ul>
       <Outlet />
-    </div>
+    </aside>
   );
 }
