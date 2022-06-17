@@ -54,7 +54,7 @@ jobs:
     - name: 壓縮 build 資料夾
       uses: TonyBogdanov/zip@1.0
       with:
-        args: zip -qq -r ./build.zip ./build
+        args: zip -qq -r ./build.zip ./build ./public
 
     - name: 上傳 build 🆙
       uses: actions/upload-artifact@v3
@@ -88,21 +88,21 @@ jobs:
           source: "./,!.git,!build.zip"
           target: "~/web/awmr-2-dev"
 
-      - name: 改一下位置唄
-        uses: garygrossgarten/github-action-ssh@release
-        with:
-          command: |
-            cd web
-            mv awmr-2-dev trash
-            mv trash/build .
-            mv trash/package.json ./build
-            mv trash/node_modules ./build
-            mv build awmr-2-dev
-            rm -rf ./trash
-            chmod -R 775 awmr-2-dev
-          host: ${{secrets.HOST}}
-          username: ${{secrets.USER}}
-          privateKey: ${{ secrets.KEY }}
+      # - name: 改一下位置唄
+      #   uses: garygrossgarten/github-action-ssh@release
+      #   with:
+      #     command: |
+      #       cd web
+      #       mv awmr-2-dev trash
+      #       mv trash/build .
+      #       mv trash/package.json ./build
+      #       mv trash/node_modules ./build
+      #       mv build awmr-2-dev
+      #       rm -rf ./trash
+      #       chmod -R 775 awmr-2-dev
+      #     host: ${{secrets.HOST}}
+      #     username: ${{secrets.USER}}
+      #     privateKey: ${{ secrets.KEY }}
 
   # slack-notice: # 通知啦幹
   #     runs-on: ubuntu-latest
