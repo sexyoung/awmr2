@@ -4,16 +4,15 @@ import { Form, Link, useActionData, useLoaderData, useFetcher } from "@remix-run
 import { db } from "~/utils/db.server";
 import type { ActionDataGen } from "~/type/action.data";
 import type { NewProjectForm, Project } from "~/type/project";
+import { RecordCount, sum } from "~/api/record";
 export { action } from "./action";
 
 type ActionData = ActionDataGen<NewProjectForm>
 
 type LoaderData = {
   projectListItems: Array<Project & {
-    success: number;
-    notRecord: number;
-    meterCount: number;
-  }>;
+    total: number;
+  } & RecordCount>;
 };
 
 export const loader: LoaderFunction = async () => {
@@ -28,23 +27,11 @@ export const loader: LoaderFunction = async () => {
         select: { id: true },
         where: { projectId: project.id },
       });
-
       const meterIdList = meterListItems.map(({ id }) => id);
-      const recordCount = await db.record.groupBy({
-        by: ['status'],
-        _count: { status: true },
-        where: { meterId: { in: meterIdList }}
-      });
-  
       return {
         ...project,
-        meterCount: meterIdList.length,
-        ...recordCount.reduce((obj, status) => {
-          return {
-            ...obj,
-            [status.status]: status._count.status
-          }
-        }, {})
+        total: meterIdList.length,
+        ...await sum(meterIdList),
       }
     }))
   });
@@ -75,9 +62,9 @@ export default () => {
           {project.name}/
           {project.code}/
           {project.isActive ? 'enable': 'disabled'}/
-          錶數: {project.meterCount}/
-          成功數: {project.success ?? 0}/
-          未登數: {project.notRecord ?? 0}/
+          錶數: {project.total}/
+          成功數: {project.success}/
+          未登數: {project.notRecord}/
           <Link to={`/d/project/export/${project.id}`}>匯出</Link>
           <Link to={`/d/meter/upload/${project.id}`}>上傳水錶</Link>
           <fetcher.Form method="delete">

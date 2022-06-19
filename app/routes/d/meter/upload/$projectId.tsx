@@ -69,13 +69,11 @@ const UploadPage = () => {
       !existMeterIdList.includes(item.meterID)
     );
 
-    console.log('uploadMeterList', uploadMeterList);
     setIsUpLoading(true);
     const uploadMeterList$ = from(uploadMeterList)
       .pipe(
         concatMap(async ({waterID: waterId, meterID: meterId, ...meter}) => {
           const formData = new FormData();
-          console.log('!!!!');
           formData.append('_method', 'upload');
           formData.append('data', JSON.stringify({
             projectId: +params.projectId!,
@@ -87,7 +85,6 @@ const UploadPage = () => {
             type: +meter.type,
             location: meter.location,
           }));
-          console.log('????');
           return (
             await (await fetch(`${location.href}?_data=routes%2Fd%2Fmeter%2Fupload%2F%24projectId`, {
               method: 'post',
@@ -110,7 +107,7 @@ const UploadPage = () => {
   // console.log('fetcher.state', fetcher.state);
   // console.log('fetcher.type', fetcher.type);
   // console.log('fetcher.submission', fetcher.submission);
-  console.log('fetcher.data', fetcher.data);
+  // console.log('fetcher.data', fetcher.data);
 
   return (
     <div>

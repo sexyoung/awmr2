@@ -1,4 +1,4 @@
-import type { NewProjectForm, Project } from "~/type/project";
+import type { NewProjectForm } from "~/type/project";
 import { db } from "~/utils/db.server";
 
 export async function create({ name, code, isActive }: NewProjectForm) {
