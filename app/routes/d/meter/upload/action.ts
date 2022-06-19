@@ -52,14 +52,16 @@ const verb = {
   upload: async (form: FormData): Promise<Response> => {
     const {status: suppy, address, ...meter} = JSON.parse(form.get('data') as string);
     const latlng = await verb.coordinate(address);
+    // await delay(800);
     try {
       await db.meter.create({
         data: {...meter, suppy, ...latlng, address: toSBC(address)}
       });
       return json({...meter, ...latlng});
+      // return json(true);
     } catch(e) {
       return json({
-        message: 'duplicated meter'
+        message: e
       }, { status: 500 })
     }
   },

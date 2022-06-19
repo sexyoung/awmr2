@@ -1,4 +1,5 @@
-import { from, concatMap } from "rxjs";
+import { from, concatMap, scan, distinctUntilChanged, map } from "rxjs";
+import { useState } from "react";
 import { read, utils } from "xlsx";
 import { useParams, useFetcher } from "@remix-run/react"
 import { Caliber } from "~/consts/meter";
@@ -16,10 +17,12 @@ type UploadMeter = {
 
 let data: UploadMeter[];
 const caliber = Object.values(Caliber).filter(v => typeof v === 'string');
-const sheetHeader = [ "waterID", "area", "meterID", "address", "status", "type", "location"];
+const sheetHeader = ["waterID", "area", "meterID", "address", "status", "type", "location"];
 
 const UploadPage = () => {
   const params = useParams();
+  const [percent, setPercent] = useState(0);
+  const [isUpLoading, setIsUpLoading] = useState(false);
   const fetcher = useFetcher<string[]>(); // meterId list
 
   const handleChooseFile: React.ChangeEventHandler<HTMLInputElement> = async ({ currentTarget }) => {
@@ -30,8 +33,11 @@ const UploadPage = () => {
     data = utils.sheet_to_json(workbook.Sheets.data);
     if(!data.length) return console.log('no data');
 
-    if(!Object.keys(data[0]).every(col => sheetHeader.includes(col))) {
-      return console.log('missing field');
+    const cols = Object.keys(data[0]);
+    for (let i = 0; i < sheetHeader.length; i++) {
+      if(!cols.includes(sheetHeader[i])) {
+        return console.log(`invalid field: ${sheetHeader[i]}`);
+      }
     }
 
     const validList = [];
@@ -64,17 +70,24 @@ const UploadPage = () => {
     );
 
     console.log('uploadMeterList', uploadMeterList);
-    from(uploadMeterList.slice(0, 100))
+    setIsUpLoading(true);
+    const uploadMeterList$ = from(uploadMeterList)
       .pipe(
         concatMap(async ({waterID: waterId, meterID: meterId, ...meter}) => {
           const formData = new FormData();
+          console.log('!!!!');
           formData.append('_method', 'upload');
           formData.append('data', JSON.stringify({
             projectId: +params.projectId!,
-            ...meter,
             waterId,
             meterId,
+            area: meter.area,
+            address: meter.address,
+            suppy: +meter.status,
+            type: +meter.type,
+            location: meter.location,
           }));
+          console.log('????');
           return (
             await (await fetch(`${location.href}?_data=routes%2Fd%2Fmeter%2Fupload%2F%24projectId`, {
               method: 'post',
@@ -82,8 +95,16 @@ const UploadPage = () => {
             })).json()
           )
         }),
-      )
-      .subscribe(console.log);
+        scan(sum => sum + 1, 0),
+        map(sum => ~~(sum/uploadMeterList.length * 100)),
+        distinctUntilChanged()
+      );
+      
+      uploadMeterList$.subscribe(percent => {
+        if(percent < 100) return setPercent(percent);
+        data = [];
+        setIsUpLoading(false);
+      });
   }
 
   // console.log('fetcher.state', fetcher.state);
@@ -105,7 +126,7 @@ const UploadPage = () => {
         <div>
           <h2>略過的資料</h2>
           {fetcher.data.map(meter =>
-            <div key={meter}>{meter}</div>
+            <span key={meter}>{meter}, </span>
           )}
         </div>
       )}
@@ -117,12 +138,14 @@ const UploadPage = () => {
           <button>上傳</button>
         </fetcher.Form>
       }
+      {isUpLoading && <div>{percent}%</div>}
       <ul>
         <li>v 讀取xlsx, data sheet</li>
         <li>v 傳送所有水號錶號去檢查</li>
         <li>v 略過已存在水錶 (水號or錶號相同)</li>
-        <li>分析地址</li>
-        <li>上傳水錶</li>
+        <li>v 分析地址</li>
+        <li>v 上傳水錶</li>
+        <li>v 評估上傳時間</li>
       </ul>
     </div>
   )
