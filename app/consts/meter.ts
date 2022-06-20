@@ -7,9 +7,9 @@ export enum Type {
 
 /** @description 供水狀況 */
 export enum Suppy {
-  DRT = 1, // 正常
-  TTL = 3, // 中止
-  BCH = 5, // 停水
+  NOM = 1, // 正常
+  END = 3, // 中止
+  PAU = 5, // 停水
 }
 
 /** @description 水錶口徑: 匯出的時候會用到 */
