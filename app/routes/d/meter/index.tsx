@@ -4,43 +4,64 @@ import { LoaderFunction } from "@remix-run/node";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 import { db } from "~/utils/db.server";
 import { Suppy, Type } from "~/consts/meter";
+import { Pagination, Props as PaginationProps } from "~/component/pagination";
 export { action } from "./action";
 
+const PAGE_SIZE = 30;
+
 type LoadData = {
-  projectListItems: Project,
+  href: string;
+  pathname: string;
+  searchString: string;
+  projectListItems: Project[];
   meterListItem: (
     Meter & {
       project: Project
     }
   )[]
-}
+} & PaginationProps
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
   const projectListItems = await db.project.findMany({
     orderBy: { createdAt: "desc" },
   });
+  const page = +url.searchParams.get("page")! || 1;
   const search = url.searchParams.get("search") || '';
+
+  const where = {
+    OR: [
+      {address: { contains: search }},
+      {meterId: { contains: search }},
+      {waterId: { contains: search }},
+    ]
+  }
+
+  let meterCount = await db.meter.count({ where });
+  meterCount = meterCount && (meterCount - 1);
+
+  const pageTotal = ~~(meterCount / PAGE_SIZE) + 1;
   const meterListItem = await db.meter.findMany({
-    where: {
-      OR: [
-        {address: { contains: search }},
-        {meterId: { contains: search }},
-        {waterId: { contains: search }},
-      ]
-    },
+    where,
+    skip: (page - 1) * PAGE_SIZE,
+    take: PAGE_SIZE,
     include: {
       project: true,
     }
   });
   return {
-    projectListItems,
+    page,
+    pageTotal,
     meterListItem,
+    projectListItems,
+    href: url.href,
+    pathname: url.pathname,
   };
 }
 
 const MeterPage = () => {
   const id = useRef<HTMLInputElement>(null);
+  const projectId = useRef<HTMLSelectElement>(null);
   const waterId = useRef<HTMLInputElement>(null);
   const meterId = useRef<HTMLInputElement>(null);
   const area = useRef<HTMLInputElement>(null);
@@ -51,11 +72,11 @@ const MeterPage = () => {
   const note = useRef<HTMLInputElement>(null);
   const [index, setIndex] = useState(-1);
   const fetcher = useFetcher();
-  const { meterListItem } = useLoaderData<LoadData>();
-  console.log(meterListItem);
+  const { href, pathname, page, pageTotal, meterListItem, projectListItems } = useLoaderData<LoadData>();
 
   const handleShowEdit = (index: number) => {
     id.current && (id.current.value = meterListItem[index].id?.toString() || '');
+    projectId.current && (projectId.current.value = meterListItem[index].projectId?.toString());
     waterId.current && (waterId.current.value = meterListItem[index].waterId);
     meterId.current && (meterId.current.value = meterListItem[index].meterId);
     area.current && (area.current.value = meterListItem[index].area as string);
@@ -66,10 +87,25 @@ const MeterPage = () => {
     note.current && (note.current.value = meterListItem[index].note || '');
     setIndex(index);
   }
+
+  const handleHideEdit = () => {
+    id.current && (id.current.value = "");
+    projectId.current && (projectId.current.value = "");
+    waterId.current && (waterId.current.value = "");
+    meterId.current && (meterId.current.value = "");
+    area.current && (area.current.value = "");
+    address.current && (address.current.value = "");
+    type.current && (type.current.value = "");
+    suppy.current && (suppy.current.value = "");
+    location.current && (location.current.value = "");
+    note.current && (note.current.value = "");
+  }
   
   return (
     <div>
       <h2>水錶查詢頁</h2>
+      pageTotal: {pageTotal}
+      <Pagination {...{page, pageTotal, href, pathname}} />
       <Form method="get">
         <input type="text" name="search" />
         <button>submit</button>
@@ -77,6 +113,13 @@ const MeterPage = () => {
       <Form method="patch">
         <div><input type="text" name="_method" value="update" readOnly /></div>
         <div><input ref={id} type="text" name="id" required /></div>
+        <div>
+          <select ref={projectId} name="projectId">
+            {projectListItems.map(project =>
+              <option key={project.id} value={project.id}>{project.name}</option>
+            )}
+          </select>
+        </div>
         <div><input ref={waterId} type="text" name="waterId" required /></div>
         <div><input ref={meterId} type="text" name="meterId" required /></div>
         <div><input ref={area} type="text" name="area" /></div>
@@ -97,6 +140,7 @@ const MeterPage = () => {
         </div>
         <div><input ref={location} type="text" name="location" /></div>
         <div><input ref={note} type="text" name="note" /></div>
+        <span onClick={handleHideEdit}>close</span>
         <button>update</button>
       </Form>
       {meterListItem.map((meter, index) =>

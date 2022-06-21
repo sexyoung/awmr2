@@ -23,6 +23,7 @@ const verb = {
   update: async (form: FormData): Promise<Response> => {
     const id = +form.get('id')!;
     const data = {
+      projectId: +form.get('projectId')!,
       waterId: form.get('waterId'),
       meterId: form.get('meterId'),
       area: form.get('area'),
