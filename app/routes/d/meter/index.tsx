@@ -18,7 +18,8 @@ type LoadData = {
     Meter & {
       project: Project
     }
-  )[]
+  )[];
+  search: string;
 } & PaginationProps
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -50,12 +51,11 @@ export const loader: LoaderFunction = async ({ request }) => {
     }
   });
   return {
-    page,
+    search,
     pageTotal,
     meterListItem,
     projectListItems,
     href: url.href,
-    pathname: url.pathname,
   };
 }
 
@@ -72,7 +72,7 @@ const MeterPage = () => {
   const note = useRef<HTMLInputElement>(null);
   const [index, setIndex] = useState(-1);
   const fetcher = useFetcher();
-  const { href, pathname, page, pageTotal, meterListItem, projectListItems } = useLoaderData<LoadData>();
+  const { search, href, pageTotal, meterListItem, projectListItems } = useLoaderData<LoadData>();
 
   const handleShowEdit = (index: number) => {
     id.current && (id.current.value = meterListItem[index].id?.toString() || '');
@@ -104,10 +104,9 @@ const MeterPage = () => {
   return (
     <div>
       <h2>水錶查詢頁</h2>
-      pageTotal: {pageTotal}
-      <Pagination {...{page, pageTotal, href, pathname}} />
+      <Pagination {...{pageTotal, href}} />
       <Form method="get">
-        <input type="text" name="search" />
+        <input type="text" name="search" defaultValue={search} />
         <button>submit</button>
       </Form>
       <Form method="patch">

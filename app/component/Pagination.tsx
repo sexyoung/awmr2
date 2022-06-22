@@ -2,25 +2,23 @@ import { Link } from "@remix-run/react";
 import { FC } from "react";
 export type Props = {
   href: string;
-  pathname: string;
-  page?: number;
-  pageTotal?: number;
+  pageTotal: number;
 }
 
 export const Pagination: FC<Props> = ({
   href,
-  pathname,
-  page = 1,
   pageTotal = 1,
 }) => {
-  const { searchParams } = new URL(href);
-  let prev = +searchParams.get('page')! - 1;
-  let next = +searchParams.get('page')! + 1;
+  const { searchParams, pathname } = new URL(href);
+  const page = +searchParams.get("page")! || 1;
+  
+  let prev = page - 1;
+  let next = page + 1;
   prev = prev < 1 ? 1: prev;
   next = next > pageTotal ? pageTotal: next;
   const keys = Array.from(searchParams.keys())
     .filter(k => k !== 'page')
-    .map(key => `key=${searchParams.get(key)}`)
+    .map(key => `${key}=${searchParams.get(key)}`)
     .join('&');
 
   return (

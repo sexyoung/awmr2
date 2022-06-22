@@ -33,7 +33,11 @@ const verb = {
       location: form.get('location'),
       note: form.get('note'),
     }
-    await api.update({id, data});
-    return json(true);
+    try {
+      await api.update({id, data});
+      return json(true);
+    } catch (e) {
+      return json(e, 500);
+    }
   }
 }
