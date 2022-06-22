@@ -4,7 +4,7 @@ import { LoaderFunction } from "@remix-run/node";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 import { db } from "~/utils/db.server";
 import { Suppy, Type } from "~/consts/meter";
-import { Pagination, Props as PaginationProps } from "~/component/pagination";
+import { Pagination, Props as PaginationProps } from "~/component/Pagination";
 export { action } from "./action";
 
 const PAGE_SIZE = 30;
@@ -105,6 +105,7 @@ const MeterPage = () => {
     <div>
       <h2>水錶查詢頁</h2>
       <Pagination {...{pageTotal, href}} />
+      todo: 顯示最後登記資訊: 時間、記了什麼
       <Form method="get">
         <input type="text" name="search" defaultValue={search} />
         <button>submit</button>

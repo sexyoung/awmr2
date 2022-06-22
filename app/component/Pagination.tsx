@@ -23,7 +23,6 @@ export const Pagination: FC<Props> = ({
 
   return (
     <div>
-      <h3>Pagination</h3>
       <Link to={`${pathname}?${keys}&page=1`}>首頁</Link>
       <Link to={`${pathname}?${keys}&page=${prev}`}>上頁</Link>
       <span>page: {page}/{pageTotal}</span>
