@@ -16,7 +16,7 @@ export const action: ActionFunction = async ({ request }) => {
   return json(null);
 }
 
-const toSBC = (str: string) => {
+export const toSBC = (str: string) => {
   let result = "";
   for(let i=0; i<str.length; i++) {
     let cCode = str.charCodeAt(i);
@@ -30,7 +30,7 @@ const toSBC = (str: string) => {
 
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
-const verb = {
+export const verb = {
   check: async (form: FormData): Promise<Response> => {
     const data: UploadRecord[] = JSON.parse(form.get('data') as string);
     // 用水號+錶號找看資料庫有沒有這些水錶
@@ -45,6 +45,8 @@ const verb = {
   coordinate: async (address: string = '台北市內湖區新湖三路189號'): Promise<{lat: number, lng: number}> => {
     const key = process.env.MAP8_KEY;
     const res = await (await fetch(`https://api.map8.zone/v2/place/geocode?address=${toSBC(address)}&key=${key}`)).json();
+    if(res.status === 'UNKNOWN_ERROR') return {lat: 0, lng: 0};
+    
     return res.results[0].geometry.location;
   },
 

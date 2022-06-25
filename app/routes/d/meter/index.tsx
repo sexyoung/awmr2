@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Meter, Project } from "@prisma/client";
+import { Meter, Project, Record } from "@prisma/client";
 import { LoaderFunction } from "@remix-run/node";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 import { db } from "~/utils/db.server";
@@ -16,7 +16,8 @@ type LoadData = {
   projectListItems: Project[];
   meterListItem: (
     Meter & {
-      project: Project
+      project: Project;
+      Record: Record[];
     }
   )[];
   search: string;
@@ -32,9 +33,12 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   const where = {
     OR: [
+      {area: { contains: search }},
       {address: { contains: search }},
       {meterId: { contains: search }},
       {waterId: { contains: search }},
+      {location: { contains: search }},
+      {note: { contains: search }},
     ]
   }
 
@@ -48,6 +52,10 @@ export const loader: LoaderFunction = async ({ request }) => {
     take: PAGE_SIZE,
     include: {
       project: true,
+      Record: {
+        take: 1,
+        orderBy: {id: 'desc'}
+      },
     }
   });
   return {
@@ -73,6 +81,9 @@ const MeterPage = () => {
   const [index, setIndex] = useState(-1);
   const fetcher = useFetcher();
   const { search, href, pageTotal, meterListItem, projectListItems } = useLoaderData<LoadData>();
+
+  console.log(meterListItem);
+  
 
   const handleShowEdit = (index: number) => {
     id.current && (id.current.value = meterListItem[index].id?.toString() || '');
@@ -105,7 +116,6 @@ const MeterPage = () => {
     <div>
       <h2>水錶查詢頁</h2>
       <Pagination {...{pageTotal, href}} />
-      todo: 顯示最後登記資訊: 時間、記了什麼
       <Form method="get">
         <input type="text" name="search" defaultValue={search} />
         <button>submit</button>
@@ -160,7 +170,16 @@ const MeterPage = () => {
           種類: {Type[meter.type as number]} /
           供水: {Suppy[meter.suppy as number]} /
           地址: {meter.location} /
-          <span onClick={handleShowEdit.bind(null, index)}>編輯</span>
+          {!!meter.Record.length && <>
+            記錄: {meter.Record.length && (
+              <span>
+                {new Date(+new Date(meter.Record[0].createdAt)).toLocaleString()}/
+                {meter.Record[0].status}/
+                {meter.Record[0].content}
+              </span>
+            )}
+          </>}
+          <button type="button" onClick={handleShowEdit.bind(null, index)}>編輯</button>
         </div>
       )}
     </div>
