@@ -13,6 +13,9 @@ const PAGE_SIZE = 30;
 type LoadData = {
   href: string;
   pathname: string;
+  meterCount: number;
+  successCount: number;
+  notRecordCount: number;
   searchString: string;
   projectListItems: Project[];
   meterListItem: (
@@ -27,9 +30,12 @@ type LoadData = {
 } & PaginationProps
 
 const formatYmd = (date: Date): string => {
-  date = new Date(+date - 1000 * 60 * 60 * 8);
+  // date = new Date(+date - 1000 * 60 * 60 * 8);
   return date.toLocaleDateString().slice(0, 10);
 };
+
+const getTomorrow = () => new Date(new Date().valueOf() + 1000 * 60 * 60 * 24);
+console.log(getTomorrow());
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
@@ -64,10 +70,34 @@ export const loader: LoaderFunction = async ({ request }) => {
     ]
   }
 
-  let meterCount = await db.meter.count({ where });
-  meterCount = meterCount && (meterCount - 1);
+  const {Record, ...summary} = where;
 
-  const pageTotal = ~~(meterCount / PAGE_SIZE) + 1;
+  let meterCount = await db.meter.count({ where: summary });
+  let successCount = (await db.record.groupBy({
+    where: {
+      status: 'success',
+      createdAt: {
+        gte: new Date(formatYmd(new Date())),
+        lt: new Date(formatYmd(getTomorrow())),
+      }
+    },
+    by: ['meterId'],
+    _count: { meterId: true }
+  })).length;
+
+  let notRecordCount = (await db.record.groupBy({
+    where: {
+      status: 'notRecord',
+      createdAt: {
+        gte: new Date(formatYmd(new Date())),
+        lt: new Date(formatYmd(getTomorrow())),
+      }
+    },
+    by: ['meterId'],
+    _count: { meterId: true }
+  })).length;
+
+  const pageTotal = ~~((meterCount && (meterCount - 1)) / PAGE_SIZE) + 1;
   const meterListItem = await db.meter.findMany({
     where,
     skip: (page - 1) * PAGE_SIZE,
@@ -85,6 +115,9 @@ export const loader: LoaderFunction = async ({ request }) => {
   return {
     search,
     pageTotal,
+    meterCount,
+    successCount,
+    notRecordCount,
     meterListItem,
     projectListItems,
     href: url.href,
@@ -94,7 +127,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 const RecordPage = () => {
   const fetcher = useFetcher();
   const [status, setStatus] = useState<Status>(Status.success);
-  const { search, href, pageTotal, meterListItem, projectListItems } = useLoaderData<LoadData>();
+  const { meterCount, successCount, notRecordCount, search, href, pageTotal, meterListItem, projectListItems } = useLoaderData<LoadData>();
   // console.log(meterListItem);
   // console.log('fetcher.data', fetcher.data);
   
@@ -104,8 +137,12 @@ const RecordPage = () => {
       <Pagination {...{pageTotal, href}} />
       todo:
       <ul>
-        <li>統計今日登記比例（同一水錶超過1次就算1次）</li>
+        <li>登記順便把水錶內容改掉</li>
       </ul>
+
+      水錶量: {meterCount}
+      抄錶量: {successCount}
+      未登量: {notRecordCount}
 
       <Form method="get">
         <input type="text" name="search" defaultValue={search} />
