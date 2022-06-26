@@ -6,6 +6,7 @@ import { requireUserId } from "~/api/user";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request";
 import { toSBC, verb as MeterUploadAction } from "~/routes/d/meter/upload/action";
+import * as meterApi from "~/api/meter";
 
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData();
@@ -14,6 +15,8 @@ export const action: ActionFunction = async ({ request }) => {
   form.delete('_method');
   switch (method) {
     case 'create': return verb.create(form, userId);
+    case 'changeArea': return verb.changeArea(form);
+    case 'deleteOut': return verb.deleteOut(form);
     default:
       await api.create({
         userId,
@@ -59,5 +62,15 @@ const verb = {
 
     // return json({...fields, ...latlng});
     // return json({status, content});
-  }
+  },
+  changeArea: async (form: FormData): Promise<Response> => {
+    meterApi.update({id: +form.get('meterId')!, data: {
+      area: form.get('area'),
+    }})
+    return json(true);
+  },
+  deleteOut: async (form: FormData): Promise<Response> => {
+    api.destroy(+form.get('recordId')!);
+    return json(true);
+  },
 }

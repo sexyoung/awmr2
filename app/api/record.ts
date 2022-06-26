@@ -38,3 +38,7 @@ export const sum: SumFunc = async (meterIdList) => {
 export async function create(data: {userId: number; meterId: number; status: Status ; content: string}) {
   await db.record.create({ data });
 }
+
+export async function destroy(id: number) {
+  await db.record.delete({ where: { id } });
+}

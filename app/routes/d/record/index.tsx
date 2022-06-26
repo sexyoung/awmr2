@@ -2,10 +2,12 @@ import { useState } from "react";
 import { LoaderFunction } from "@remix-run/node";
 import { Meter, Project, Record, User } from "@prisma/client";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
+
 import { db } from "~/utils/db.server";
 import { Suppy, Type } from "~/consts/meter";
 import { NotRecordReason, Status } from "~/consts/reocrd";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
+
 export { action } from "./action";
 
 const PAGE_SIZE = 30;
@@ -149,7 +151,7 @@ const RecordPage = () => {
         <button>submit</button>
       </Form>
       {meterListItem.length ?
-        meterListItem.map((meter, index) =>
+        meterListItem.map(meter =>
         <div key={meter.id}>
           水號: {meter.waterId} / 
           錶號: {meter.meterId} / 
