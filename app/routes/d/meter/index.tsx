@@ -11,7 +11,6 @@ const PAGE_SIZE = 30;
 
 type LoadData = {
   href: string;
-  pathname: string;
   searchString: string;
   projectListItems: Project[];
   meterListItem: (

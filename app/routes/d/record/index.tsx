@@ -14,7 +14,6 @@ const PAGE_SIZE = 30;
 
 type LoadData = {
   href: string;
-  pathname: string;
   meterCount: number;
   successCount: number;
   notRecordCount: number;
@@ -37,7 +36,6 @@ const formatYmd = (date: Date): string => {
 };
 
 const getTomorrow = () => new Date(new Date().valueOf() + 1000 * 60 * 60 * 24);
-console.log(getTomorrow());
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
