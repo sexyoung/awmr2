@@ -1,12 +1,14 @@
+import { useRef } from "react";
 import type { Record, User, Project, Meter } from "@prisma/client";
 import { LoaderFunction } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { useFetcher, useLoaderData } from "@remix-run/react";
 import { Role } from "~/consts/role";
 import { db } from "~/utils/db.server";
+export { action } from "./action";
 
 type LoaderData = { user: User & {
   Record: (Record & { meter: Meter })[];
-  projects: Project[];
+  projects: number[];
 }, projectListItems: Project[] };
 
 export const loader: LoaderFunction = async ({ params: { userId = 0 } }) => {
@@ -37,8 +39,25 @@ export const loader: LoaderFunction = async ({ params: { userId = 0 } }) => {
 };
 
 const UserRoute = () => {
+  const form = useRef(null);
+  const fetcher = useFetcher();
   const { user, projectListItems } = useLoaderData<LoaderData>();
   console.log(user);
+
+  const handleChange = (projectId: number) => {
+    const formData = new FormData(document.getElementById(`form${projectId}`) as HTMLFormElement);
+    const _method = formData.get('_method') as string;
+    const userId = formData.get('userId')! as string;
+    // const projectId = formData.get('projectId')! as string;
+    
+    fetcher.submit({
+      _method,
+      userId,
+      projectId: projectId.toString(),
+    }, {
+      method: 'patch',
+    });
+  }
   
   return (
     <div>
@@ -65,10 +84,15 @@ const UserRoute = () => {
       <ul>
         {projectListItems.map(project =>
           <li key={project.id}>
-            <label>
-              <input type="checkbox" defaultChecked={user.projects.includes(project.id)} />
-              {project.name}
-            </label>
+            <form method="patch" id={`form${project.id}`}>
+            <input type="hidden" name="_method" value="attach" />
+            <input type="hidden" name="userId" defaultValue={user.id} />
+            <input type="hidden" name="projectId" defaultValue={project.id} />
+              <label>
+                <input type="checkbox" defaultChecked={user.projects.includes(project.id)} onChange={handleChange.bind(null, project.id)} />
+                {project.name}
+              </label>
+            </form>
           </li>
         )}
       </ul>
