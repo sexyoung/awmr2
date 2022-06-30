@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import type { Record, User, Project, Meter } from "@prisma/client";
 import { LoaderFunction } from "@remix-run/node";
-import { useFetcher, useLoaderData } from "@remix-run/react";
+import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 import { Role } from "~/consts/role";
 import { db } from "~/utils/db.server";
 export { action } from "./action";
@@ -62,24 +62,30 @@ const UserRoute = () => {
   return (
     <div>
       <h2>使用者內頁</h2>
-      <div>id: {user.avatar}</div>
-      <div>id: {user.id}</div>
-      <div>帳號: {user.name}</div>
-      <div>本名: {user.fullname}</div>
-      <div>權限:
-        <select name="title" defaultValue={user.title}>
-          <option value={Role.ENG}>工程師</option>
-          <option value={Role.ENM}>工程師主管</option>
-          <option value={Role.OFW}>文書</option>
-          <option value={Role.ADM}>管理員</option>
-        </select>
-      </div>
-      <div>信箱: {user.email}</div>
-      <div>電話: {user.phone}</div>
-      <div>備註: {user.note}</div>
-      <div>line登入:
-        <input type="checkbox" name="isDailyLink" defaultChecked={user.isDailyLink} value="1" />
-      </div>
+      <Form method="put">
+        <input name="_method" type="hidden" value="update" />
+        <input name="id" type="hidden" value={user.id} />
+        <div>avatar: {user.avatar}</div>
+        <div>id: {user.id}</div>
+        <div>帳號: {user.name}</div>
+        <div>密碼: <input type="password" name="password" /></div>
+        <div>本名: <input type="text" name="fullname" defaultValue={user.fullname || ""} /></div>
+        <div>權限:
+          <select name="title" defaultValue={user.title}>
+            <option value={Role.ENG}>工程師</option>
+            <option value={Role.ENM}>工程師主管</option>
+            <option value={Role.OFW}>文書</option>
+            <option value={Role.ADM}>管理員</option>
+          </select>
+        </div>
+        <div>信箱: <input type="text" name="email" defaultValue={user.email || ""} /></div>
+        <div>電話: <input type="text" name="phone" defaultValue={user.phone || ""} /></div>
+        <div>備註: <input type="text" name="note" defaultValue={user.note || ""} /></div>
+        <div>line登入:
+          <input type="checkbox" name="isDailyLink" defaultChecked={user.isDailyLink} value="1" />
+        </div>
+        <button>update</button>
+      </Form>
       <h2>所屬標案</h2>
       <ul>
         {projectListItems.map(project =>

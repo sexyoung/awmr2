@@ -102,3 +102,10 @@ export async function createUserSession(
     },
   });
 }
+
+export async function update(id: number, data: any) {
+  await db.user.update({
+    where: { id },
+    data,
+  });
+}
