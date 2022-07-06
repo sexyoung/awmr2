@@ -75,10 +75,10 @@ export const loader: LoaderFunction = async ({ request }) => {
 }
 
 const isNewMeter = (record: ItemType) => {
-  console.log(
-    record.meter.createdAt,
-    record.createdAt,
-  );
+  // console.log(
+  //   record.meter.createdAt,
+  //   record.createdAt,
+  // );
   
   const t = (
     +new Date(record.createdAt) -

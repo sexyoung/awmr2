@@ -81,7 +81,7 @@ const MeterPage = () => {
   const fetcher = useFetcher();
   const { search, href, pageTotal, meterListItem, projectListItems } = useLoaderData<LoadData>();
 
-  console.log(meterListItem);
+  // console.log(meterListItem);
   
 
   const handleShowEdit = (index: number) => {

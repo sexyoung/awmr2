@@ -4,6 +4,7 @@ import { LoaderFunction } from "@remix-run/node";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 import { Role } from "~/consts/role";
 import { db } from "~/utils/db.server";
+import { Avator } from "./avatar";
 export { action } from "./action";
 
 type LoaderData = { user: User & {
@@ -39,10 +40,8 @@ export const loader: LoaderFunction = async ({ params: { userId = 0 } }) => {
 };
 
 const UserRoute = () => {
-  const form = useRef(null);
   const fetcher = useFetcher();
   const { user, projectListItems } = useLoaderData<LoaderData>();
-  console.log(user);
 
   const handleChange = (projectId: number) => {
     const formData = new FormData(document.getElementById(`form${projectId}`) as HTMLFormElement);
@@ -65,7 +64,11 @@ const UserRoute = () => {
       <Form method="put">
         <input name="_method" type="hidden" value="update" />
         <input name="id" type="hidden" value={user.id} />
-        <div>avatar: {user.avatar}</div>
+        <div>
+          avatar: {user.avatar}
+          <Avator id={user.id} picture={user.avatar} afterChange={() => location.reload()} />
+          {/* <input type="file" /> */}
+        </div>
         <div>id: {user.id}</div>
         <div>帳號: {user.name}</div>
         <div>密碼: <input type="password" name="password" /></div>
