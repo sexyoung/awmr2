@@ -4,6 +4,7 @@ import { db } from "~/utils/db.server";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
 import { Meter, Record, User } from "@prisma/client";
 import { Form, useLoaderData } from "@remix-run/react";
+import { isAdmin } from "~/api/user";
 
 export { action } from "./action";
 
@@ -24,6 +25,7 @@ type LoadData = {
 
 
 export const loader: LoaderFunction = async ({ request }) => {
+  await isAdmin(request);
   const url = new URL(request.url);
   const page = +url.searchParams.get("page")! || 1;
 

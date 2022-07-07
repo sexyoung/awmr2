@@ -11,6 +11,7 @@ import rdrTheme from 'react-date-range/dist/theme/default.css'; // theme css fil
 import { db } from "~/utils/db.server";
 import { Meter, Project, Record, User } from "@prisma/client";
 import { Caliber } from "~/consts/meter";
+import { isAdmin } from "~/api/user";
 
 type LoaderData = {
   areaListItems: {
@@ -51,7 +52,8 @@ export const links: LinksFunction = () => {
   ]
 }
 
-export const loader: LoaderFunction = async ({ params: { projectId = 0 } }) => {
+export const loader: LoaderFunction = async ({ params: { projectId = 0 }, request }) => {
+  await isAdmin(request);
   const projectListItems = await db.project.findMany({
     orderBy: { createdAt: "desc" },
   });

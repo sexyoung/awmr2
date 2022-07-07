@@ -5,6 +5,7 @@ import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 import { db } from "~/utils/db.server";
 import { Suppy, Type } from "~/consts/meter";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
+import { isAdmin } from "~/api/user";
 export { action } from "./action";
 
 const PAGE_SIZE = 30;
@@ -23,6 +24,7 @@ type LoadData = {
 } & PaginationProps
 
 export const loader: LoaderFunction = async ({ request }) => {
+  await isAdmin(request);
   const url = new URL(request.url);
   const projectListItems = await db.project.findMany({
     orderBy: { createdAt: "desc" },

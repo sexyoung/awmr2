@@ -5,6 +5,7 @@ import { db } from "~/utils/db.server";
 import type { ActionDataGen } from "~/type/action.data";
 import type { NewProjectForm, Project } from "~/type/project";
 import { RecordCount, sum } from "~/api/record";
+import { isAdmin } from "~/api/user";
 export { action } from "./action";
 
 type ActionData = ActionDataGen<NewProjectForm>
@@ -15,7 +16,8 @@ type LoaderData = {
   } & RecordCount>;
 };
 
-export const loader: LoaderFunction = async () => {
+export const loader: LoaderFunction = async ({ request }) => {
+  await isAdmin(request);
   const projectListItems = await db.project.findMany({
     orderBy: { createdAt: "desc" },
   });

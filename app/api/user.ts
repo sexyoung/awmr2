@@ -81,6 +81,14 @@ export async function getUser(request: Request) {
   }
 }
 
+export async function isAdmin(request: Request) {
+  const user = await getUser(request);
+  if(!user) return false;
+  if(user.title === Role.ENG) {
+    throw redirect(`/d/record`);
+  }
+}
+
 export async function logout(request: Request) {
   const session = await getUserSession(request);
   return redirect("/login", {

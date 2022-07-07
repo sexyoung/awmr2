@@ -3,6 +3,7 @@ import { LoaderFunction } from "@remix-run/node";
 import { Form, Link, useLoaderData } from "@remix-run/react";
 import { db } from "~/utils/db.server";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
+import { isAdmin } from "~/api/user";
 
 
 const PAGE_SIZE = 30;
@@ -19,6 +20,7 @@ type LoadData = {
 } & PaginationProps
 
 export const loader: LoaderFunction = async ({ request }) => {
+  await isAdmin(request);
   const url = new URL(request.url);
   const page = +url.searchParams.get("page")! || 1;
   const search = url.searchParams.get("search") || '';

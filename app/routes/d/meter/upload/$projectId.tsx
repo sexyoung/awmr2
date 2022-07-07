@@ -3,6 +3,8 @@ import { useState } from "react";
 import { read, utils } from "xlsx";
 import { useParams, useFetcher } from "@remix-run/react"
 import { Caliber } from "~/consts/meter";
+import { LoaderFunction } from "@remix-run/node";
+import { isAdmin } from "~/api/user";
 export { action } from "./action";
 
 type UploadMeter = {
@@ -18,6 +20,11 @@ type UploadMeter = {
 let data: UploadMeter[];
 const caliber = Object.values(Caliber).filter(v => typeof v === 'string');
 const sheetHeader = ["waterID", "area", "meterID", "address", "status", "type", "location"];
+
+
+export const loader: LoaderFunction = async ({ request }) => {
+  await isAdmin(request);
+}
 
 const UploadPage = () => {
   const params = useParams();

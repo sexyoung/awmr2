@@ -1,9 +1,9 @@
-import { redirect } from "@remix-run/node";
+import { LoaderFunction, redirect } from "@remix-run/node";
 import type { ActionFunction } from "@remix-run/node";
 import { Form, useActionData, useSearchParams } from "@remix-run/react";
 
 import { Role } from "~/consts/role";
-import { register } from "~/api/user";
+import { isAdmin, register } from "~/api/user";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request";
 import type { ActionDataGen } from "~/type/action.data";
@@ -23,6 +23,10 @@ function validatePassword(password: unknown) {
   if (typeof password !== "string" || password.length < 6) {
     return `Passwords must be at least 6 characters long`;
   }
+}
+
+export const loader: LoaderFunction = async ({ request }) => {
+  await isAdmin(request);
 }
 
 export const action: ActionFunction = async ({ request }) => {

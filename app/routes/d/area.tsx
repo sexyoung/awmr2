@@ -1,6 +1,7 @@
 import { json, LoaderFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { RecordCount, sum } from "~/api/record";
+import { isAdmin } from "~/api/user";
 import { db } from "~/utils/db.server";
 
 type LoaderData = {
@@ -11,7 +12,8 @@ type LoaderData = {
   } & RecordCount)[]
 }
 
-export const loader: LoaderFunction = async () => {
+export const loader: LoaderFunction = async ({ request }) => {
+  await isAdmin(request);
   const data: LoaderData = {
     areaListItems: []
   }

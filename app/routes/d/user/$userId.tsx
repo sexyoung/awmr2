@@ -5,6 +5,7 @@ import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 import { Role } from "~/consts/role";
 import { db } from "~/utils/db.server";
 import { Avator } from "./avatar";
+import { isAdmin } from "~/api/user";
 export { action } from "./action";
 
 type LoaderData = { user: User & {
@@ -12,7 +13,8 @@ type LoaderData = { user: User & {
   projects: number[];
 }, projectListItems: Project[] };
 
-export const loader: LoaderFunction = async ({ params: { userId = 0 } }) => {
+export const loader: LoaderFunction = async ({ params: { userId = 0 }, request }) => {
+  await isAdmin(request);
   const projectListItems = await db.project.findMany({
     orderBy: { createdAt: "desc" },
   });
