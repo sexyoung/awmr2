@@ -95,8 +95,8 @@ export default () => {
   
   return (
     <div className="LoginPage">
-      <h2>LoginPage</h2>
       <Form method="post">
+        <div className="title">登入系統</div>
         <input
           type="hidden"
           name="redirectTo"
@@ -107,28 +107,29 @@ export default () => {
           id="name-input"
           name="name"
           required
+          placeholder="帳號"
           defaultValue={actionData?.fields?.name}
           aria-invalid={Boolean(actionData?.fieldErrors?.name)}
           aria-errormessage={actionData?.fieldErrors?.name ? "name-error": undefined}
         />
-        {actionData?.fieldErrors?.name && <p>{actionData.fieldErrors.name}</p>}
-        <br />
+        {actionData?.fieldErrors?.name && <p className="error">{actionData.fieldErrors.name}</p>}
         <input
           id="password-input"
           name="password"
           defaultValue={actionData?.fields?.password}
           type="password"
           required
+          placeholder="密碼"
           aria-invalid={Boolean(actionData?.fieldErrors?.password) || undefined}
           aria-errormessage={actionData?.fieldErrors?.password ? "password-error" : undefined}
         />
-        {actionData?.fieldErrors?.password && <p>{actionData.fieldErrors.password}</p>}
+        {actionData?.fieldErrors?.password && <p className="error">{actionData.fieldErrors.password}</p>}
 
         <div id="form-error-message">
-          {actionData?.formError && <p>{actionData.formError}</p>}
+          {actionData?.formError && <p className="error">{actionData.formError}</p>}
         </div>
         <button type="submit" className="button">
-          Submit
+          登入
         </button>
       </Form>
     </div>
