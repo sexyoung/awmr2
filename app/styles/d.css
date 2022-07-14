@@ -1,8 +1,84 @@
-.aside .menu {
-  padding: 0;
+.frame {
+  min-height: 100%;
+  display: flex;
 }
-.aside .menu li {
-  margin: 0 2px;
-  font-size: .9rem;
-  display: inline;
+
+.frame .app {
+  width: 100%;
+  display: flex;
+  margin: 0 auto;
+  max-width: 1024px;
+}
+
+.frame:before,
+.frame:after {
+  flex: 1;
+  content: '';
+}
+
+.frame:before,
+.frame .app .menu {
+  background-color: #67747c;
+}
+
+.frame .app .menu {
+  min-width: 200px;
+  text-align: center;
+  padding-top: 1.5rem;
+}
+
+.frame .app .menu .system-name {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.frame .app .menu .user-info .avatar {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto;
+  border-radius: 100%;
+  border: 4px solid #fff;
+  background-size: cover;
+  background-position: 50%;
+  background-repeat: no-repeat;
+}
+
+.frame .app .menu .user-info .name {
+  margin-top: 10px;
+}
+
+.frame .app .menu .user-info .logout {
+  width: 60px;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 3px;
+  margin: 5px auto 10px;
+  font-family: Noto Sans TC,sans-serif;
+  background-color: #505a60;
+}
+
+.frame .app .menu,
+.frame .app .menu a {
+  color: #fff;
+}
+
+.frame .app .menu ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.frame .app .menu ul li {
+
+}
+
+.frame .app .menu ul li a {
+  display: block;
+  padding: 6px 0;
+  text-decoration: none;
+}
+
+.frame .app .menu ul li a:hover {
+  background-color: rgba(153,173,186,.2);
 }

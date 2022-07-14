@@ -27,6 +27,7 @@ function validatePassword(password: unknown) {
 
 export const loader: LoaderFunction = async ({ request }) => {
   await isAdmin(request);
+  return null;
 }
 
 export const action: ActionFunction = async ({ request }) => {

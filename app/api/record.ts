@@ -1,9 +1,11 @@
+import { Record } from "@prisma/client";
 import { Status } from "~/consts/reocrd";
 import { db } from "~/utils/db.server";
 
 export type RecordCount = {
   success?: number;
   notRecord?: number;
+  lastRecordTime?: Date;
 }
 
 type SumFunc = {
@@ -15,6 +17,11 @@ export const sum: SumFunc = async (meterIdList) => {
     by: ['status'],
     _count: { status: true },
     where: { meterId: { in: meterIdList }}
+  });
+
+  const lastRecord = await db.record.findFirst({
+    where: { meterId: { in: meterIdList }},
+    orderBy: { createdAt: 'desc'}
   });
 
   const result = recordCount.reduce((obj, status) => {
@@ -32,6 +39,7 @@ export const sum: SumFunc = async (meterIdList) => {
   return {
     success,
     notRecord,
+    lastRecordTime: lastRecord?.createdAt,
   };
 }
 

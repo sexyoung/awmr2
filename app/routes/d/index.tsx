@@ -1,22 +1,24 @@
-import { Project, Record, User } from "@prisma/client";
-import { json, LoaderFunction } from "@remix-run/node";
+import { format } from 'date-fns';
+import { Record, User } from "@prisma/client";
+import { json, LinksFunction, LoaderFunction } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
-import { RecordCount, sum } from "~/api/record";
+import { query as areaQuery, AreaData } from "~/api/area";
+import { query as projectQuery, ProjectData } from "~/api/project";
 import { isAdmin } from "~/api/user";
 import { db } from "~/utils/db.server";
 
+import stylesUrl from "~/styles/home-page.css";
+import RecordBar from "~/component/RecordBar";
+
 const TAKE = 5;
 
-type LoaderData = {
-  projectListItems: Array<Project & {
-    total: number;
-  } & RecordCount>;
+export const links: LinksFunction = () => {
+  return [{ rel: "stylesheet", href: stylesUrl }];
+};
 
-  areaListItems: ({
-    projectName: string;
-    area: string;
-    total: number;
-  } & RecordCount)[];
+type LoaderData = {
+  projectListItems: ProjectData;
+  areaListItems: AreaData;
 
   userListItems: (User & {
     Record: Record[];
@@ -32,110 +34,128 @@ export const loader: LoaderFunction = async ({ request }) => {
     userListItems: [],
   }
 
-  const projectListItems = await db.project.findMany({
-    take: TAKE,
+  data.projectListItems = await projectQuery(TAKE);
+  data.areaListItems = await areaQuery(TAKE);
+
+  data.userListItems = await db.user.findMany({
     orderBy: { createdAt: "desc" },
-  });
-
-  data.projectListItems = await Promise.all(projectListItems.map(async project => {
-    // 取得 meter id
-    const meterListItems = await db.meter.findMany({
-      select: { id: true },
-      where: { projectId: project.id },
-    });
-    const meterIdList = meterListItems.map(({ id }) => id);
-    return {
-      ...project,
-      total: meterIdList.length,
-      ...await sum(meterIdList),
+    take: TAKE,
+    include: {
+      Record: true,
     }
-  }));
-
-  const areaListItems = (await db.meter.groupBy({
-    by: ['area'],
-    _count: {
-      area: true,
-    },
-  })).slice(0, TAKE);
-
-  for (let i = 0; i < areaListItems.length; i++) {
-    const area = areaListItems[i];
-    const m = await db.meter.findFirst({
-      where: { area: area.area },
-      orderBy: { createdAt: 'desc' }
-    });
-    if(!m) return;
-    const p = await db.project.findUnique({ where: { id: m.projectId} });
-    if(!p) return;
-
-    const meterIdList = (await db.meter.findMany({
-      where: { area: area.area },
-      orderBy: { createdAt: 'desc' },
-      select: { id: true }
-    })).map(m => m.id);
-    
-    data.areaListItems.push({
-      projectName: p.name,
-      area: m.area || "",
-      total: area._count.area,
-      ...await sum(meterIdList),
-    });
-
-    data.userListItems = await db.user.findMany({
-      orderBy: { createdAt: "desc" },
-      take: TAKE,
-      include: {
-        Record: true,
-      }
-    })
-  }
+  });
 
   return json(data);
 };
 
 const HomePage = () => {
   const { projectListItems, areaListItems, userListItems } = useLoaderData<LoaderData>();
-  console.log(projectListItems, areaListItems, userListItems);
-  
+  console.log(areaListItems);
+
   return (
-    <div>
-      <h2>登入後首頁</h2>
-      <h3><Link to="/d/area">小區查詢</Link></h3>
-      {areaListItems.map(area =>
-        <div key={area.area}>
-          專案: {area.projectName} /
-          小區: {area.area} /
-          登記: {area.success} /
-          未登: {area.notRecord} /
-          錶數: {area.total}
-        </div>
-      )}
-
-      <h3><Link to="/d/project">標案管理</Link></h3>
-      {projectListItems.map(project =>
-        <div key={project.id}>
-          {project.id}/
-          {project.name}/
-          {project.code}/
-          {project.isActive ? 'enable': 'disabled'}/
-          錶數: {project.total}/
-          成功數: {project.success}/
-          未登數: {project.notRecord}/
-          <Link to={`/d/project/export/${project.id}`}>匯出</Link>
-          <Link to={`/d/meter/upload/${project.id}`}>上傳水錶</Link>
-        </div>
-      )}
-
-      <h3><Link to="/d/user">人事查詢</Link></h3>
-      {userListItems.map(user =>
-        <div key={user.id}>
-          {user.fullname} / 
-          {user.phone} / 
-          {user.email} / 
-          最後登入時間
-          <Link to={`/d/user/${user.id}`}>{user.name}</Link>
-        </div>
-      )}
+    <div className="Page HomePage">
+      <div className="block">
+        <h2 className="title">小區查詢</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>標案名稱</th>
+              <th>小區代號</th>
+              <th>登錄</th>
+              <th style={{width: 80, boxSizing: 'border-box'}}>抄見率</th>
+              <th style={{width: 150, boxSizing: 'border-box'}}>進度</th>
+              <th>錶數</th>
+              <th style={{width: 210, boxSizing: 'border-box'}}>登錄時間</th>
+            </tr>
+          </thead>
+          <tbody>
+            {areaListItems.map((area, index) =>
+              <tr key={area.area}>
+                <td>{area.projectName}</td>
+                <td>{area.area}</td>
+                <td>{area.success}</td>
+                <td>{~~((area.success || 0) / area.total * 100)}%</td>
+                <td>
+                  <RecordBar {...{
+                    success: area.success,
+                    notRecord: area.notRecord,
+                    total: area.total,
+                    z: areaListItems.length - index,
+                  }} />
+                </td>
+                <td>{area.total}</td>
+                <td>{
+                  /* {area.lastRecordTime ? format(new Date(area.lastRecordTime), 'MM-dd hh:mm'): '未登錄'}<br /> */
+                  area.lastRecordTime ? format(new Date(area.lastRecordTime), 'MM-dd HH:mm'): '未登錄'
+                }</td>
+              </tr>
+            )}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colSpan={7}>
+                <Link to="/d/area">所有小區</Link>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div className="block">
+        <h2 className="title">標案管理</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>啟用</th>
+              <th>標案名稱</th>
+              <th>標案代號</th>
+              <th>小區</th>
+              <th style={{width: 150, boxSizing: 'border-box'}}>進度</th>
+              <th>錶數</th>
+              <th colSpan={2} />
+            </tr>
+          </thead>
+          <tbody>
+            {projectListItems.map((project, index) =>
+              <tr key={project.id}>
+                <td>{project.isActive ? 'enable': 'disabled'}</td>
+                <td>{project.name}</td>
+                <td>{project.code}</td>
+                <td>{project.areaCount}</td>
+                <td>
+                  <RecordBar {...{
+                    success: project.success,
+                    notRecord: project.notRecord,
+                    total: project.total,
+                    z: projectListItems.length - index,
+                  }} />
+                </td>
+                <td>{project.total}</td>
+                <td><Link to={`/d/meter/upload/${project.id}`}>上傳水錶</Link></td>
+                <td><Link to={`/d/project/export/${project.id}`}>匯出</Link></td>
+              </tr>
+            )}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colSpan={8}>
+                <Link to="/d/project">所有標案</Link>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div className="block">
+        <h2 className="title"><Link to="/d/user">人事查詢</Link></h2>
+        {userListItems.map(user =>
+          <div key={user.id}>
+            {user.fullname} / 
+            {user.phone} / 
+            {user.email} / 
+            最後登入時間
+            <Link to={`/d/user/${user.id}`}>{user.name}</Link>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

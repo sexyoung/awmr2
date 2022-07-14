@@ -1,49 +1,32 @@
 import { json, LoaderFunction } from "@remix-run/node";
 import { Form, Link, useActionData, useLoaderData, useFetcher } from "@remix-run/react";
 
-import { db } from "~/utils/db.server";
 import type { ActionDataGen } from "~/type/action.data";
 import type { NewProjectForm, Project } from "~/type/project";
 import { RecordCount, sum } from "~/api/record";
 import { isAdmin } from "~/api/user";
+import { query as projectQuery, ProjectData } from "~/api/project";
 export { action } from "./action";
 
 type ActionData = ActionDataGen<NewProjectForm>
 
 type LoaderData = {
   projectListItems: Array<Project & {
+    areaCount: number;
     total: number;
   } & RecordCount>;
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
   await isAdmin(request);
-  const projectListItems = await db.project.findMany({
-    orderBy: { createdAt: "desc" },
-  });
-
-  return json({
-    projectListItems: await Promise.all(projectListItems.map(async project => {
-      // 取得 meter id
-      const meterListItems = await db.meter.findMany({
-        select: { id: true },
-        where: { projectId: project.id },
-      });
-      const meterIdList = meterListItems.map(({ id }) => id);
-      return {
-        ...project,
-        total: meterIdList.length,
-        ...await sum(meterIdList),
-      }
-    }))
-  });
+  return json(await projectQuery());
 };
 
 export default () => {
   const fetcher = useFetcher();
   const actionData = useActionData<ActionData>();
-  const { projectListItems } = useLoaderData<LoaderData>();
-  
+  const projectListItems = useLoaderData<ProjectData>();
+
   return (
     <div>
       <h2>標案管理頁</h2>
@@ -64,6 +47,7 @@ export default () => {
           {project.name}/
           {project.code}/
           {project.isActive ? 'enable': 'disabled'}/
+          小區數: {project.areaCount}/
           錶數: {project.total}/
           成功數: {project.success}/
           未登數: {project.notRecord}/

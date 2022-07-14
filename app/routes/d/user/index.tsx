@@ -1,10 +1,9 @@
 import { Record, User } from "@prisma/client";
 import { LoaderFunction } from "@remix-run/node";
 import { Form, Link, useLoaderData } from "@remix-run/react";
+import { isAdmin } from "~/api/user";
 import { db } from "~/utils/db.server";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
-import { isAdmin } from "~/api/user";
-
 
 const PAGE_SIZE = 30;
 
@@ -62,6 +61,7 @@ export default () => {
     <div>
       <h2>使用者頁</h2>
       <Pagination {...{pageTotal, href}} />
+      <Link to="/d/user/new">新增使用者</Link>
       <Form method="get">
         <input type="text" name="search" defaultValue={search} />
         <button>submit</button>

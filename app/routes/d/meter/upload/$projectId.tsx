@@ -24,6 +24,7 @@ const sheetHeader = ["waterID", "area", "meterID", "address", "status", "type", 
 
 export const loader: LoaderFunction = async ({ request }) => {
   await isAdmin(request);
+  return null;
 }
 
 const UploadPage = () => {

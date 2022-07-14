@@ -86,7 +86,8 @@ const UserRoute = () => {
         <div>信箱: <input type="text" name="email" defaultValue={user.email || ""} /></div>
         <div>電話: <input type="text" name="phone" defaultValue={user.phone || ""} /></div>
         <div>備註: <input type="text" name="note" defaultValue={user.note || ""} /></div>
-        <div>line登入:
+        <div>
+          line登入:
           <input type="checkbox" name="isDailyLink" defaultChecked={user.isDailyLink} value="1" />
         </div>
         <button>update</button>

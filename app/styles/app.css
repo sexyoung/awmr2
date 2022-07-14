@@ -1,5 +1,87 @@
+:root {
+  --color-gallery: #eee;
+  --color-spanish-green: #7F8E7C;
+  --color-mantis: #7FC072;
+  --color-zombie: #E6E69F;
+}
+
 html, body {
   margin: 0;
   height: 100%;
   background-color: #f3f7f9;
+}
+
+.Page {
+  flex: 1;
+  padding: 20px;
+}
+
+.bar {
+  height: 10px;
+  display: flex;
+  position: relative;
+  border-radius: 2px;
+  background-color: var(--color-gallery);
+}
+
+.bar > * {
+  height: 100%;
+  position: relative;
+  z-index: 0;
+  display: inline-block;
+  transition: width .3s;
+}
+
+.bar > *:first-of-type {
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+}
+.bar > *:last-of-type {
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+.bar > *:before, .bar > *:after {
+  left: 50%;
+  z-index: 1;
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+.bar > *:hover:before {
+  top: 20px;
+  width: 90px;
+  color: #fff;
+  font-size: 14px;
+  padding: 2px 5px;
+  text-align: center;
+  border-radius: 3px;
+  content: attr(data-text);
+  background-color: var(--color-spanish-green);
+}
+.bar > *:hover:after {
+  top: 14px;
+  width: 0;
+  height: 0;
+  content: '';
+  border-style: solid;
+  border-width: 0 5.5px 6px 5.5px;
+  border-color: transparent transparent var(--color-spanish-green) transparent;
+}
+
+.bar .success {
+  background-color: var(--color-mantis);
+}
+
+.bar .success:hover {
+  background-color: var(--color-mantis);
+  filter: brightness(0.85);
+}
+
+.bar .notRecord {
+  background-color: var(--zombie);
+}
+
+.bar .notRecord:hover {
+  background-color:var(--zombie), 15%;
+  filter: brightness(0.85);
 }

@@ -1,58 +1,15 @@
 import { json, LoaderFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { RecordCount, sum } from "~/api/record";
+import { query, AreaData } from "~/api/area";
 import { isAdmin } from "~/api/user";
-import { db } from "~/utils/db.server";
-
-type LoaderData = {
-  areaListItems: ({
-    projectName: string;
-    area: string;
-    total: number;
-  } & RecordCount)[]
-}
 
 export const loader: LoaderFunction = async ({ request }) => {
   await isAdmin(request);
-  const data: LoaderData = {
-    areaListItems: []
-  }
-  const areaListItems = await db.meter.groupBy({
-    by: ['area'],
-    _count: {
-      area: true,
-    },
-  });
-
-  for (let i = 0; i < areaListItems.length; i++) {
-    const area = areaListItems[i];
-    const m = await db.meter.findFirst({
-      where: { area: area.area },
-      orderBy: { createdAt: 'desc' }
-    });
-    if(!m) return;
-    const p = await db.project.findUnique({ where: { id: m.projectId} });
-    if(!p) return;
-
-    const meterIdList = (await db.meter.findMany({
-      where: { area: area.area },
-      orderBy: { createdAt: 'desc' },
-      select: { id: true }
-    })).map(m => m.id);
-    
-    data.areaListItems.push({
-      projectName: p.name,
-      area: m.area || "",
-      total: area._count.area,
-      ...await sum(meterIdList),
-    });
-  }
-
-  return json(data);
+  return json(await query());
 };
 
 const AreaPage = () => {
-  const { areaListItems } = useLoaderData<LoaderData>();
+  const areaListItems = useLoaderData<AreaData>();
   
   return (
     <div>
@@ -70,4 +27,4 @@ const AreaPage = () => {
   )
 }
 
-export default AreaPage
+export default AreaPage;

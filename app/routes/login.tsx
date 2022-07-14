@@ -1,5 +1,5 @@
 import { ActionFunction, json, LinksFunction, LoaderFunction, MetaFunction, redirect } from "@remix-run/node";
-import { Form, useActionData, useLoaderData, useSearchParams } from "@remix-run/react"
+import { Form, useActionData, useSearchParams } from "@remix-run/react"
 import { createUserSession, getUser, login } from "~/api/user";
 import stylesUrl from "~/styles/login.css";
 
@@ -91,7 +91,6 @@ export const action: ActionFunction = async ({
 export default () => {
   const [searchParams] = useSearchParams();
   const actionData = useActionData<ActionData>();
-  const { user } = useLoaderData();
   
   return (
     <div className="LoginPage">
