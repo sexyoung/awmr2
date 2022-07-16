@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { Record, User } from "@prisma/client";
+import { Record, Role, User } from "@prisma/client";
 import { json, LinksFunction, LoaderFunction } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { query as areaQuery, AreaData } from "~/api/area";
@@ -15,6 +15,13 @@ const TAKE = 5;
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
 };
+
+const RoleMap = {
+  [Role.ENG]: '工程師',
+  [Role.ENM]: '工程師主管',
+  [Role.OFW]: '文書',
+  [Role.ADM]: '管理員',
+}
 
 type LoaderData = {
   projectListItems: ProjectData;
@@ -65,7 +72,7 @@ const HomePage = () => {
               <th style={{width: 80, boxSizing: 'border-box'}}>抄見率</th>
               <th style={{width: 150, boxSizing: 'border-box'}}>進度</th>
               <th>錶數</th>
-              <th style={{width: 210, boxSizing: 'border-box'}}>登錄時間</th>
+              <th style={{width: 130, boxSizing: 'border-box'}}>登錄時間</th>
             </tr>
           </thead>
           <tbody>
@@ -74,7 +81,7 @@ const HomePage = () => {
                 <td>{area.projectName}</td>
                 <td>{area.area}</td>
                 <td>{area.success}</td>
-                <td>{~~((area.success || 0) / area.total * 100)}%</td>
+                <td className='color-mantis'>{~~((area.success || 0) / area.total * 100)}%</td>
                 <td>
                   <RecordBar {...{
                     success: area.success,
@@ -117,7 +124,9 @@ const HomePage = () => {
           <tbody>
             {projectListItems.map((project, index) =>
               <tr key={project.id}>
-                <td>{project.isActive ? 'enable': 'disabled'}</td>
+                <td>
+                  <input type="checkbox" checked={project.isActive} value="1" />
+                </td>
                 <td>{project.name}</td>
                 <td>{project.code}</td>
                 <td>{project.areaCount}</td>
@@ -145,16 +154,46 @@ const HomePage = () => {
         </table>
       </div>
       <div className="block">
-        <h2 className="title"><Link to="/d/user">人事查詢</Link></h2>
-        {userListItems.map(user =>
-          <div key={user.id}>
-            {user.fullname} / 
-            {user.phone} / 
-            {user.email} / 
-            最後登入時間
-            <Link to={`/d/user/${user.id}`}>{user.name}</Link>
-          </div>
-        )}
+        <h2 className="title">人事查詢</h2>
+        <table>
+          <thead>
+            <tr>
+              <th style={{width: 40}}>啟用</th>
+              <th>頭像</th>
+              <th>全名</th>
+              <th>帳號</th>
+              <th>權限</th>
+              <th>手機</th>
+              <th>信箱</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {userListItems.map(user =>
+              <tr key={user.id}>
+                <td>
+                  <input type="checkbox" checked={user.isActive} value="1" />
+                </td>
+                <td>
+                  {user.avatar && <div className='bgsc bgpc' style={{margin: `0 auto`, width: 20, height: 20, backgroundImage: `url(/avatar/${user.avatar})`}} />}
+                </td>
+                <td>{user.fullname}</td>
+                <td>{user.name}</td>
+                <td>{RoleMap[user.title]}</td>
+                <td>{user.phone}</td>
+                <td>{user.email}</td>
+                <td><Link to={`/d/user/${user.id}`}>編輯</Link></td>
+              </tr>
+            )}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colSpan={8}>
+                <Link to="/d/user">所有人事</Link>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
       </div>
     </div>
   )

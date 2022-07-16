@@ -16,6 +16,19 @@ html, body {
   padding: 20px;
 }
 
+.bgsc {
+  background-size: cover;
+}
+
+.bgpc {
+  background-position: center;
+}
+
+.color-mantis {
+  color: var(--color-mantis);
+}
+
+/* record bar */
 .bar {
   height: 10px;
   display: flex;

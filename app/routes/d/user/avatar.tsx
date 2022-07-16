@@ -41,7 +41,7 @@ export const Avator: FC<IAvatar> = (props) => {
   };
   return (
     <label className={'style.avatar'}>
-      {props.picture && <div className={'style.picture'} style={{backgroundImage: `url(/avatar/${props.picture}); height: 100px`}} />}
+      {props.picture && <img src={`/avatar/${props.picture}`} alt="" style={{width: 100}} />}
       <div className={'style.text'}>
         {preview ? '上傳中...': '上傳照片'}
       </div>

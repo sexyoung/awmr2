@@ -67,7 +67,7 @@ const UserRoute = () => {
         <input name="_method" type="hidden" value="update" />
         <input name="id" type="hidden" value={user.id} />
         <div>
-          avatar: {user.avatar}
+          {/* avatar: {user.avatar} */}
           <Avator id={user.id} picture={user.avatar} afterChange={() => location.reload()} />
           {/* <input type="file" /> */}
         </div>

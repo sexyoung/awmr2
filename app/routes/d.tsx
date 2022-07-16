@@ -24,19 +24,25 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export default function DashBoard() {
   const { user } = useLoaderData<LoaderData>();
+
+  const handleLogout: React.FormEventHandler<HTMLFormElement> = (e) => {
+    !confirm('確定登出?') && e.preventDefault();
+  }
   
   return (
     <div className="frame">
       <div className="app">
         <div className="menu">
           <div className="system-name">
-            小區抄表系統
+            小區
+            <u>抄表系統</u>
+            <small><small><small>v1.5</small></small></small>
           </div>
           {user &&
             <div className="user-info">
               <div className="avatar" style={{backgroundImage: `url(/avatar/${user.avatar})`}}/>
               <div className="name">{user.name}</div>
-              <Form action="/logout" method="post">
+              <Form action="/logout" method="post" onSubmit={handleLogout}>
                 <button type="submit" className="logout">
                   登出
                 </button>
@@ -44,7 +50,6 @@ export default function DashBoard() {
             </div>
           }
           <ul>
-            {/* <li><Link to="/login">登入</Link></li> */}
             {user?.title !== Role.ENG && <>
               <li><Link to="/d">首頁總覽</Link></li>
               <li><Link to="/d/area">小區查詢</Link></li>
@@ -59,7 +64,6 @@ export default function DashBoard() {
               <li><Link to="/d/record/out">區外要求</Link></li>
               <li><Link to="/d/user">人事查詢</Link></li>
             </>}
-            {/* <li><Link to="/d/project/export">標案匯出</Link></li> */}
           </ul>
         </div>
         <Outlet />
