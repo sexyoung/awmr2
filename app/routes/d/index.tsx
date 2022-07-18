@@ -42,7 +42,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   }
 
   data.projectListItems = await projectQuery(TAKE);
-  data.areaListItems = await areaQuery(TAKE);
+  data.areaListItems = (await areaQuery({ take: TAKE })).data;
 
   data.userListItems = await db.user.findMany({
     orderBy: { createdAt: "desc" },
@@ -57,7 +57,6 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 const HomePage = () => {
   const { projectListItems, areaListItems, userListItems } = useLoaderData<LoaderData>();
-  console.log(areaListItems);
 
   return (
     <div className="Page HomePage">

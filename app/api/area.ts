@@ -8,7 +8,13 @@ export type AreaData = ({
   total: number;
 } & RecordCount)[];
 
-export async function query(take?: number) {
+type Params = {
+  where?: any;
+  take?: number;
+  skip?: number;
+}
+
+export async function query({ take = 0, where = {}, skip = 0 }: Params) {
   const data: AreaData = [];
 
   // 統計每個小區有幾個水錶
@@ -17,6 +23,7 @@ export async function query(take?: number) {
     _count: {
       area: true,
     },
+    where
   });
 
   for (let i = 0; i < areaListItems.length; i++) {
@@ -51,6 +58,9 @@ export async function query(take?: number) {
     const bd = +(b.lastRecordTime || 0);
     return bd - ad;
   });
-  
-  return take ? data.slice(0, take): data;
+
+  return {
+    count: areaListItems.length,
+    data: take ? data.slice(skip, skip+take): data,
+  }
 }

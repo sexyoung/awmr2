@@ -22,10 +22,10 @@ export const Pagination: FC<Props> = ({
     .join('&');
 
   return (
-    <div>
+    <div className="pagination">
       <Link to={`${pathname}?${keys}&page=1`}>首頁</Link>
       <Link to={`${pathname}?${keys}&page=${prev}`}>上頁</Link>
-      <span>page: {page}/{pageTotal}</span>
+      <span>{page}/{pageTotal}頁</span>
       <Link to={`${pathname}?${keys}&page=${next}`}>下頁</Link>
       <Link to={`${pathname}?${keys}&page=${pageTotal}`}>底頁</Link>
     </div>
