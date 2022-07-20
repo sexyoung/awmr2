@@ -58,23 +58,27 @@ export const loader: LoaderFunction = async ({ request }) => {
 export default () => {
   const { userListItems, pageTotal, href, search } = useLoaderData<LoadData>();
   return (
-    <div>
-      <h2>使用者頁</h2>
-      <Pagination {...{pageTotal, href}} />
-      <Link to="/d/user/new">新增使用者</Link>
-      <Form method="get">
-        <input type="text" name="search" defaultValue={search} />
-        <button>submit</button>
-      </Form>
-      {userListItems.map(user =>
-        <div key={user.id}>
-          {user.fullname} / 
-          {user.phone} / 
-          {user.email} / 
-          最後登入時間
-          <Link to={`/d/user/${user.id}`}>{user.name}</Link>
+    <div className="Page UserPage">
+      <div className="block">
+        <div className="header">
+          <h2 className="title">人事查詢</h2>
+          <Pagination {...{pageTotal, href}} />
         </div>
-      )}
+        <Link to="/d/user/new">新增使用者</Link>
+        <Form method="get">
+          <input type="text" name="search" defaultValue={search} />
+          <button>submit</button>
+        </Form>
+        {userListItems.map(user =>
+          <div key={user.id}>
+            {user.fullname} / 
+            {user.phone} / 
+            {user.email} / 
+            最後登入時間
+            <Link to={`/d/user/${user.id}`}>{user.name}</Link>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

@@ -118,40 +118,35 @@ const UploadPage = () => {
   // console.log('fetcher.data', fetcher.data);
 
   return (
-    <div>
-      <h2>上傳水錶頁</h2>
-      {params.projectId}
-      {fetcher.state === 'idle' &&
-        <fetcher.Form method="post">
-          <input type="file" onChange={handleChooseFile} accept=".xlsx, application/vnd.openxmlfetcher.Formats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
-        </fetcher.Form>
-      }
-
-      {!!fetcher.data && !!fetcher.data.length && (
-        <div>
-          <h2>略過的資料</h2>
-          {fetcher.data.map(meter =>
-            <span key={meter}>{meter}, </span>
-          )}
+    <div className="Page MeterUploadPage">
+      <div className="block">
+      <div className="header">
+          <h2 className="title">上傳水錶頁</h2>
         </div>
-      )}
+        {fetcher.state === 'idle' &&
+          <fetcher.Form method="post">
+            <input type="file" onChange={handleChooseFile} accept=".xlsx, application/vnd.openxmlfetcher.Formats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+          </fetcher.Form>
+        }
 
-      {data && data.length && fetcher.data &&
-        <fetcher.Form method="post" onSubmit={handleUpload}>
-          <div>要上傳筆數: {data.length - fetcher.data.length}</div>
-          <input type="hidden" name="_method" value="upload" />
-          <button>上傳</button>
-        </fetcher.Form>
-      }
-      {isUpLoading && <div>{percent}%</div>}
-      <ul>
-        <li>v 讀取xlsx, data sheet</li>
-        <li>v 傳送所有水號錶號去檢查</li>
-        <li>v 略過已存在水錶 (水號or錶號相同)</li>
-        <li>v 分析地址</li>
-        <li>v 上傳水錶</li>
-        <li>v 評估上傳時間</li>
-      </ul>
+        {!!fetcher.data && !!fetcher.data.length && (
+          <div>
+            <h2>略過的資料</h2>
+            {fetcher.data.map(meter =>
+              <span key={meter}>{meter}, </span>
+            )}
+          </div>
+        )}
+
+        {data && data.length && fetcher.data &&
+          <fetcher.Form method="post" onSubmit={handleUpload}>
+            <div>要上傳筆數: {data.length - fetcher.data.length}</div>
+            <input type="hidden" name="_method" value="upload" />
+            <button>上傳</button>
+          </fetcher.Form>
+        }
+        {isUpLoading && <div>{percent}%</div>}
+      </div>
     </div>
   )
 }

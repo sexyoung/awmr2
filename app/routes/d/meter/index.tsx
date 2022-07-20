@@ -114,75 +114,79 @@ const MeterPage = () => {
   }
   
   return (
-    <div>
-      <h2>水錶查詢頁</h2>
-      <Pagination {...{pageTotal, href}} />
-      <Form method="get">
-        <input type="text" name="search" defaultValue={search} />
-        <button>submit</button>
-      </Form>
-      <Form method="patch">
-        <div><input type="text" name="_method" value="update" readOnly /></div>
-        <div><input ref={id} type="text" name="id" required /></div>
-        <div>
-          <select ref={projectId} name="projectId">
-            {projectListItems.map(project =>
-              <option key={project.id} value={project.id}>{project.name}</option>
-            )}
-          </select>
+    <div className="Page MeterPage">
+      <div className="block">
+        <div className="header">
+          <h2 className="title">水錶查詢頁</h2>
+          <Pagination {...{pageTotal, href}} />
         </div>
-        <div><input ref={waterId} type="text" name="waterId" required /></div>
-        <div><input ref={meterId} type="text" name="meterId" required /></div>
-        <div><input ref={area} type="text" name="area" /></div>
-        <div><input ref={address} type="text" name="address" /></div>
-        <div>
-          <select ref={type} name="type" required>
-            <option value={Suppy.NOM}>正常</option>
-            <option value={Suppy.END}>中止</option>
-            <option value={Suppy.PAU}>停水</option>
-          </select>
-        </div>
-        <div>
-          <select ref={suppy} name="suppy" required>
-            <option value={Type.DRT}>直接錶</option>
-            <option value={Type.TTL}>總錶</option>
-            <option value={Type.BCH}>分錶</option>
-          </select>
-        </div>
-        <div><input ref={location} type="text" name="location" /></div>
-        <div><input ref={note} type="text" name="note" /></div>
-        <span onClick={handleHideEdit}>close</span>
-        <button>update</button>
-      </Form>
-      {meterListItem.map((meter, index) =>
-        <div key={meter.id}>
-          <fetcher.Form method="patch">
-            <input type="hidden" name="_method" value="toggle" />
-            <input type="hidden" name="id" defaultValue={meter.id} />
-            <input type="hidden" name="isActive" defaultValue={meter.isActive ? "1": ""} />
-            <button>toggle</button>
-          </fetcher.Form>
-          {meter.isActive ? 'enable': 'disabled'}/
-          標案: {meter.project.name} /
-          小區: {meter.area} /
-          水號: {meter.waterId} / 
-          錶號: {meter.meterId} / 
-          地址: {meter.address} /
-          種類: {Type[meter.type as number]} /
-          供水: {Suppy[meter.suppy as number]} /
-          地址: {meter.location} /
-          {!!meter.Record.length && <>
-            記錄: {meter.Record.length && (
-              <span>
-                {new Date(+new Date(meter.Record[0].createdAt)).toLocaleString()}/
-                {meter.Record[0].status}/
-                {meter.Record[0].content}
-              </span>
-            )}
-          </>}
-          <button type="button" onClick={handleShowEdit.bind(null, index)}>編輯</button>
-        </div>
-      )}
+        <Form method="get">
+          <input type="text" name="search" defaultValue={search} />
+          <button>submit</button>
+        </Form>
+        <Form method="patch">
+          <div><input type="text" name="_method" value="update" readOnly /></div>
+          <div><input ref={id} type="text" name="id" required /></div>
+          <div>
+            <select ref={projectId} name="projectId">
+              {projectListItems.map(project =>
+                <option key={project.id} value={project.id}>{project.name}</option>
+              )}
+            </select>
+          </div>
+          <div><input ref={waterId} type="text" name="waterId" required /></div>
+          <div><input ref={meterId} type="text" name="meterId" required /></div>
+          <div><input ref={area} type="text" name="area" /></div>
+          <div><input ref={address} type="text" name="address" /></div>
+          <div>
+            <select ref={type} name="type" required>
+              <option value={Suppy.NOM}>正常</option>
+              <option value={Suppy.END}>中止</option>
+              <option value={Suppy.PAU}>停水</option>
+            </select>
+          </div>
+          <div>
+            <select ref={suppy} name="suppy" required>
+              <option value={Type.DRT}>直接錶</option>
+              <option value={Type.TTL}>總錶</option>
+              <option value={Type.BCH}>分錶</option>
+            </select>
+          </div>
+          <div><input ref={location} type="text" name="location" /></div>
+          <div><input ref={note} type="text" name="note" /></div>
+          <span onClick={handleHideEdit}>close</span>
+          <button>update</button>
+        </Form>
+        {meterListItem.map((meter, index) =>
+          <div key={meter.id}>
+            <fetcher.Form method="patch">
+              <input type="hidden" name="_method" value="toggle" />
+              <input type="hidden" name="id" defaultValue={meter.id} />
+              <input type="hidden" name="isActive" defaultValue={meter.isActive ? "1": ""} />
+              <button>toggle</button>
+            </fetcher.Form>
+            {meter.isActive ? 'enable': 'disabled'}/
+            標案: {meter.project.name} /
+            小區: {meter.area} /
+            水號: {meter.waterId} / 
+            錶號: {meter.meterId} / 
+            地址: {meter.address} /
+            種類: {Type[meter.type as number]} /
+            供水: {Suppy[meter.suppy as number]} /
+            地址: {meter.location} /
+            {!!meter.Record.length && <>
+              記錄: {meter.Record.length && (
+                <span>
+                  {new Date(+new Date(meter.Record[0].createdAt)).toLocaleString()}/
+                  {meter.Record[0].status}/
+                  {meter.Record[0].content}
+                </span>
+              )}
+            </>}
+            <button type="button" onClick={handleShowEdit.bind(null, index)}>編輯</button>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

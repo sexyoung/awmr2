@@ -90,33 +90,35 @@ const HistoryPage = () => {
   const fetcher = useFetcher();
   const { search, href, pageTotal, recordListItems } = useLoaderData<LoadData>();
   return (
-    <div>
-      <h2>登錄記錄頁</h2>
-      <Pagination {...{pageTotal, href}} />
-
-      <Form method="get">
-        <input type="text" name="search" defaultValue={search} />
-        <button>submit</button>
-      </Form>
-
-      {recordListItems.map(record =>
-        <div key={record.id}>
-          {record.id}
-          水號: {record.meter.waterId} /
-          錶號: {record.meter.meterId} /
-          地址: {record.meter.address} /
-          登錄人: {record.user.fullname} /
-          新水錶?: {isNewMeter(record) && (
-            <fetcher.Form method="patch">
-              <input type="hidden" name="_method" value="toggle" />
-              <input type="hidden" name="id" defaultValue={record.meter.id} />
-              <input type="hidden" name="isActive" value="" readOnly />
-              <button>啟用</button>
-            </fetcher.Form>
-          )} /
-          時間: {new Date(record.createdAt).toLocaleString()}
+    <div className="Page HistoryPage">
+      <div className="block">
+        <div className="header">
+          <h2 className="title">登錄記錄頁</h2>
+          <Pagination {...{pageTotal, href}} />
         </div>
-      )}
+        <Form method="get">
+          <input type="text" name="search" defaultValue={search} />
+          <button>submit</button>
+        </Form>
+        {recordListItems.map(record =>
+          <div key={record.id}>
+            {record.id}
+            水號: {record.meter.waterId} /
+            錶號: {record.meter.meterId} /
+            地址: {record.meter.address} /
+            登錄人: {record.user.fullname} /
+            新水錶?: {isNewMeter(record) && (
+              <fetcher.Form method="patch">
+                <input type="hidden" name="_method" value="toggle" />
+                <input type="hidden" name="id" defaultValue={record.meter.id} />
+                <input type="hidden" name="isActive" value="" readOnly />
+                <button>啟用</button>
+              </fetcher.Form>
+            )} /
+            時間: {new Date(record.createdAt).toLocaleString()}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

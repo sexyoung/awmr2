@@ -71,36 +71,39 @@ const OutPage = () => {
   const { href, pageTotal, projectAreaList, recordListItems } = useLoaderData<LoadData>();
   
   return (
-    <div>
-      <h2>區外要求</h2>
-      <Pagination {...{pageTotal, href}} />
-
-      {recordListItems.map(record =>
-        <div key={record.id}>
-          {record.id}
-          小區: {record.meter.area} /
-          水號: {record.meter.waterId} /
-          錶號: {record.meter.meterId} /
-          登錄人: {record.user.fullname} /
-          時間: {new Date(record.createdAt).toLocaleString()} /
-          <Form method="post">
-            <input type="hidden" name="_method" value="changeArea" />
-            <input type="hidden" name="meterId" defaultValue={record.meter.id} />
-            <select name="area" defaultValue={record.meter.area!}>
-              {projectAreaList[record.meter.projectId].map(area =>
-                <option key={area} value={area}>{area}</option>
-              )}
-            </select>
-            <button>update</button>
-          </Form>
-          <Form method="delete">
-            <input type="hidden" name="_method" value="deleteOut" />
-            <input type="hidden" name="recordId" defaultValue={record.id} />
-            <button>delete</button>
-          </Form>
-          <hr />
+    <div className="Page OutPage">
+      <div className="block">
+        <div className="header">
+          <h2 className="title">區外要求</h2>
+          <Pagination {...{pageTotal, href}} />
         </div>
-      )}
+        {recordListItems.map(record =>
+          <div key={record.id}>
+            {record.id}
+            小區: {record.meter.area} /
+            水號: {record.meter.waterId} /
+            錶號: {record.meter.meterId} /
+            登錄人: {record.user.fullname} /
+            時間: {new Date(record.createdAt).toLocaleString()} /
+            <Form method="post">
+              <input type="hidden" name="_method" value="changeArea" />
+              <input type="hidden" name="meterId" defaultValue={record.meter.id} />
+              <select name="area" defaultValue={record.meter.area!}>
+                {projectAreaList[record.meter.projectId].map(area =>
+                  <option key={area} value={area}>{area}</option>
+                )}
+              </select>
+              <button>update</button>
+            </Form>
+            <Form method="delete">
+              <input type="hidden" name="_method" value="deleteOut" />
+              <input type="hidden" name="recordId" defaultValue={record.id} />
+              <button>delete</button>
+            </Form>
+            <hr />
+          </div>
+        )}
+      </div>
     </div>
   )
 }
