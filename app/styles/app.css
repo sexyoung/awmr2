@@ -1,5 +1,6 @@
 :root {
   --color-gallery: #eee;
+  --color-gray: #ccc;
   --color-spanish-green: #7F8E7C;
   --color-mantis: #7FC072;
   --color-zombie: #E6E69F;
@@ -10,6 +11,22 @@ html, body {
   margin: 0;
   height: 100%;
   background-color: #f3f7f9;
+}
+
+.f1r {
+  font-size: 1rem;
+}
+
+.df {
+  display: flex;
+}
+
+.jcsa {
+  justify-content: space-around;
+}
+
+.aic {
+  align-items: center;
 }
 
 .Page {
@@ -190,8 +207,7 @@ html, body {
   width: 100vw;
   height: 100vh;
   position: fixed;
-  background-color: rgba(103, 116, 124, .7);
-  filter: brightness(0.85);
+  background-color: rgba(57,64,68,.7);
 }
 
 .ModalBG .Modal {
@@ -202,4 +218,31 @@ html, body {
   position: absolute;
   background-color: #fff;
   transform: translate(-50%, -50%);
+}
+
+.input {
+  outline: none;
+  padding: 5px 7px;
+  border-radius: 3px;
+  border: 2px solid var(--color-gray);
+}
+
+.input:focus {
+  border-color: var(--color-blue-bayoux);
+}
+
+.btn {
+  padding: 5px 10px;
+  border-radius: 3px;
+}
+
+.btn:hover {
+  cursor: pointer;
+  filter: brightness(0.85);
+}
+
+.btn.primary {
+  border: none;
+  color: #fff;
+  background-color: var(--color-blue-bayoux);
 }
