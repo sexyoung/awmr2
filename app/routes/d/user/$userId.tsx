@@ -49,7 +49,6 @@ const UserRoute = () => {
     const formData = new FormData(document.getElementById(`form${projectId}`) as HTMLFormElement);
     const _method = formData.get('_method') as string;
     const userId = formData.get('userId')! as string;
-    // const projectId = formData.get('projectId')! as string;
     
     fetcher.submit({
       _method,

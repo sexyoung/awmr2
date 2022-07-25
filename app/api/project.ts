@@ -31,6 +31,7 @@ export async function remove({id}: {id: number}) {
 export type ProjectData = Array<Project & {
   total: number;
   areaCount: number;
+  notActiveCount: number;
 } & RecordCount>
 
 export async function query(take?: number) {

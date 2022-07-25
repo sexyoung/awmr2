@@ -28,7 +28,20 @@ export default () => {
   const fetcher = useFetcher();
   const actionData = useActionData<ActionData>();
   const projectListItems = useLoaderData<ProjectData>();
-console.log(projectListItems);
+
+  const handleChange = (projectId: number) => {
+    const formData = new FormData(document.getElementById(`formToggle${projectId}`) as HTMLFormElement);
+    const _method = formData.get('_method') as string;
+    const isActive = (document.getElementById(`isActive${projectId}`) as HTMLInputElement).checked;
+
+    fetcher.submit({
+      _method,
+      isActive: isActive ? '': '1',
+      id: projectId.toString(),
+    }, {
+      method: 'patch',
+    });
+  }
 
   return (
     <div className="Page ProjectPage">
@@ -69,10 +82,9 @@ console.log(projectListItems);
             {projectListItems.map((project, index) =>
               <tr key={project.id}>
                 <td>
-                  <fetcher.Form method="patch">
+                  <fetcher.Form method="patch" id={`formToggle${project.id}`}>
                     <input type="hidden" name="_method" value="toggle" />
-                    <input type="hidden" name="id" defaultValue={project.id} />
-                    <input type="checkbox" name="isActive" defaultChecked={project.isActive} value={project.isActive ? "1": ""} />
+                    <input type="checkbox" name="isActive" id={`isActive${project.id}`} defaultChecked={project.isActive} value={project.isActive ? "1": ""} onChange={handleChange.bind(null, project.id)} />
                   </fetcher.Form>
                 </td>
                 <td>{project.name}</td>
