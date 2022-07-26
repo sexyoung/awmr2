@@ -17,7 +17,7 @@ const RecordBar:React.FC<IProps> = ({success = 0, notRecord = 0, total = 0, z = 
     notRecord: ~~(notRecord / total * 100),
   };
   return (
-    <div className='bar' style={{zIndex: z}}>
+    <div className='record-bar' style={{zIndex: z}}>
       {!!success &&
         <div
           data-text={`登記: ${success}`}

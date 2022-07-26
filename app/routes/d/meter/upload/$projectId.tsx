@@ -1,11 +1,15 @@
 import { from, concatMap, scan, distinctUntilChanged, map } from "rxjs";
 import { useState } from "react";
 import { read, utils } from "xlsx";
-import { useParams, useFetcher } from "@remix-run/react"
+import { useParams, useFetcher, useLoaderData } from "@remix-run/react"
 import { Caliber } from "~/consts/meter";
-import { LoaderFunction } from "@remix-run/node";
+import { LinksFunction, LoaderFunction } from "@remix-run/node";
 import { isAdmin } from "~/api/user";
+import { db } from "~/utils/db.server";
+import { Project } from "@prisma/client";
 export { action } from "./action";
+
+import stylesUrl from "~/styles/meter-upload.css";
 
 type UploadMeter = {
   area: string;
@@ -17,14 +21,27 @@ type UploadMeter = {
   location: string;
 }
 
+type LoaderData = {
+  projectListItems: Project[]
+};
+
 let data: UploadMeter[];
+let fileName: string = '';
 const caliber = Object.values(Caliber).filter(v => typeof v === 'string');
 const sheetHeader = ["waterID", "area", "meterID", "address", "status", "type", "location"];
 
+export const links: LinksFunction = () => {
+  return [{ rel: "stylesheet", href: stylesUrl }];
+};
 
 export const loader: LoaderFunction = async ({ request }) => {
   await isAdmin(request);
-  return null;
+  const projectListItems = await db.project.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+  return {
+    projectListItems,
+  };
 }
 
 const UploadPage = () => {
@@ -32,6 +49,11 @@ const UploadPage = () => {
   const [percent, setPercent] = useState(0);
   const [isUpLoading, setIsUpLoading] = useState(false);
   const fetcher = useFetcher<string[]>(); // meterId list
+  const { projectListItems } = useLoaderData<LoaderData>();
+
+  const handleChangeProject: React.ChangeEventHandler<HTMLSelectElement> = ({ currentTarget }) => {
+    location.href = `/d/meter/upload/${currentTarget.value}`;
+  }
 
   const handleChooseFile: React.ChangeEventHandler<HTMLInputElement> = async ({ currentTarget }) => {
     const [ file = null ] = currentTarget.files as FileList;
@@ -59,6 +81,8 @@ const UploadPage = () => {
         meterId: data[i].meterID,
       })
     };
+
+    fileName = file.name;
 
     fetcher.submit({
       _method: 'check',
@@ -109,7 +133,12 @@ const UploadPage = () => {
         if(percent < 100) return setPercent(percent);
         data = [];
         setIsUpLoading(false);
+        location.reload();
       });
+  }
+
+  const handleClearData = () => {
+    location.reload();
   }
 
   // console.log('fetcher.state', fetcher.state);
@@ -120,32 +149,52 @@ const UploadPage = () => {
   return (
     <div className="Page MeterUploadPage">
       <div className="block">
-      <div className="header">
+        <div className="header">
           <h2 className="title">上傳水錶頁</h2>
         </div>
-        {fetcher.state === 'idle' &&
-          <fetcher.Form method="post">
-            <input type="file" onChange={handleChooseFile} accept=".xlsx, application/vnd.openxmlfetcher.Formats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
-          </fetcher.Form>
-        }
-
-        {!!fetcher.data && !!fetcher.data.length && (
-          <div>
-            <h2>略過的資料</h2>
-            {fetcher.data.map(meter =>
-              <span key={meter}>{meter}, </span>
-            )}
+        <div className="wrap">
+          {fetcher.state === 'idle' &&
+            <fetcher.Form method="post" className="check-form">
+              <select onChange={handleChangeProject} defaultValue={params.projectId}>
+                {projectListItems.map(project =>
+                  <option key={project.id} value={project.id}>{project.name}</option>
+                )}
+              </select>
+              <label className={`label ${data && data.length ? 'disabled': ''}`} htmlFor="file">
+                <input type="file" id="file" onChange={handleChooseFile} accept=".xlsx, application/vnd.openxmlfetcher.Formats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+                <div className="choose">選擇檔案</div>
+              </label>
+            </fetcher.Form>
+          }
+          {!!data && !!data.length && !!fetcher.data &&
+            <fetcher.Form method="post" className="upload-form" onSubmit={handleUpload}>
+              <input type="hidden" name="_method" value="upload" />
+              <div>{fileName} 上傳水錶: <span className="color-mantis">{data.length - fetcher.data.length}</span></div>
+              <div className="btn-list">
+                <button className="f1r btn bg-mantis cf" disabled={!(data.length - fetcher.data.length)}>開始上傳</button>
+                <button className="f1r btn bg-zombie" type="button" onClick={handleClearData}>重選檔案</button>
+              </div>
+            </fetcher.Form>
+          }
+          
+          {isUpLoading &&
+          <div className="progress-block">
+            <div className="progress">
+              <div className="bar bg-mantis" style={{width: `${percent}%`}} />
+            </div>
+            <div style={{ marginLeft: `${percent}%`}}>{percent}%</div>
           </div>
-        )}
+          }
 
-        {data && data.length && fetcher.data &&
-          <fetcher.Form method="post" onSubmit={handleUpload}>
-            <div>要上傳筆數: {data.length - fetcher.data.length}</div>
-            <input type="hidden" name="_method" value="upload" />
-            <button>上傳</button>
-          </fetcher.Form>
-        }
-        {isUpLoading && <div>{percent}%</div>}
+          {!!fetcher.data && !!fetcher.data.length && (
+            <div className="skip-upload">
+              <div className="title">略過的資料 ({fetcher.data.length})</div>
+              {fetcher.data.map(meter =>
+                <span className="dib" key={meter}>{meter}, </span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

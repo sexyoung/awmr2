@@ -1,0 +1,84 @@
+.MeterUploadPage .check-form {
+  display: flex;
+  overflow: hidden;
+  border-radius: 3px;
+  border: 1px solid #aaa;
+}
+
+.MeterUploadPage .check-form select {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 20px;
+  padding: 5px 10px;
+  border-radius: 0;
+  background-color: #fff;
+  -webkit-appearance: initial;
+}
+
+.MeterUploadPage .check-form #file {
+  display: none;
+}
+
+.MeterUploadPage .check-form .choose {
+  width: 150px;
+  height: 100%;
+  color: #fff;
+  padding-top: 4px;
+  text-align: center;
+  display: inline-block;
+  box-sizing: border-box;
+  background-color: var(--color-blue-bayoux);
+}
+
+.MeterUploadPage .check-form .label.disabled {
+  pointer-events: none;
+}
+
+.MeterUploadPage .check-form .label.disabled .choose {
+  color: #bbb;
+  background-color: #ddd;
+}
+
+.MeterUploadPage .upload-form {
+  padding: 10px 5px 0;
+  color: #aaa;
+}
+
+.MeterUploadPage .upload-form .btn-list {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.MeterUploadPage .progress-block {
+
+}
+
+.MeterUploadPage .progress-block .progress {
+  margin-top: 10px;
+  height: 3px;
+  border-radius: 3px;
+  background-color: #ccc;
+}
+
+.MeterUploadPage .progress-block .progress + div,
+.MeterUploadPage .progress-block .progress .bar {
+  height: 100%;
+  transition: all .15s;
+}
+
+.MeterUploadPage .skip-upload {
+  margin-top: 10px;
+}
+
+.MeterUploadPage .skip-upload .title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.MeterUploadPage .skip-upload span {
+  margin: 2px;
+  font-size: 15px;
+}
