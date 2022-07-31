@@ -1,6 +1,6 @@
+import { format } from "date-fns";
 import { json, LoaderFunction } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
-import { format } from "date-fns";
 import { query, AreaData } from "~/api/area";
 import { isAdmin } from "~/api/user";
 import { Pagination } from "~/component/Pagination";

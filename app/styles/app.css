@@ -33,6 +33,13 @@ html, body {
   background-color: var(--color-zombie);
 }
 
+.nowrap {
+  white-space: nowrap;
+}
+
+.f13 {
+  font-size: 13px;
+}
 
 .f1r {
   font-size: 1rem;
@@ -40,6 +47,14 @@ html, body {
 
 .df {
   display: flex;
+}
+
+.fx1 {
+  flex: 1;
+}
+
+.dn {
+  display: none;
 }
 
 .dib {
@@ -92,6 +107,22 @@ html, body {
   padding: 15px;
 }
 
+.cp {
+  cursor: pointer;
+}
+
+.ml5 {
+  margin-left: 5px;
+}
+
+.gap10 {
+  gap: 10px;
+}
+
+.w300 {
+  width: 300px;
+}
+
 .bgsc {
   background-size: cover;
 }
@@ -104,11 +135,20 @@ html, body {
   color: var(--color-mantis);
 }
 
+.wp100 {
+  width: 100%;
+}
+
+.bsbb {
+  box-sizing: border-box;
+}
+
 /* table */
 .Page > .block > table {
   width: 100%;
   color: var(--color-blue-bayoux);
   border-spacing: 0;
+  table-layout: fixed;
 }
 
 .Page > .block > table a {
@@ -137,6 +177,9 @@ html, body {
 
 .Page > .block > table td {
   padding: 5px 10px;
+  /* overflow: hidden; */
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .Page > .block > table > tfoot td {
@@ -247,6 +290,11 @@ html, body {
   position: absolute;
   background-color: #fff;
   transform: translate(-50%, -50%);
+}
+
+.ModalBG .Modal .title {
+  font-size: 20px;
+  font-weight: 700;
 }
 
 .input {

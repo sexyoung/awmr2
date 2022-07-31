@@ -1,12 +1,17 @@
+import { format } from "date-fns";
 import { useRef, useState } from "react";
 import { Meter, Project, Record } from "@prisma/client";
-import { LoaderFunction } from "@remix-run/node";
+import { LinksFunction, LoaderFunction } from "@remix-run/node";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 import { db } from "~/utils/db.server";
 import { Suppy, Type } from "~/consts/meter";
+import { Status } from "~/consts/reocrd";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
+import Modal from "~/component/Modal";
 import { isAdmin } from "~/api/user";
 export { action } from "./action";
+
+import stylesUrl from "~/styles/meter-page.css";
 
 const PAGE_SIZE = 30;
 
@@ -22,6 +27,10 @@ type LoadData = {
   )[];
   search: string;
 } & PaginationProps
+
+export const links: LinksFunction = () => {
+  return [{ rel: "stylesheet", href: stylesUrl }];
+};
 
 export const loader: LoaderFunction = async ({ request }) => {
   await isAdmin(request);
@@ -83,9 +92,6 @@ const MeterPage = () => {
   const fetcher = useFetcher();
   const { search, href, pageTotal, meterListItem, projectListItems } = useLoaderData<LoadData>();
 
-  // console.log(meterListItem);
-  
-
   const handleShowEdit = (index: number) => {
     id.current && (id.current.value = meterListItem[index].id?.toString() || '');
     projectId.current && (projectId.current.value = meterListItem[index].projectId?.toString());
@@ -111,6 +117,21 @@ const MeterPage = () => {
     suppy.current && (suppy.current.value = "");
     location.current && (location.current.value = "");
     note.current && (note.current.value = "");
+    setIndex(-1);
+  }
+
+  const handleToggle = (meterId: number) => {
+    const formData = new FormData(document.getElementById(`formToggle${meterId}`) as HTMLFormElement);
+    const _method = formData.get('_method') as string;
+    const isActive = (document.getElementById(`isActive${meterId}`) as HTMLInputElement).checked;
+
+    fetcher.submit({
+      _method,
+      isActive: isActive ? '': '1',
+      id: meterId.toString(),
+    }, {
+      method: 'patch',
+    });
   }
   
   return (
@@ -120,72 +141,113 @@ const MeterPage = () => {
           <h2 className="title">水錶查詢頁</h2>
           <Pagination {...{pageTotal, href}} />
         </div>
-        <Form method="get">
-          <input type="text" name="search" defaultValue={search} />
-          <button>submit</button>
-        </Form>
-        <Form method="patch">
-          <div><input type="text" name="_method" value="update" readOnly /></div>
-          <div><input ref={id} type="text" name="id" required /></div>
-          <div>
-            <select ref={projectId} name="projectId">
-              {projectListItems.map(project =>
-                <option key={project.id} value={project.id}>{project.name}</option>
-              )}
-            </select>
-          </div>
-          <div><input ref={waterId} type="text" name="waterId" required /></div>
-          <div><input ref={meterId} type="text" name="meterId" required /></div>
-          <div><input ref={area} type="text" name="area" /></div>
-          <div><input ref={address} type="text" name="address" /></div>
-          <div>
-            <select ref={type} name="type" required>
-              <option value={Suppy.NOM}>正常</option>
-              <option value={Suppy.END}>中止</option>
-              <option value={Suppy.PAU}>停水</option>
-            </select>
-          </div>
-          <div>
-            <select ref={suppy} name="suppy" required>
-              <option value={Type.DRT}>直接錶</option>
-              <option value={Type.TTL}>總錶</option>
-              <option value={Type.BCH}>分錶</option>
-            </select>
-          </div>
-          <div><input ref={location} type="text" name="location" /></div>
-          <div><input ref={note} type="text" name="note" /></div>
-          <span onClick={handleHideEdit}>close</span>
-          <button>update</button>
-        </Form>
-        {meterListItem.map((meter, index) =>
-          <div key={meter.id}>
-            <fetcher.Form method="patch">
-              <input type="hidden" name="_method" value="toggle" />
-              <input type="hidden" name="id" defaultValue={meter.id} />
-              <input type="hidden" name="isActive" defaultValue={meter.isActive ? "1": ""} />
-              <button>toggle</button>
-            </fetcher.Form>
-            {meter.isActive ? 'enable': 'disabled'}/
-            標案: {meter.project.name} /
-            小區: {meter.area} /
-            水號: {meter.waterId} / 
-            錶號: {meter.meterId} / 
-            地址: {meter.address} /
-            種類: {Type[meter.type as number]} /
-            供水: {Suppy[meter.suppy as number]} /
-            地址: {meter.location} /
-            {!!meter.Record.length && <>
-              記錄: {meter.Record.length && (
-                <span>
-                  {new Date(+new Date(meter.Record[0].createdAt)).toLocaleString()}/
-                  {meter.Record[0].status}/
-                  {meter.Record[0].content}
-                </span>
-              )}
-            </>}
-            <button type="button" onClick={handleShowEdit.bind(null, index)}>編輯</button>
-          </div>
-        )}
+        <div className="search-form">
+          <Form method="get">
+            <input type="text" name="search" defaultValue={search} placeholder="搜尋小區、地址、水錶、水號、位置、備註" />
+          </Form>
+        </div>
+        <Modal onClose={handleHideEdit} className={index === -1 ? "dn": ''}>
+          <Form method="patch" className="EditForm">
+            <div className="title">修改水錶</div>
+            <input type="hidden" name="_method" value="update" readOnly />
+            <input ref={id} type="hidden" name="id" required />
+            <div className="df aic gap10 w300">
+              <div>標案</div>
+              <select ref={projectId} name="projectId" className="input wp100 bsbb fx1">
+                {projectListItems.map(project =>
+                  <option key={project.id} value={project.id}>{project.name}</option>
+                )}
+              </select>
+            </div>
+            <div className="df aic gap10 w300">
+              <div>水號</div>
+              <input className="input wp100 bsbb fx1" placeholder="水號" ref={waterId} type="text" name="waterId" required />
+            </div>
+            <div className="df aic gap10 w300">
+              <div>表號</div>
+              <input className="input wp100 bsbb fx1" placeholder="表號" ref={meterId} type="text" name="meterId" required />
+            </div>
+            <div className="df aic gap10 w300">
+              <div>小區</div>
+              <input className="input wp100 bsbb fx1" placeholder="小區" ref={area} type="text" name="area" />
+            </div>
+            <div className="df aic gap10 w300">
+              <div>地址</div>
+              <input className="input wp100 bsbb fx1" placeholder="地址" ref={address} type="text" name="address" />
+            </div>
+            <div className="df aic gap10 w300">供水
+              <select className="input wp100 bsbb fx1" ref={type} name="type" required>
+                <option value={Suppy.NOM}>正常</option>
+                <option value={Suppy.END}>中止</option>
+                <option value={Suppy.PAU}>停水</option>
+              </select>
+            </div>
+            <div className="df aic gap10 w300">表種
+              <select className="input wp100 bsbb fx1" ref={suppy} name="suppy" required>
+                <option value={Type.DRT}>直接錶</option>
+                <option value={Type.TTL}>總錶</option>
+                <option value={Type.BCH}>分錶</option>
+              </select>
+            </div>
+            <div className="df aic gap10 w300">
+              <div>位置</div>
+              <input className="input wp100 bsbb fx1" placeholder="位置" ref={location} type="text" name="location" />
+            </div>
+            <div className="df aic gap10 w300">
+              <div>備註</div>
+              <input className="input wp100 bsbb fx1" placeholder="備註" ref={note} type="text" name="note" />
+            </div>
+            <button className="btn primary f1r" onClick={setIndex.bind(null, -1)}>確定更新</button>
+          </Form>
+        </Modal>
+        <table style={{tableLayout: 'fixed'}}>
+          <thead>
+            <tr>
+              <th style={{width: 62, boxSizing: 'border-box'}}>啟用</th>
+              {/* <th style={{width: 130, boxSizing: 'border-box'}}>標案</th>
+              <th style={{width: 150, boxSizing: 'border-box'}}>小區</th> */}
+              <th style={{width: 130, boxSizing: 'border-box'}}>水號</th>
+              <th style={{width: 120, boxSizing: 'border-box'}}>錶號</th>
+              <th >地址</th>
+              <th style={{width: 180, boxSizing: 'border-box'}}> </th>
+            </tr>
+          </thead>
+          <tbody>
+            {meterListItem.map((meter, index) =>
+              <tr key={meter.id}>
+                <td>
+                  <fetcher.Form method="patch" id={`formToggle${meter.id}`}>
+                    <input type="hidden" name="_method" value="toggle" />
+                    <input type="hidden" name="id" defaultValue={meter.id} />
+                    <input type="checkbox" name="isActive" id={`isActive${meter.id}`} defaultValue={meter.isActive ? "1": ""} defaultChecked={meter.isActive} onChange={handleToggle.bind(null, meter.id)} />
+                    {/* <button>toggle</button> */}
+                  </fetcher.Form>
+                  {/* {meter.isActive ? 'enable': 'disabled'} */}
+                </td>
+                {/* <td>{meter.project.name}</td>
+                <td>{meter.area}</td> */}
+                <td>{meter.waterId}</td>
+                <td>{meter.meterId}</td>
+                <td style={{whiteSpace: 'normal'}}>{meter.address}</td>
+                {/* <td>{Type[meter.type as number]}</td>
+                <td>{Suppy[meter.suppy as number]}</td>
+                <td>{meter.location}</td> */}
+                <td style={{whiteSpace: 'normal'}}>
+                  {!!meter.Record.length && <>
+                    {meter.Record.length && (
+                      <span className={`f13 ${meter.Record[0].status}`}>
+                        {format(new Date(+new Date(meter.Record[0].createdAt)), 'MM-dd HH:mm')} » {meter.Record[0].content}
+                        {meter.Record[0].status === Status.success && '度'}
+                      </span>
+                    )}
+                  </>}
+                  <span className="ml5 cp" onClick={handleShowEdit.bind(null, index)}>⚙</span>
+                  {/* <button type="button" onClick={handleShowEdit.bind(null, index)}>編輯</button> */}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )

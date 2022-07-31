@@ -4,9 +4,10 @@ const modalBG = createRef<HTMLDivElement>();
 
 interface IProps {
   onClose?: any;
+  className?: string;
 }
 
-const Modal:React.FC<IProps> = ({ children, onClose }) => {
+const Modal:React.FC<IProps> = ({ children, onClose, className = '' }) => {
 
   useEffect(() => {
     const body = document.getElementsByTagName('body')[0];
@@ -25,7 +26,7 @@ const Modal:React.FC<IProps> = ({ children, onClose }) => {
   };
   
   return (
-    <div data-testid="modalBG" className='ModalBG' ref={modalBG} onClick={handleClick}>
+    <div data-testid="modalBG" className={`ModalBG ${className}`} ref={modalBG} onClick={handleClick}>
       <div data-testid="modal" className='Modal'>
         {children}
       </div>

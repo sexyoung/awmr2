@@ -1,0 +1,9 @@
+.MeterPage .success {
+  color: var(--color-mantis);
+}
+
+.MeterPage .EditForm {
+  display: flex;
+  gap: 7px;
+  flex-direction: column;
+}
