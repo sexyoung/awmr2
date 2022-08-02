@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { LoaderFunction } from "@remix-run/node";
+import { useState, Fragment } from "react";
+import { LinksFunction, LoaderFunction } from "@remix-run/node";
 import { Meter, Project, Record, User } from "@prisma/client";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 
@@ -7,6 +7,8 @@ import { db } from "~/utils/db.server";
 import { Suppy, Type } from "~/consts/meter";
 import { NotRecordReason, Status } from "~/consts/reocrd";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
+
+import stylesUrl from "~/styles/record-page.css";
 
 export { action } from "./action";
 
@@ -36,6 +38,10 @@ const formatYmd = (date: Date): string => {
 };
 
 const getTomorrow = () => new Date(new Date().valueOf() + 1000 * 60 * 60 * 24);
+
+export const links: LinksFunction = () => {
+  return [{ rel: "stylesheet", href: stylesUrl }];
+};
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
@@ -136,7 +142,12 @@ const RecordPage = () => {
       <div className="block">
         <div className="header">
           <h2 className="title">水錶登錄頁</h2>
-          <Pagination {...{pageTotal, href}} />
+          {pageTotal > 1 && <Pagination {...{pageTotal, href}} />}
+        </div>
+        <div className="search-form">
+          <Form method="get">
+            <input type="text" name="search" defaultValue={search} placeholder="搜尋小區、地址、錶號、水號、位置或備註..." />
+          </Form>
         </div>
         todo:
         <ul>
@@ -147,114 +158,118 @@ const RecordPage = () => {
         抄錶量: {successCount}
         未登量: {notRecordCount}
 
-        <Form method="get">
-          <input type="text" name="search" defaultValue={search} />
-          <button>submit</button>
-        </Form>
-        {meterListItem.length ?
-          meterListItem.map(meter =>
-          <div key={meter.id}>
-            水號: {meter.waterId} / 
-            錶號: {meter.meterId} / 
-            地址: {meter.address} /
-            錶位: {meter.location} /
-            備註: {meter.note} /
-            {meter.Record.map(record =>
-              <div key={record.id}>
-                {record.user.name}/
-                {record.status}/
-                {record.content}/
-                {new Date(record.createdAt).toLocaleString()}
-              </div>
-            )}
-            <fetcher.Form method="post">
-              <input type="hidden" name="_method" value={Status.success} />
-              <input type="hidden" name="meterId" defaultValue={meter.id} />
-              <input type="tel" name="content" placeholder="度數" required />
-              <button>submit</button>
-            </fetcher.Form>
-            <fetcher.Form method="post">
-              <input type="hidden" name="_method" value={Status.notRecord} />
-              <input type="hidden" name="meterId" defaultValue={meter.id} />
-              <select name="content" required>
-                <option key={NotRecordReason.Abort} value={NotRecordReason.Abort}>中止</option>
-                <option key={NotRecordReason.Stop} value={NotRecordReason.Stop}>停水</option>
-                <option key={NotRecordReason.NoOne} value={NotRecordReason.NoOne}>無人</option>
-                <option key={NotRecordReason.Empty} value={NotRecordReason.Empty}>空屋</option>
-                <option key={NotRecordReason.Car} value={NotRecordReason.Car}>車擋</option>
-                <option key={NotRecordReason.Heavy} value={NotRecordReason.Heavy}>重壓</option>
-                <option key={NotRecordReason.NoExist} value={NotRecordReason.NoExist}>查無</option>
-                <option key={NotRecordReason.EvilDog} value={NotRecordReason.EvilDog}>惡犬</option>
-                <option key={NotRecordReason.OutOfArea} value={NotRecordReason.OutOfArea}>區域外</option>
-                <option key={NotRecordReason.NoEntrance} value={NotRecordReason.NoEntrance}>無法進入</option>
-                <option key={NotRecordReason.Other} value={NotRecordReason.Other}>其他</option>
-              </select>
-              <button>submit</button>
-            </fetcher.Form>
-            <hr />
-          </div>
-          ):
-          <div>
-            找不到水錶來新增水錶
-            <fetcher.Form method="post">
-            <input type="hidden" name="_method" value={'create'} />
-              <div>
-                <select name="projectId" defaultValue={fetcher.data?.fields?.projectId}>
-                  {projectListItems.map(project =>
-                    <option key={project.id} value={project.id}>{project.name}</option>
-                  )}
-                </select>
-              </div>
-              <div><input type="text" name="waterId" defaultValue={fetcher.data?.fields?.waterId} placeholder="waterId" required /></div>
-              {fetcher.data?.fieldErrors?.waterId && <p>{fetcher.data?.fieldErrors.waterId}</p>}
-              <div><input type="text" name="meterId" defaultValue={fetcher.data?.fields?.meterId} placeholder="meterId" required /></div>
-              {fetcher.data?.fieldErrors?.meterId && <p>{fetcher.data?.fieldErrors.meterId}</p>}
-              <div><input type="text" name="area" defaultValue={fetcher.data?.fields?.area} placeholder="area" /></div>
-              <div><input type="text" name="address" defaultValue={fetcher.data?.fields?.address} placeholder="address" /></div>
-              <div>
-                <select name="type" required>
-                  <option value={Suppy.NOM}>正常</option>
-                  <option value={Suppy.END}>中止</option>
-                  <option value={Suppy.PAU}>停水</option>
-                </select>
-              </div>
-              <div>
-                <select name="suppy" required>
-                  <option value={Type.DRT}>直接錶</option>
-                  <option value={Type.TTL}>總錶</option>
-                  <option value={Type.BCH}>分錶</option>
-                </select>
-              </div>
-              <div><input type="text" name="location" defaultValue={fetcher.data?.fields?.location} placeholder="location" /></div>
-              <div><input type="text" name="note" defaultValue={fetcher.data?.fields?.note} placeholder="note" /></div>
+        <div className="df fww item-list">
+          {meterListItem.length ?
+            meterListItem.map((meter, index) =>
+              <Fragment key={meter.id}>
+                <div className="fg1 fbp50 mwp50">
+                  <div className="item m0a">
+                    <div>水號 <span className="value">{meter.waterId}</span></div>
+                    <div>錶號 <span className="value">{meter.meterId}</span></div>
+                    <div>地址 <span className="value">{meter.address}</span></div>
+                    <div>錶位 <span className="value">{meter.location}</span></div>
+                    <div>備註 <span className="value">{meter.note}</span></div>
+                    <div className="dn">
+                      {meter.Record.map(record =>
+                        <div key={record.id}>
+                          {record.user.name}/
+                          {record.status}/
+                          {record.content}/
+                          {new Date(record.createdAt).toLocaleString()}
+                        </div>
+                      )}
+                    </div>
+                    <fetcher.Form className="dn" method="post">
+                      <input type="hidden" name="_method" value={Status.success} />
+                      <input type="hidden" name="meterId" defaultValue={meter.id} />
+                      <input type="tel" name="content" placeholder="度數" required />
+                      <button>submit</button>
+                    </fetcher.Form>
+                    <fetcher.Form className="dn" method="post">
+                      <input type="hidden" name="_method" value={Status.notRecord} />
+                      <input type="hidden" name="meterId" defaultValue={meter.id} />
+                      <select name="content" required>
+                        <option key={NotRecordReason.Abort} value={NotRecordReason.Abort}>中止</option>
+                        <option key={NotRecordReason.Stop} value={NotRecordReason.Stop}>停水</option>
+                        <option key={NotRecordReason.NoOne} value={NotRecordReason.NoOne}>無人</option>
+                        <option key={NotRecordReason.Empty} value={NotRecordReason.Empty}>空屋</option>
+                        <option key={NotRecordReason.Car} value={NotRecordReason.Car}>車擋</option>
+                        <option key={NotRecordReason.Heavy} value={NotRecordReason.Heavy}>重壓</option>
+                        <option key={NotRecordReason.NoExist} value={NotRecordReason.NoExist}>查無</option>
+                        <option key={NotRecordReason.EvilDog} value={NotRecordReason.EvilDog}>惡犬</option>
+                        <option key={NotRecordReason.OutOfArea} value={NotRecordReason.OutOfArea}>區域外</option>
+                        <option key={NotRecordReason.NoEntrance} value={NotRecordReason.NoEntrance}>無法進入</option>
+                        <option key={NotRecordReason.Other} value={NotRecordReason.Other}>其他</option>
+                      </select>
+                      <button>submit</button>
+                    </fetcher.Form>
+                  </div>
+                </div>
+                {!!(index % 2) && <div className="break" />}
+              </Fragment>
+            ):
+            <div>
+              找不到水錶來新增水錶
+              <fetcher.Form method="post">
+              <input type="hidden" name="_method" value={'create'} />
+                <div>
+                  <select name="projectId" defaultValue={fetcher.data?.fields?.projectId}>
+                    {projectListItems.map(project =>
+                      <option key={project.id} value={project.id}>{project.name}</option>
+                    )}
+                  </select>
+                </div>
+                <div><input type="text" name="waterId" defaultValue={fetcher.data?.fields?.waterId} placeholder="waterId" required /></div>
+                {fetcher.data?.fieldErrors?.waterId && <p>{fetcher.data?.fieldErrors.waterId}</p>}
+                <div><input type="text" name="meterId" defaultValue={fetcher.data?.fields?.meterId} placeholder="meterId" required /></div>
+                {fetcher.data?.fieldErrors?.meterId && <p>{fetcher.data?.fieldErrors.meterId}</p>}
+                <div><input type="text" name="area" defaultValue={fetcher.data?.fields?.area} placeholder="area" /></div>
+                <div><input type="text" name="address" defaultValue={fetcher.data?.fields?.address} placeholder="address" /></div>
+                <div>
+                  <select name="type" required>
+                    <option value={Suppy.NOM}>正常</option>
+                    <option value={Suppy.END}>中止</option>
+                    <option value={Suppy.PAU}>停水</option>
+                  </select>
+                </div>
+                <div>
+                  <select name="suppy" required>
+                    <option value={Type.DRT}>直接錶</option>
+                    <option value={Type.TTL}>總錶</option>
+                    <option value={Type.BCH}>分錶</option>
+                  </select>
+                </div>
+                <div><input type="text" name="location" defaultValue={fetcher.data?.fields?.location} placeholder="location" /></div>
+                <div><input type="text" name="note" defaultValue={fetcher.data?.fields?.note} placeholder="note" /></div>
 
-              <button type="button" onClick={setStatus.bind(null, Status.success)}>成功</button>
-              <button type="button" onClick={setStatus.bind(null, Status.notRecord)}>未記</button>
-              {status === Status.success && <>
-                <input type="text" name="status" value={Status.success} readOnly />
-                <input type="tel" name="content" defaultValue={fetcher.data?.fields?.content} placeholder="度數" required />
-              </>}
+                <button type="button" onClick={setStatus.bind(null, Status.success)}>成功</button>
+                <button type="button" onClick={setStatus.bind(null, Status.notRecord)}>未記</button>
+                {status === Status.success && <>
+                  <input type="text" name="status" value={Status.success} readOnly />
+                  <input type="tel" name="content" defaultValue={fetcher.data?.fields?.content} placeholder="度數" required />
+                </>}
 
-              {status === Status.notRecord && <>
-                <input type="text" name="status" value={Status.notRecord} readOnly />
-                <select name="content" defaultValue={fetcher.data?.fields?.content} required>
-                  <option key={NotRecordReason.Abort} value={NotRecordReason.Abort}>中止</option>
-                  <option key={NotRecordReason.Stop} value={NotRecordReason.Stop}>停水</option>
-                  <option key={NotRecordReason.NoOne} value={NotRecordReason.NoOne}>無人</option>
-                  <option key={NotRecordReason.Empty} value={NotRecordReason.Empty}>空屋</option>
-                  <option key={NotRecordReason.Car} value={NotRecordReason.Car}>車擋</option>
-                  <option key={NotRecordReason.Heavy} value={NotRecordReason.Heavy}>重壓</option>
-                  <option key={NotRecordReason.NoExist} value={NotRecordReason.NoExist}>查無</option>
-                  <option key={NotRecordReason.EvilDog} value={NotRecordReason.EvilDog}>惡犬</option>
-                  <option key={NotRecordReason.OutOfArea} value={NotRecordReason.OutOfArea}>區域外</option>
-                  <option key={NotRecordReason.NoEntrance} value={NotRecordReason.NoEntrance}>無法進入</option>
-                  <option key={NotRecordReason.Other} value={NotRecordReason.Other}>其他</option>
-                </select>
-              </>}
-              <button>登記</button>
-            </fetcher.Form>
-          </div>
-        }
+                {status === Status.notRecord && <>
+                  <input type="text" name="status" value={Status.notRecord} readOnly />
+                  <select name="content" defaultValue={fetcher.data?.fields?.content} required>
+                    <option key={NotRecordReason.Abort} value={NotRecordReason.Abort}>中止</option>
+                    <option key={NotRecordReason.Stop} value={NotRecordReason.Stop}>停水</option>
+                    <option key={NotRecordReason.NoOne} value={NotRecordReason.NoOne}>無人</option>
+                    <option key={NotRecordReason.Empty} value={NotRecordReason.Empty}>空屋</option>
+                    <option key={NotRecordReason.Car} value={NotRecordReason.Car}>車擋</option>
+                    <option key={NotRecordReason.Heavy} value={NotRecordReason.Heavy}>重壓</option>
+                    <option key={NotRecordReason.NoExist} value={NotRecordReason.NoExist}>查無</option>
+                    <option key={NotRecordReason.EvilDog} value={NotRecordReason.EvilDog}>惡犬</option>
+                    <option key={NotRecordReason.OutOfArea} value={NotRecordReason.OutOfArea}>區域外</option>
+                    <option key={NotRecordReason.NoEntrance} value={NotRecordReason.NoEntrance}>無法進入</option>
+                    <option key={NotRecordReason.Other} value={NotRecordReason.Other}>其他</option>
+                  </select>
+                </>}
+                <button>登記</button>
+              </fetcher.Form>
+            </div>
+          }
+        </div>
       </div>
     </div>
   )

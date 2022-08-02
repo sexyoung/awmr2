@@ -1,0 +1,20 @@
+.RecordPage .item-list {
+  padding: 10px;
+}
+
+.RecordPage .item {
+  border: 1px solid #eee;
+  box-sizing: border-box;
+  width: calc(100% - 10px);
+}
+
+.RecordPage .item > div {
+  padding: 5px 10px;
+}
+.RecordPage .item > div + * {
+  border-top: 1px solid #eee;
+}
+
+.RecordPage .item .value {
+  color: var(--color-blue-bayoux);
+}

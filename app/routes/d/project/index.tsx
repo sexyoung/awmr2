@@ -68,9 +68,9 @@ export default () => {
         <table>
           <thead>
             <tr>
-              <th style={{width: 34}}>啟用</th>
-              <th>標案名稱</th>
-              <th>標案代號</th>
+              <th style={{whiteSpace: 'nowrap'}}>啟用</th>
+              <th style={{whiteSpace: 'nowrap'}}>標案名稱</th>
+              <th style={{whiteSpace: 'nowrap'}}>標案代號</th>
               <th>小區</th>
               <th style={{width: 150, boxSizing: 'border-box'}}>進度</th>
               <th>錶數</th>

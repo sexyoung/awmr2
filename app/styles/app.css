@@ -17,6 +17,10 @@ html, body {
   color: #fff;
 }
 
+.m0a {
+  margin: 0 auto;
+}
+
 .color-mantis {
   color: var(--color-mantis);
 }
@@ -141,6 +145,27 @@ html, body {
 
 .bsbb {
   box-sizing: border-box;
+}
+
+.break {
+  flex-basis: 100%;
+  height: 10px;
+}
+
+.fww {
+  flex-wrap: wrap;
+}
+
+.fg1 {
+  flex-grow: 1
+}
+
+.fbp50 {
+  flex-basis: 50%;
+}
+
+.mwp50 {
+  max-width: 50%;
 }
 
 /* table */

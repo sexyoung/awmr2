@@ -49,7 +49,7 @@ const AreaPage = () => {
       <div className="block">
         <div className="header">
           <h2 className="title">小區查詢</h2>
-          <Pagination {...{pageTotal, href}} />
+          {pageTotal > 1 && <Pagination {...{pageTotal, href}} />}
         </div>
         <div className="search-form">
           <Form method="get">
