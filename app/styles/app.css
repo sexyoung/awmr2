@@ -5,6 +5,8 @@
   --color-mantis: #7FC072;
   --color-zombie: #E6E69F;
   --color-blue-bayoux: #67747C;
+
+  --mobile-size: 768px;
 }
 
 html, body {
@@ -19,6 +21,14 @@ html, body {
 
 .m0a {
   margin: 0 auto;
+}
+
+.bg-blue-bayoux {
+  background-color: var(--color-blue-bayoux);
+}
+
+.color-blue-bayoux {
+  color: var(--color-blue-bayoux);
 }
 
 .color-mantis {
@@ -349,4 +359,14 @@ html, body {
   border: none;
   color: #fff;
   background-color: var(--color-blue-bayoux);
+}
+
+
+@media screen and (max-width: 768px) {
+  .xs\:df {
+    display: flex;
+  }
+  .xs\:jcsb {
+    justify-content: space-between;
+  }
 }
