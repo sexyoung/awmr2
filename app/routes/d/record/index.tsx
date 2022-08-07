@@ -1,4 +1,5 @@
-import { useState, Fragment } from "react";
+import { format } from "date-fns";
+import { useState, Fragment, MouseEventHandler, useRef } from "react";
 import { LinksFunction, LoaderFunction } from "@remix-run/node";
 import { Meter, Project, Record, User } from "@prisma/client";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
@@ -12,7 +13,7 @@ import stylesUrl from "~/styles/record-page.css";
 
 export { action } from "./action";
 
-const PAGE_SIZE = 30;
+const PAGE_SIZE = 3;
 
 type LoadData = {
   href: string;
@@ -134,8 +135,17 @@ const RecordPage = () => {
   const fetcher = useFetcher();
   const [status, setStatus] = useState<Status>(Status.success);
   const { meterCount, successCount, notRecordCount, search, href, pageTotal, meterListItem, projectListItems } = useLoaderData<LoadData>();
-  // console.log(meterListItem);
-  // console.log('fetcher.data', fetcher.data);
+
+  const handleChecked: MouseEventHandler = ({ target }) => {
+    const DOM = (target as HTMLInputElement);
+    const otherDOM = (document.getElementById(DOM.dataset.other as string) as HTMLInputElement);
+    otherDOM.checked = false;
+  }
+
+  const handleSubmit = (id: number) => {
+    (document.getElementById(`success-${id}`) as HTMLInputElement).checked = false;
+    (document.getElementById(`notRecord-${id}`) as HTMLInputElement).checked = false;
+  }
   
   return (
     <div className="Page RecordPage">
@@ -160,35 +170,54 @@ const RecordPage = () => {
 
         <div className="df fww item-list">
           {meterListItem.length ?
-            meterListItem.map((meter, index) =>
+            meterListItem.map(meter =>
               <Fragment key={meter.id}>
-                <div className="fg1 fbp50 mwp50">
-                  <div className="item m0a">
+                <div className="fg1 fbp50 mwp50 xs:fbp100 xs:mwp100">
+                  <div className="item m0a pr ovh">
+                    <input type="checkbox" id={`toggle-record-${meter.id}`} className="toggle-record" />
+                    <input onClick={handleChecked} data-other={`notRecord-${meter.id}`} type="checkbox" id={`success-${meter.id}`} className="toggle-success" />
+                    <input onClick={handleChecked} data-other={`success-${meter.id}`} type="checkbox" id={`notRecord-${meter.id}`} className="toggle-notRecord" />
                     <div>水號 <span className="value">{meter.waterId}</span></div>
                     <div>錶號 <span className="value">{meter.meterId}</span></div>
                     <div>地址 <span className="value">{meter.address}</span></div>
                     <div>錶位 <span className="value">{meter.location}</span></div>
                     <div>備註 <span className="value">{meter.note}</span></div>
-                    <div className="dn">
-                      {meter.Record.map(record =>
-                        <div key={record.id}>
-                          {record.user.name}/
-                          {record.status}/
-                          {record.content}/
-                          {new Date(record.createdAt).toLocaleString()}
+                    {!!meter.Record.length &&
+                      <>
+                        <label className={`last-record pa bg-${meter.Record[0].status}`} htmlFor={`toggle-record-${meter.id}`}>
+                          {meter.Record[0].user.fullname}({meter.Record.length})
+                        </label>
+                        <div className="record-list pa fill ova ttyp-100 tt150ms">
+                          <div className="tar">
+                            <label className="close" htmlFor={`toggle-record-${meter.id}`}>
+                              <span>×</span>
+                            關閉
+                            </label>
+                          </div>
+                          {meter.Record.map(record =>
+                            <div key={record.id} className="record df jcsb">
+                              <div className={`tac content bg-${record.status}`}>{record.content}</div>
+                              <div className="name">{record.user.fullname}</div>
+                              <div className="time f12 mono-font">{format(new Date(record.createdAt), 'MM-dd HH:mm')}</div>
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </>
+                    }
+                    <div className="btn-block df gap5 f2r">
+                      <label className="fx1 tac p10 color-mantis cf border-mantis" htmlFor={`success-${meter.id}`}>正常</label>
+                      <label className="fx1 tac p10 color-zombie cf border-zombie" htmlFor={`notRecord-${meter.id}`}>異常</label>
                     </div>
-                    <fetcher.Form className="dn" method="post">
+                    <fetcher.Form onSubmit={handleSubmit.bind(null, meter.id)} method="post" className="success-form pa fill ttxp-100 tt150ms df fdc jcc p10 gap10">
                       <input type="hidden" name="_method" value={Status.success} />
                       <input type="hidden" name="meterId" defaultValue={meter.id} />
-                      <input type="tel" name="content" placeholder="度數" required />
-                      <button>submit</button>
+                      <input className="input f3r" type="tel" name="content" placeholder="度數" required />
+                      <button className="btn primary f2r">登錄</button>
                     </fetcher.Form>
-                    <fetcher.Form className="dn" method="post">
+                    <fetcher.Form onSubmit={handleSubmit.bind(null, meter.id)} method="post" className="notRecord-form pa fill ttxp100 tt150ms df fdc jcc p10 gap10">
                       <input type="hidden" name="_method" value={Status.notRecord} />
                       <input type="hidden" name="meterId" defaultValue={meter.id} />
-                      <select name="content" required>
+                      <select className="input f3r" name="content" required>
                         <option key={NotRecordReason.Abort} value={NotRecordReason.Abort}>中止</option>
                         <option key={NotRecordReason.Stop} value={NotRecordReason.Stop}>停水</option>
                         <option key={NotRecordReason.NoOne} value={NotRecordReason.NoOne}>無人</option>
@@ -201,11 +230,11 @@ const RecordPage = () => {
                         <option key={NotRecordReason.NoEntrance} value={NotRecordReason.NoEntrance}>無法進入</option>
                         <option key={NotRecordReason.Other} value={NotRecordReason.Other}>其他</option>
                       </select>
-                      <button>submit</button>
+                      <button className="btn primary f2r">登錄</button>
                     </fetcher.Form>
                   </div>
                 </div>
-                {!!(index % 2) && <div className="break" />}
+                <div className="break" />
               </Fragment>
             ):
             <div>

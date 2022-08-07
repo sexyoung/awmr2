@@ -22,6 +22,7 @@
 }
 
 .frame .app .menu {
+  z-index: 1;
   min-width: 200px;
   text-align: center;
   padding-top: 1.5rem;
@@ -124,6 +125,7 @@
 
   .frame .app .menu {
     width: 100%;
+    padding: 10px 0;
     box-sizing: border-box;
   }
 
@@ -140,6 +142,10 @@
     bottom: 0;
     display: none;
     background-color: rgba(0,0,0, .8);
+  }
+
+  .frame .app .menu .system-name {
+    margin-bottom: 0;
   }
 
   .frame .app .menu .info {
@@ -166,5 +172,9 @@
 
   .frame .app .menu ul li {
     padding: 0 30px;
+  }
+
+  .frame .app .menu + .Page {
+    margin-top: 44px;
   }
 }

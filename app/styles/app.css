@@ -15,6 +15,21 @@ html, body {
   background-color: #f3f7f9;
 }
 
+.pr {
+  position: relative;
+}
+
+.pa {
+  position: absolute;
+}
+
+.fill {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
 .cf {
   color: #fff;
 }
@@ -31,11 +46,15 @@ html, body {
   color: var(--color-blue-bayoux);
 }
 
+.border-mantis {
+  border: 2px solid var(--color-mantis);
+}
+
 .color-mantis {
   color: var(--color-mantis);
 }
 
-.bg-mantis {
+.bg-mantis, .bg-success {
   background-color: var(--color-mantis);
 }
 
@@ -43,12 +62,20 @@ html, body {
   color: var(--color-zombie);
 }
 
-.bg-zombie {
+.border-zombie {
+  border: 2px solid var(--color-zombie);
+}
+
+.bg-zombie, .bg-notRecord {
   background-color: var(--color-zombie);
 }
 
 .nowrap {
   white-space: nowrap;
+}
+
+.f12 {
+  font-size: 12px;
 }
 
 .f13 {
@@ -59,8 +86,24 @@ html, body {
   font-size: 1rem;
 }
 
+.f2r {
+  font-size: 2rem;
+}
+
+.f3r {
+  font-size: 3rem;
+}
+
 .df {
   display: flex;
+}
+
+.fdc {
+  flex-direction: column;
+}
+
+.jcc {
+  justify-content: center;
 }
 
 .fx1 {
@@ -129,6 +172,10 @@ html, body {
   margin-left: 5px;
 }
 
+.gap5 {
+  gap: 5px;
+}
+
 .gap10 {
   gap: 10px;
 }
@@ -176,6 +223,34 @@ html, body {
 
 .mwp50 {
   max-width: 50%;
+}
+
+.tac {
+  text-align: center;
+}
+
+.tar {
+  text-align: right;
+}
+
+.ova {
+  overflow: auto;
+}
+
+.ovh {
+  overflow: hidden;
+}
+
+.jcsb {
+  justify-content: space-between;
+}
+
+.p10 {
+  padding: 10px;
+}
+
+.mono-font {
+  font-family: Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
 }
 
 /* table */
@@ -361,12 +436,32 @@ html, body {
   background-color: var(--color-blue-bayoux);
 }
 
-
 @media screen and (max-width: 768px) {
   .xs\:df {
     display: flex;
   }
   .xs\:jcsb {
     justify-content: space-between;
+  }
+
+  .xs\:fbp100 {
+    flex-basis: 100%;
+  }
+  
+  .xs\:mwp100 {
+    max-width: 100%;
+  }
+
+  .Page {
+    padding: 0;
+  }
+
+  .Page > .block > .header {
+    text-align: center;
+    flex-direction: column;
+  }
+
+  .Page > .block > .header > .pagination{
+    margin: 0 auto;
   }
 }
