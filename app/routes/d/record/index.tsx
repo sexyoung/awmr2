@@ -10,6 +10,7 @@ import { NotRecordReason, Status } from "~/consts/reocrd";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
 
 import stylesUrl from "~/styles/record-page.css";
+import RecordBar from "~/component/RecordBar";
 
 export { action } from "./action";
 
@@ -18,9 +19,11 @@ const PAGE_SIZE = 3;
 type LoadData = {
   href: string;
   meterCount: number;
+  meterCountSummary: number;
   successCount: number;
   notRecordCount: number;
   searchString: string;
+  showRecord: boolean;
   projectListItems: Project[];
   meterListItem: (
     Meter & {
@@ -79,14 +82,12 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   const {Record, ...summary} = where;
 
-  let meterCount = await db.meter.count({ where: summary });
+  let meterCount = await db.meter.count({ where });
+  let meterCountSummary = await db.meter.count({ where: summary });
   let successCount = (await db.record.groupBy({
     where: {
       status: 'success',
-      createdAt: {
-        gte: new Date(formatYmd(new Date())),
-        lt: new Date(formatYmd(getTomorrow())),
-      }
+      meter: {...summary},
     },
     by: ['meterId'],
     _count: { meterId: true }
@@ -95,10 +96,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   let notRecordCount = (await db.record.groupBy({
     where: {
       status: 'notRecord',
-      createdAt: {
-        gte: new Date(formatYmd(new Date())),
-        lt: new Date(formatYmd(getTomorrow())),
-      }
+      meter: {...summary},
     },
     by: ['meterId'],
     _count: { meterId: true }
@@ -122,7 +120,9 @@ export const loader: LoaderFunction = async ({ request }) => {
   return {
     search,
     pageTotal,
+    showRecord,
     meterCount,
+    meterCountSummary,
     successCount,
     notRecordCount,
     meterListItem,
@@ -134,7 +134,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 const RecordPage = () => {
   const fetcher = useFetcher();
   const [status, setStatus] = useState<Status>(Status.success);
-  const { meterCount, successCount, notRecordCount, search, href, pageTotal, meterListItem, projectListItems } = useLoaderData<LoadData>();
+  const { meterCount, meterCountSummary, successCount, notRecordCount, search, href, pageTotal, meterListItem, projectListItems, showRecord } = useLoaderData<LoadData>();
 
   const handleChecked: MouseEventHandler = ({ target }) => {
     const DOM = (target as HTMLInputElement);
@@ -145,6 +145,22 @@ const RecordPage = () => {
   const handleSubmit = (id: number) => {
     (document.getElementById(`success-${id}`) as HTMLInputElement).checked = false;
     (document.getElementById(`notRecord-${id}`) as HTMLInputElement).checked = false;
+  }
+
+  const toggleShowRecord = () => {
+    let paramsObj = (
+      location.search.slice(1).split('&').reduce((obj, str) => ({
+        ...obj,
+        [str.split('=')[0]]: str.split('=')[1],
+      }), {} as {[key: string]: string})
+    );
+    if(showRecord) {
+      delete paramsObj.showRecord;
+    } else {
+      paramsObj.showRecord = "1";
+    }
+
+    location.href = `/d/record?${(Object.keys(paramsObj).map(key => `${key}=${paramsObj[key]}`).join('&'))}`;
   }
   
   return (
@@ -159,15 +175,35 @@ const RecordPage = () => {
             <input type="text" name="search" defaultValue={search} placeholder="搜尋小區、地址、錶號、水號、位置或備註..." />
           </Form>
         </div>
+        <div className="df gap10 ph20">
+          <div>
+            <input id="hadRecord" type="checkbox" defaultChecked={showRecord} onChange={toggleShowRecord} />
+            <label htmlFor="hadRecord">已登記水錶</label>
+            {/* <input id="GPS" type="checkbox" />
+            <label htmlFor="GPS">GPS</label> */}
+          </div>
+          <div className="fx1">
+            <RecordBar {...{
+              success: successCount,
+              notRecord: notRecordCount,
+              total: meterCountSummary,
+              z: 1,
+            }} />
+            <ul className="sum-num df m0 p0 lsn">
+              <li className="f14">登錄: {successCount}</li>
+              <li className="f14">異常: {notRecordCount}</li>
+              <li className="f14">剩餘: {meterCountSummary - successCount - notRecordCount}</li>
+              <li className="f14">
+                抄見率:
+                {~~(10000 * successCount / (meterCountSummary - notRecordCount))/100}%
+              </li>
+            </ul>
+          </div>
+        </div>
         todo:
         <ul>
           <li>登記順便把水錶內容改掉</li>
         </ul>
-
-        水錶量: {meterCount}
-        抄錶量: {successCount}
-        未登量: {notRecordCount}
-
         <div className="df fww item-list">
           {meterListItem.length ?
             meterListItem.map(meter =>
@@ -205,8 +241,8 @@ const RecordPage = () => {
                       </>
                     }
                     <div className="btn-block df gap5 f2r">
-                      <label className="fx1 tac p10 color-mantis cf border-mantis" htmlFor={`success-${meter.id}`}>正常</label>
-                      <label className="fx1 tac p10 color-zombie cf border-zombie" htmlFor={`notRecord-${meter.id}`}>異常</label>
+                      <label className="fx1 tac p10 color-mantis cp cf border-mantis" htmlFor={`success-${meter.id}`}>正常</label>
+                      <label className="fx1 tac p10 color-zombie cp cf border-zombie" htmlFor={`notRecord-${meter.id}`}>異常</label>
                     </div>
                     <fetcher.Form onSubmit={handleSubmit.bind(null, meter.id)} method="post" className="success-form pa fill ttxp-100 tt150ms df fdc jcc p10 gap10">
                       <input type="hidden" name="_method" value={Status.success} />
