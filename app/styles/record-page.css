@@ -14,6 +14,19 @@
   transition: transform .15s;
 }
 
+.RecordPage .toggle-block input {
+  display: none;
+}
+
+.RecordPage .toggle-block label {
+  
+}
+
+.RecordPage .toggle-block input:checked + label {
+  color: #fff;
+  background-color: var(--color-blue-bayoux);
+}
+
 .RecordPage ul.sum-num li:before {
   content: '';
   display: inline-block;

@@ -14,7 +14,7 @@ import RecordBar from "~/component/RecordBar";
 
 export { action } from "./action";
 
-const PAGE_SIZE = 3;
+const PAGE_SIZE = 30;
 
 type LoadData = {
   href: string;
@@ -175,10 +175,10 @@ const RecordPage = () => {
             <input type="text" name="search" defaultValue={search} placeholder="搜尋小區、地址、錶號、水號、位置或備註..." />
           </Form>
         </div>
-        <div className="df gap10 ph20">
-          <div>
+        <div className="df gap10 ph20 xs:fdc">
+          <div className="toggle-block df">
             <input id="hadRecord" type="checkbox" defaultChecked={showRecord} onChange={toggleShowRecord} />
-            <label htmlFor="hadRecord">已登記水錶</label>
+            <label className="df aic ph20" htmlFor="hadRecord">已登記水錶</label>
             {/* <input id="GPS" type="checkbox" />
             <label htmlFor="GPS">GPS</label> */}
           </div>
@@ -189,7 +189,7 @@ const RecordPage = () => {
               total: meterCountSummary,
               z: 1,
             }} />
-            <ul className="sum-num df m0 p0 lsn">
+            <ul className="sum-num df m0 p0 lsn mt5">
               <li className="f14">登錄: {successCount}</li>
               <li className="f14">異常: {notRecordCount}</li>
               <li className="f14">剩餘: {meterCountSummary - successCount - notRecordCount}</li>

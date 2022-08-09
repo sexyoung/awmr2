@@ -110,6 +110,10 @@ html, body {
   font-size: 3rem;
 }
 
+.mt5 {
+  margin-top: 5px;
+}
+
 .df {
   display: flex;
 }
@@ -470,6 +474,10 @@ html, body {
   
   .xs\:mwp100 {
     max-width: 100%;
+  }
+
+  .xs\:fdc {
+    flex-direction: column;
   }
 
   .Page {
