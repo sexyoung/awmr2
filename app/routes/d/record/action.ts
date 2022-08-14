@@ -64,9 +64,10 @@ const verb = {
     // return json({status, content});
   },
   changeArea: async (form: FormData): Promise<Response> => {
-    meterApi.update({id: +form.get('meterId')!, data: {
+    await meterApi.update({id: +form.get('meterId')!, data: {
       area: form.get('area'),
     }})
+    await api.destroy(+form.get('recordId')!);
     return json(true);
   },
   deleteOut: async (form: FormData): Promise<Response> => {

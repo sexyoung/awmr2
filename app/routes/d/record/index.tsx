@@ -87,6 +87,10 @@ export const loader: LoaderFunction = async ({ request }) => {
   let successCount = (await db.record.groupBy({
     where: {
       status: 'success',
+      createdAt: {
+        gte: new Date(formatYmd(new Date())),
+        lt: new Date(formatYmd(getTomorrow())),
+      },
       meter: {...summary},
     },
     by: ['meterId'],
@@ -96,6 +100,10 @@ export const loader: LoaderFunction = async ({ request }) => {
   let notRecordCount = (await db.record.groupBy({
     where: {
       status: 'notRecord',
+      createdAt: {
+        gte: new Date(formatYmd(new Date())),
+        lt: new Date(formatYmd(getTomorrow())),
+      },
       meter: {...summary},
     },
     by: ['meterId'],
@@ -178,7 +186,7 @@ const RecordPage = () => {
         <div className="df gap10 ph20 xs:fdc">
           <div className="toggle-block df">
             <input id="hadRecord" type="checkbox" defaultChecked={showRecord} onChange={toggleShowRecord} />
-            <label className="df aic ph20" htmlFor="hadRecord">已登記水錶</label>
+            <label className="df bg-gallery jcc aic ph20 xs:fx1 xs:p10" htmlFor="hadRecord">已登記水錶</label>
             {/* <input id="GPS" type="checkbox" />
             <label htmlFor="GPS">GPS</label> */}
           </div>

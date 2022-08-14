@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { LoaderFunction } from "@remix-run/node";
 import { db } from "~/utils/db.server";
 
@@ -75,34 +76,47 @@ const OutPage = () => {
       <div className="block">
         <div className="header">
           <h2 className="title">區外要求</h2>
-          <Pagination {...{pageTotal, href}} />
+          {pageTotal > 1 && <Pagination {...{pageTotal, href}} />}
         </div>
-        {recordListItems.map(record =>
-          <div key={record.id}>
-            {record.id}
-            小區: {record.meter.area} /
-            水號: {record.meter.waterId} /
-            錶號: {record.meter.meterId} /
-            登錄人: {record.user.fullname} /
-            時間: {new Date(record.createdAt).toLocaleString()} /
-            <Form method="post">
-              <input type="hidden" name="_method" value="changeArea" />
-              <input type="hidden" name="meterId" defaultValue={record.meter.id} />
-              <select name="area" defaultValue={record.meter.area!}>
-                {projectAreaList[record.meter.projectId].map(area =>
-                  <option key={area} value={area}>{area}</option>
-                )}
-              </select>
-              <button>update</button>
-            </Form>
-            <Form method="delete">
-              <input type="hidden" name="_method" value="deleteOut" />
-              <input type="hidden" name="recordId" defaultValue={record.id} />
-              <button>delete</button>
-            </Form>
-            <hr />
-          </div>
-        )}
+        <table style={{tableLayout: 'fixed'}}>
+        <thead>
+            <tr>
+              <th style={{width: 150, boxSizing: 'border-box'}}>小區</th>
+              <th style={{width: 130, boxSizing: 'border-box'}}>水號</th>
+              <th style={{width: 120, boxSizing: 'border-box'}}>錶號</th>
+              <th style={{width: 120, boxSizing: 'border-box'}}>時間</th>
+              <th> </th>
+            </tr>
+          </thead>
+          <tbody>
+            {recordListItems.map(record =>
+              <tr key={record.id}>
+                <td>{record.meter.area}</td>
+                <td>{record.meter.waterId}</td>
+                <td>{record.meter.meterId}</td>
+                <td>{format(new Date(record.createdAt), 'MM-dd HH:mm')}</td>
+                <td className="df gap10 jce">
+                  <Form method="post" className="df gap10">
+                    <input type="hidden" name="_method" value="changeArea" />
+                    <input type="hidden" name="recordId" defaultValue={record.id} />
+                    <input type="hidden" name="meterId" defaultValue={record.meter.id} />
+                    <select name="area" defaultValue={record.meter.area!} className="input bsbb fx1">
+                      {projectAreaList[record.meter.projectId].map(area =>
+                        <option key={area} value={area}>{area}</option>
+                      )}
+                    </select>
+                    <button className="btn primary">更新</button>
+                  </Form>
+                  <Form method="delete" className="dib">
+                    <input type="hidden" name="_method" value="deleteOut" />
+                    <input type="hidden" name="recordId" defaultValue={record.id} />
+                    <button className="btn primary">刪除</button>
+                  </Form>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )

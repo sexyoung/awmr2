@@ -1,9 +1,11 @@
+import { format } from "date-fns";
 import { Meter, Record, User } from "@prisma/client";
 import { LoaderFunction } from "@remix-run/node";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
+import { NotRecordReasonMap, Status } from "~/consts/reocrd";
 
 export { action } from "../meter/action";
 
@@ -94,30 +96,48 @@ const HistoryPage = () => {
       <div className="block">
         <div className="header">
           <h2 className="title">登錄記錄頁</h2>
-          <Pagination {...{pageTotal, href}} />
+          {pageTotal > 1 && <Pagination {...{pageTotal, href}} />}
         </div>
-        <Form method="get">
-          <input type="text" name="search" defaultValue={search} />
-          <button>submit</button>
-        </Form>
-        {recordListItems.map(record =>
-          <div key={record.id}>
-            {record.id}
-            水號: {record.meter.waterId} /
-            錶號: {record.meter.meterId} /
-            地址: {record.meter.address} /
-            登錄人: {record.user.fullname} /
-            新水錶?: {isNewMeter(record) && (
-              <fetcher.Form method="patch">
-                <input type="hidden" name="_method" value="toggle" />
-                <input type="hidden" name="id" defaultValue={record.meter.id} />
-                <input type="hidden" name="isActive" value="" readOnly />
-                <button>啟用</button>
-              </fetcher.Form>
-            )} /
-            時間: {new Date(record.createdAt).toLocaleString()}
-          </div>
-        )}
+        <div className="search-form">
+          <Form method="get">
+            <input type="text" name="search" defaultValue={search} placeholder="搜尋師父、小區、地址、水錶、水號、位置、備註" />
+          </Form>
+        </div>
+        <table style={{tableLayout: 'fixed'}}>
+          <thead>
+            <tr>
+              <th style={{width: 130, boxSizing: 'border-box'}}>水號</th>
+              <th style={{width: 120, boxSizing: 'border-box'}}>錶號</th>
+              <th style={{width: 90, boxSizing: 'border-box'}}>師父</th>
+              <th style={{boxSizing: 'border-box'}}>內容</th>
+              <th style={{width: 180, boxSizing: 'border-box'}}>時間</th>
+              <th>新?</th>
+            </tr>
+          </thead>
+          <tbody>
+            {recordListItems.map(record =>
+              <tr key={record.id}>
+                <td>{record.meter.waterId}</td>
+                <td>{record.meter.meterId}</td>
+                <td>{record.user.fullname}</td>
+                <td>
+                  {record.status === Status.success ? record.content : NotRecordReasonMap[record.content as keyof typeof NotRecordReasonMap]}
+                </td>
+                <td>{format(new Date(+new Date(record.createdAt)), 'MM-dd HH:mm')}</td>
+                <td>
+                  {isNewMeter(record) && (
+                    <fetcher.Form method="patch">
+                      <input type="hidden" name="_method" value="toggle" />
+                      <input type="hidden" name="id" defaultValue={record.meter.id} />
+                      <input type="hidden" name="isActive" value="" readOnly />
+                      <button className="btn primary">啟用</button>
+                    </fetcher.Form>
+                  )}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )

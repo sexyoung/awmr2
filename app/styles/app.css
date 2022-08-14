@@ -50,6 +50,14 @@ html, body {
   list-style: none;
 }
 
+.bg-gallery {
+  background-color: var(--color-gallery);
+}
+
+.color-gallery {
+  color: var(--color-gallery);
+}
+
 .bg-blue-bayoux {
   background-color: var(--color-blue-bayoux);
 }
@@ -140,6 +148,10 @@ html, body {
 
 .jcsa {
   justify-content: space-around;
+}
+
+.jce {
+  justify-content: end;
 }
 
 .aic {
@@ -464,8 +476,18 @@ html, body {
   .xs\:df {
     display: flex;
   }
+  .xs\:db {
+    display: block;
+  }
+  .xs\:fx1 {
+    flex: 1;
+  }
   .xs\:jcsb {
     justify-content: space-between;
+  }
+
+  .xs\:p10 {
+    padding: 10px;
   }
 
   .xs\:fbp100 {
