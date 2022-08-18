@@ -200,6 +200,10 @@ html, body {
   cursor: pointer;
 }
 
+.tdn {
+  text-decoration: none;
+}
+
 .ml5 {
   margin-left: 5px;
 }

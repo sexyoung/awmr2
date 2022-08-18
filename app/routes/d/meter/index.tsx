@@ -41,7 +41,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   const page = +url.searchParams.get("page")! || 1;
   const search = url.searchParams.get("search") || '';
 
-  const where = {
+  const where = search ? {
     OR: [
       {area: { contains: search }},
       {address: { contains: search }},
@@ -50,7 +50,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       {location: { contains: search }},
       {note: { contains: search }},
     ]
-  }
+  }: {}
 
   let meterCount = await db.meter.count({ where });
   meterCount = meterCount && (meterCount - 1);

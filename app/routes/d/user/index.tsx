@@ -61,14 +61,17 @@ export default () => {
     <div className="Page UserPage">
       <div className="block">
         <div className="header">
-          <h2 className="title">人事查詢</h2>
-          <Pagination {...{pageTotal, href}} />
+          <h2 className="title">
+            人事查詢
+            <Link className="btn primary f1r ml5 tdn" to="/d/user/new">新增使用者</Link>
+          </h2>
+          {pageTotal && <Pagination {...{pageTotal, href}} />}
         </div>
-        <Link to="/d/user/new">新增使用者</Link>
-        <Form method="get">
-          <input type="text" name="search" defaultValue={search} />
-          <button>submit</button>
-        </Form>
+        <div className="search-form">
+          <Form method="get">
+            <input type="text" name="search" defaultValue={search}  placeholder="搜尋帳號本名、信箱、手機、備註" />
+          </Form>
+        </div>
         {userListItems.map(user =>
           <div key={user.id}>
             {user.fullname} / 

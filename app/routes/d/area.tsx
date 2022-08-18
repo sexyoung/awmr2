@@ -14,11 +14,11 @@ export const loader: LoaderFunction = async ({ request }) => {
   const page = +url.searchParams.get("page")! || 1;
   const search = url.searchParams.get("search") || '';
 
-  const where = {
+  const where = search ? {
     OR: [
       {area: { contains: search }},
     ]
-  }
+  }: {}
 
   const {
     count,
@@ -30,9 +30,10 @@ export const loader: LoaderFunction = async ({ request }) => {
   });
 
   return json({
+    search,
+    areaListItems,
     href: url.href,
     pageTotal: ~~((count && (count - 1)) / PAGE_SIZE) + 1,
-    areaListItems,
   });
 };
 
@@ -59,8 +60,8 @@ const AreaPage = () => {
         <table>
           <thead>
             <tr>
-              <th>標案名稱</th>
-              <th>小區代號</th>
+              <th style={{width: 100, boxSizing: 'border-box'}}>標案名稱</th>
+              <th style={{width: 150, boxSizing: 'border-box'}}>小區代號</th>
               <th>登錄</th>
               <th style={{width: 80, boxSizing: 'border-box'}}>抄見率</th>
               <th style={{width: 150, boxSizing: 'border-box'}}>進度</th>

@@ -11,6 +11,7 @@ import { Pagination, Props as PaginationProps } from "~/component/Pagination";
 
 import stylesUrl from "~/styles/record-page.css";
 import RecordBar from "~/component/RecordBar";
+import { formatYmd, getTomorrow } from "~/utils/time";
 
 export { action } from "./action";
 
@@ -35,13 +36,6 @@ type LoadData = {
   )[];
   search: string;
 } & PaginationProps
-
-const formatYmd = (date: Date): string => {
-  // date = new Date(+date - 1000 * 60 * 60 * 8);
-  return date.toLocaleDateString().slice(0, 10);
-};
-
-const getTomorrow = () => new Date(new Date().valueOf() + 1000 * 60 * 60 * 24);
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
