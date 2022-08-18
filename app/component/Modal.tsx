@@ -11,6 +11,7 @@ const Modal:React.FC<IProps> = ({ children, onClose, className = '' }) => {
 
   useEffect(() => {
     const body = document.getElementsByTagName('body')[0];
+    if(className.includes('dn')) return;
     body.setAttribute(
       "style",
       "overflow: hidden"
@@ -18,7 +19,7 @@ const Modal:React.FC<IProps> = ({ children, onClose, className = '' }) => {
     return () => {
       body.setAttribute("style", "");
     };
-  }, []);
+  }, [className]);
   const handleClick: React.MouseEventHandler<HTMLDivElement>  = e => {
     if(e.target === modalBG.current) {
       onClose && onClose();

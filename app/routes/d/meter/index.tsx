@@ -5,7 +5,7 @@ import { LinksFunction, LoaderFunction } from "@remix-run/node";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 import { db } from "~/utils/db.server";
 import { Suppy, Type } from "~/consts/meter";
-import { Status } from "~/consts/reocrd";
+import { NotRecordReasonMap, Status } from "~/consts/reocrd";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
 import Modal from "~/component/Modal";
 import { isAdmin } from "~/api/user";
@@ -236,8 +236,11 @@ const MeterPage = () => {
                   {!!meter.Record.length && <>
                     {meter.Record.length && (
                       <span className={`f13 ${meter.Record[0].status}`}>
-                        {format(new Date(+new Date(meter.Record[0].createdAt)), 'MM-dd HH:mm')} » {meter.Record[0].content}
-                        {meter.Record[0].status === Status.success && '度'}
+                        {format(new Date(+new Date(meter.Record[0].createdAt)), 'MM-dd HH:mm')} » 
+                        {meter.Record[0].status === Status.success ?
+                          `${meter.Record[0].content}度`:
+                          `${NotRecordReasonMap[meter.Record[0].content as keyof typeof NotRecordReasonMap]}`
+                        }
                       </span>
                     )}
                   </>}

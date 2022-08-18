@@ -10,7 +10,7 @@ export type RecordCount = {
 }
 
 type SumFunc = {
-  (meterIdList: number[], isAllDate: boolean): Promise<RecordCount>
+  (meterIdList: number[], isAllDate?: boolean): Promise<RecordCount>
 }
 
 export const sum: SumFunc = async (meterIdList, isAllDate = false) => {

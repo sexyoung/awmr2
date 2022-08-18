@@ -48,17 +48,19 @@ export const loader: LoaderFunction = async ({ request }) => {
     }
   });
 
-  const projectIdList = recordListItems.map(item => item.meter.projectId);
-  const projectAreaList = await Promise.resolve([...new Set(projectIdList)].reduce(async (obj, projectId) => {
-    return {
-      ...obj,
-      [projectId]: (await db.meter.findMany({
-        select: { area: true },
-        where: { projectId },
-        distinct: ['area'],
-      })).map(({ area }) => area)
-    }
-  }, {}));
+  const projectIdList = (await db.project.findMany({
+    orderBy: { createdAt: "desc" },
+  })).map(({ id }) => id);
+
+  let projectAreaList: {[key: number]: any[]} = {};
+  for (const projectId of projectIdList) {
+    const areaList = (await db.meter.findMany({
+      select: { area: true },
+      where: { projectId },
+      distinct: ['area'],
+    })).map(({ area }) => area)
+    projectAreaList[projectId] = areaList;
+  }
 
   return {
     pageTotal,
@@ -70,7 +72,6 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 const OutPage = () => {
   const { href, pageTotal, projectAreaList, recordListItems } = useLoaderData<LoadData>();
-  
   return (
     <div className="Page OutPage">
       <div className="block">
