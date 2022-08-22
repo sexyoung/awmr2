@@ -24,8 +24,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   const page = +url.searchParams.get("page")! || 1;
   const search = url.searchParams.get("search") || '';
 
-  // 預設排除今日登記
-  const where = {
+  const where = search ? {
     OR: [
       {name: { contains: search }},
       {fullname: { contains: search }},
@@ -33,7 +32,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       {phone: { contains: search }},
       {note: { contains: search }},
     ]
-  }
+  }: {}
 
   let userCount = await db.user.count({ where });
   userCount = userCount && (userCount - 1);
@@ -48,9 +47,9 @@ export const loader: LoaderFunction = async ({ request }) => {
       where,
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
-      include: {
-        Record: true,
-      }
+      // include: { // 這個加去會很久
+      //   Record: true,
+      // }
     }),
   };
 };
@@ -65,7 +64,7 @@ export default () => {
             人事查詢
             <Link className="btn primary f1r ml5 tdn" to="/d/user/new">新增使用者</Link>
           </h2>
-          {pageTotal && <Pagination {...{pageTotal, href}} />}
+          {pageTotal > 1 && <Pagination {...{pageTotal, href}} />}
         </div>
         <div className="search-form">
           <Form method="get">

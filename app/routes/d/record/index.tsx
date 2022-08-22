@@ -6,12 +6,12 @@ import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 import { Suppy, Type } from "~/consts/meter";
-import { NotRecordReason, Status } from "~/consts/reocrd";
+import { NotRecordReason, NotRecordReasonMap, Status } from "~/consts/reocrd";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
 
-import stylesUrl from "~/styles/record-page.css";
 import RecordBar from "~/component/RecordBar";
-import { formatYmd, getTomorrow } from "~/utils/time";
+import { cacheOrNew } from "./cache.or.new";
+import stylesUrl from "~/styles/record-page.css";
 
 export { action } from "./action";
 
@@ -50,59 +50,13 @@ export const loader: LoaderFunction = async ({ request }) => {
   const search = url.searchParams.get("search") || '';
   const showRecord = Boolean(url.searchParams.get("showRecord")! || 0);
 
-  // 預設排除今日登記
-  const where = {
-    ...(showRecord ? {}: {
-      Record: {
-        every: {
-          createdAt: {
-            lt: new Date(formatYmd(new Date())),
-          }
-        }
-      }
-    }),
-    AND: [
-      {isActive: true},
-    ],
-    OR: [
-      {area: { contains: search }},
-      {address: { contains: search }},
-      {meterId: { contains: search }},
-      {waterId: { contains: search }},
-      {location: { contains: search }},
-      {note: { contains: search }},
-    ]
-  }
-
-  const {Record, ...summary} = where;
-
-  let meterCount = await db.meter.count({ where });
-  let meterCountSummary = await db.meter.count({ where: summary });
-  let successCount = (await db.record.groupBy({
-    where: {
-      status: 'success',
-      createdAt: {
-        gte: new Date(formatYmd(new Date())),
-        lt: new Date(formatYmd(getTomorrow())),
-      },
-      meter: {...summary},
-    },
-    by: ['meterId'],
-    _count: { meterId: true }
-  })).length;
-
-  let notRecordCount = (await db.record.groupBy({
-    where: {
-      status: 'notRecord',
-      createdAt: {
-        gte: new Date(formatYmd(new Date())),
-        lt: new Date(formatYmd(getTomorrow())),
-      },
-      meter: {...summary},
-    },
-    by: ['meterId'],
-    _count: { meterId: true }
-  })).length;
+  const {
+    where,
+    meterCount,
+    meterCountSummary,
+    successCount,
+    notRecordCount,
+  } = await cacheOrNew({ search, showRecord });
 
   const pageTotal = ~~((meterCount && (meterCount - 1)) / PAGE_SIZE) + 1;
   const meterListItem = await db.meter.findMany({
@@ -123,7 +77,6 @@ export const loader: LoaderFunction = async ({ request }) => {
     search,
     pageTotal,
     showRecord,
-    meterCount,
     meterCountSummary,
     successCount,
     notRecordCount,
@@ -136,7 +89,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 const RecordPage = () => {
   const fetcher = useFetcher();
   const [status, setStatus] = useState<Status>(Status.success);
-  const { meterCount, meterCountSummary, successCount, notRecordCount, search, href, pageTotal, meterListItem, projectListItems, showRecord } = useLoaderData<LoadData>();
+  const { meterCountSummary, successCount, notRecordCount, search, href, pageTotal, meterListItem, projectListItems, showRecord } = useLoaderData<LoadData>();
 
   const handleChecked: MouseEventHandler = ({ target }) => {
     const DOM = (target as HTMLInputElement);
@@ -234,7 +187,9 @@ const RecordPage = () => {
                           </div>
                           {meter.Record.map(record =>
                             <div key={record.id} className="record df jcsb">
-                              <div className={`tac content bg-${record.status}`}>{record.content}</div>
+                              <div className={`tac content bg-${record.status}`}>
+                                {record.status === Status.success? record.content: NotRecordReasonMap[record.content as keyof typeof NotRecordReasonMap]}
+                              </div>
                               <div className="name">{record.user.fullname}</div>
                               <div className="time f12 mono-font">{format(new Date(record.createdAt), 'MM-dd HH:mm')}</div>
                             </div>

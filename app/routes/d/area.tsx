@@ -86,7 +86,6 @@ const AreaPage = () => {
                 </td>
                 <td>{area.total}</td>
                 <td>{
-                  /* {area.lastRecordTime ? format(new Date(area.lastRecordTime), 'MM-dd hh:mm'): '未登錄'}<br /> */
                   area.lastRecordTime ? format(new Date(area.lastRecordTime), 'MM-dd HH:mm'): '未登錄'
                 }</td>
               </tr>
