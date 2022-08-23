@@ -82,7 +82,7 @@ const OutPage = () => {
         <table style={{tableLayout: 'fixed'}}>
         <thead>
             <tr>
-              <th style={{width: 150, boxSizing: 'border-box'}}>小區</th>
+              <th style={{width: 190, boxSizing: 'border-box'}}>小區</th>
               <th style={{width: 130, boxSizing: 'border-box'}}>水號</th>
               <th style={{width: 120, boxSizing: 'border-box'}}>錶號</th>
               <th style={{width: 120, boxSizing: 'border-box'}}>時間</th>
@@ -101,7 +101,7 @@ const OutPage = () => {
                     <input type="hidden" name="_method" value="changeArea" />
                     <input type="hidden" name="recordId" defaultValue={record.id} />
                     <input type="hidden" name="meterId" defaultValue={record.meter.id} />
-                    <select name="area" defaultValue={record.meter.area!} className="input bsbb fx1">
+                    <select name="area" defaultValue={record.meter.area!} className="input bsbb wp100">
                       {projectAreaList[record.meter.projectId].map(area =>
                         <option key={area} value={area}>{area}</option>
                       )}

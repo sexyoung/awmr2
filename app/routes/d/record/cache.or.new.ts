@@ -6,6 +6,7 @@ const REDIS_PREFIX = 'record:summary:search';
 
 export async function cacheOrNew({
   search = '',
+  isForce = false,
   showRecord = false
 }) {
   // 預設排除今日登記
@@ -35,14 +36,16 @@ export async function cacheOrNew({
   const redis = new Redis(process.env.REDIS_URL);
   await redis.connect();
 
-  const sammary = await redis.hGetAll(`${REDIS_PREFIX}:${search}`);
-  if(Object.entries(sammary).length) {
-    return {
-      where,
-      meterCount: +sammary.meterCount,
-      meterCountSummary: +sammary.meterCountSummary,
-      successCount: +sammary.successCount,
-      notRecordCount: +sammary.notRecordCount,
+  if(!isForce) {
+    const sammary = await redis.hGetAll(`${REDIS_PREFIX}:${search}`);
+    if(Object.entries(sammary).length) {
+      return {
+        where,
+        meterCount: +sammary.meterCount,
+        meterCountSummary: +sammary.meterCountSummary,
+        successCount: +sammary.successCount,
+        notRecordCount: +sammary.notRecordCount,
+      }
     }
   }
 
