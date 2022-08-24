@@ -1,4 +1,3 @@
-import { Record } from "@prisma/client";
 import { Status } from "~/consts/reocrd";
 import { db } from "~/utils/db.server";
 import { formatYmd, getTomorrow } from "~/utils/time";
@@ -11,6 +10,41 @@ export type RecordCount = {
 
 type SumFunc = {
   (meterIdList: number[], isAllDate?: boolean): Promise<RecordCount>
+}
+
+type SumByPidFunc = {
+  (projectId: number): Promise<RecordCount>
+}
+
+export const sumByPid: SumByPidFunc = async (projectId: number) => {
+  const recordCount = await db.record.groupBy({
+    by: ['status'],
+    _count: { status: true },
+    where: {meter: {projectId}}
+  });
+
+  const lastRecord = await db.record.findFirst({
+    where: {meter: {projectId}},
+    orderBy: { createdAt: 'desc'}
+  });
+
+  const result = recordCount.reduce((obj, status) => {
+    return {
+      ...obj,
+      [status.status]: status._count.status
+    }
+  }, {} as RecordCount);
+
+  const {
+    success = 0,
+    notRecord = 0,
+  } = result;
+
+  return {
+    success,
+    notRecord,
+    lastRecordTime: lastRecord?.createdAt,
+  };
 }
 
 export const sum: SumFunc = async (meterIdList, isAllDate = false) => {

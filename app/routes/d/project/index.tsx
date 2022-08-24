@@ -69,13 +69,13 @@ export default () => {
           <thead>
             <tr>
               <th style={{whiteSpace: 'nowrap'}}>啟用</th>
-              <th style={{whiteSpace: 'nowrap'}}>標案名稱</th>
-              <th style={{whiteSpace: 'nowrap'}}>標案代號</th>
+              <th style={{whiteSpace: 'nowrap', boxSizing: 'border-box', width: 150}}>名稱</th>
+              <th style={{whiteSpace: 'nowrap'}}>代號</th>
               <th>小區</th>
-              <th style={{width: 150, boxSizing: 'border-box'}}>進度</th>
+              <th style={{width: 140, boxSizing: 'border-box'}}>進度</th>
               <th>錶數</th>
               <th>未用</th>
-              <th style={{width: 170}} />
+              <th style={{whiteSpace: 'nowrap', boxSizing: 'border-box', width: 160}} />
             </tr>
           </thead>
           <tbody>
@@ -102,7 +102,7 @@ export default () => {
                 <td>{project.notActiveCount}</td>
                 <td className="df jcsa aic">
                   <Link to={`/d/project/export/${project.id}`}>匯出</Link>
-                  <Link to={`/d/meter/upload/${project.id}`}>上傳水錶</Link>
+                  <Link to={`/d/meter/upload/${project.id}`}>上傳</Link>
                   <fetcher.Form method="delete" style={{display: 'inline'}} onSubmit={(e) => !confirm("確定要刪除標案?\n旗下水錶與登記都會遺失!\n確定嗎?") && e.preventDefault()}>
                     <input type="hidden" name="_method" value="remove" />
                     <input type="hidden" name="id" defaultValue={project.id} />

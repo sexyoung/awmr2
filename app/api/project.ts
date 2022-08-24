@@ -2,7 +2,7 @@ import { Project } from "@prisma/client";
 import type { NewProjectForm } from "~/type/project";
 import { db } from "~/utils/db.server";
 
-import { RecordCount, sum } from "./record";
+import { RecordCount, sumByPid } from "./record";
 
 export async function create({ name, code, isActive }: NewProjectForm) {
   const project = await db.project.create({
@@ -40,15 +40,11 @@ export async function query(take?: number) {
     orderBy: { createdAt: "desc" },
   });
 
-  console.log('OK嗎');
-
   const data: ProjectData = await Promise.all(projectListItems.map(async project => {
-    // 取得 meter id
     const meterListItems = await db.meter.findMany({
       select: { id: true, isActive: true },
       where: { projectId: project.id },
     });
-    console.log(meterListItems);
     const meterIdList = meterListItems.map(({ id }) => id);
     const notActiveCount = meterListItems.filter(({ isActive }) => !isActive).length;
     const areaCount = (await db.meter.groupBy({
@@ -60,7 +56,7 @@ export async function query(take?: number) {
       ...project,
       notActiveCount,
       total: meterIdList.length,
-      ...await sum(meterIdList),
+      ...await sumByPid(project.id),
       areaCount,
     }
   }));
