@@ -8,7 +8,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   
   // await redis.get('abc:def:ghi');
   // await hGetAll('area:19:南寮');
-  return (await redis.hGetAll('record:summary:search:x'));
+  return (await redis.hGetAll('area:abc'));
 }
 
 export default () => {

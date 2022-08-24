@@ -1,4 +1,4 @@
-import { Meter, Project, Record, User } from "@prisma/client";
+import { Meter} from "@prisma/client";
 import { ActionFunction, json } from "@remix-run/node";
 import * as api from "~/api/record";
 import { Status } from "~/consts/reocrd";

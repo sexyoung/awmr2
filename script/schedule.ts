@@ -1,12 +1,12 @@
 import {config} from 'dotenv';
 import {resolve} from 'path'
-import { cacheOrNew } from '~/routes/d/record/cache.or.new';
+import { cache } from '~/routes/d/record/cache';
 import { Redis } from "~/utils/redis.server";
 
 config({path: resolve(__dirname, "../.env")});
 
 (async () => {
-  await cacheOrNew({ isForce: true });
+  await cache({ isForce: true });
 
   const redis = new Redis(process.env.REDIS_URL);
   await redis.connect();

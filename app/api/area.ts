@@ -1,7 +1,7 @@
-import { Meter, Project } from "@prisma/client";
 import { db } from "~/utils/db.server";
-import { showCostTime, startTime } from "~/utils/helper";
-import { RecordCount, sum } from "./record";
+// import { showCostTime, startTime } from "~/utils/helper";
+import { cacheAll, cache } from "./cache/area.cache";
+import { RecordCount } from "./record";
 
 export type AreaData = ({
   projectName: string;
@@ -18,7 +18,7 @@ type Params = {
 export async function query({ take = 0, where = {}, skip = 0 }: Params) {
   const data: AreaData = [];
 
-  startTime();
+  // startTime();
 
   // 統計每個小區有幾個水錶
   const areaListItems = await db.meter.groupBy({
@@ -28,39 +28,18 @@ export async function query({ take = 0, where = {}, skip = 0 }: Params) {
     },
     where
   });
+  // showCostTime('統計每個小區有幾個水錶');
 
-  showCostTime('統計每個小區有幾個水錶');
+  // 先取得快照裡的全部小區資料
+  const cacheArea = await cacheAll();
 
   for (let i = 0; i < areaListItems.length; i++) {
-    // 找到小區裡的第一個水錶
     const area = areaListItems[i];
-    
-    console.log('area', area);
-    const m = await db.meter.findFirst({
-      where: { area: area.area },
-      orderBy: { createdAt: 'desc' }
-    }) as Meter;
-    showCostTime('找第一個水錶'); // <--- 花時間
-
-    const p = await db.project.findUnique({
-      where: { id: m.projectId}
-    }) as Project;
-    showCostTime('找標案');
-
-    const meterIdList = (await db.meter.findMany({
-      where: { area: area.area },
-      orderBy: { createdAt: 'desc' },
-      select: { id: true }
-    })).map(m => m.id);
-    showCostTime('找水錶id'); // <--- 花時間
-    
-    data.push({
-      projectName: p.name,
-      area: m.area || "",
-      total: area._count.area,
-      ...await sum(meterIdList),
-    });
-    showCostTime('統計成功/失敗記錄'); // <--- 花時間
+    if(!cacheArea[area.area as string]) {
+      data.push(await cache(area));
+    } else {
+      data.push(cacheArea[area.area as string]);
+    }
   }
 
   data.sort((a, b) => {
@@ -68,7 +47,6 @@ export async function query({ take = 0, where = {}, skip = 0 }: Params) {
     const bd = +(b.lastRecordTime || 0);
     return bd - ad;
   });
-  showCostTime('排序');
 
   return {
     count: areaListItems.length,

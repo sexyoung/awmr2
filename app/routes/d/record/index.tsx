@@ -10,7 +10,7 @@ import { NotRecordReason, NotRecordReasonMap, Status } from "~/consts/reocrd";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
 
 import RecordBar from "~/component/RecordBar";
-import { cacheOrNew } from "./cache.or.new";
+import { cache } from "./cache";
 import stylesUrl from "~/styles/record-page.css";
 
 export { action } from "./action";
@@ -56,7 +56,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     meterCountSummary,
     successCount,
     notRecordCount,
-  } = await cacheOrNew({ search, showRecord });
+  } = await cache({ search, showRecord });
 
   const pageTotal = ~~((meterCount && (meterCount - 1)) / PAGE_SIZE) + 1;
   const meterListItem = await db.meter.findMany({

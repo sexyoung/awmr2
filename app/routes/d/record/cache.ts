@@ -4,7 +4,7 @@ import { formatYmd, getTomorrow } from "~/utils/time";
 
 const REDIS_PREFIX = 'record:summary:search';
 
-export async function cacheOrNew({
+export async function cache({
   search = '',
   isForce = false,
   showRecord = false
@@ -39,6 +39,7 @@ export async function cacheOrNew({
   if(!isForce) {
     const sammary = await redis.hGetAll(`${REDIS_PREFIX}:${search}`);
     if(Object.entries(sammary).length) {
+      await redis.disconnect();
       return {
         where,
         meterCount: +sammary.meterCount,
