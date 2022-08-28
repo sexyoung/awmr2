@@ -60,8 +60,8 @@ const AreaPage = () => {
         <table>
           <thead>
             <tr>
-              <th style={{width: 100, boxSizing: 'border-box'}}>標案名稱</th>
-              <th style={{width: 150, boxSizing: 'border-box'}}>小區代號</th>
+              <th style={{width: 130, boxSizing: 'border-box'}}>標案</th>
+              <th style={{width: 150, boxSizing: 'border-box'}}>小區</th>
               <th>登錄</th>
               <th style={{width: 80, boxSizing: 'border-box'}}>抄見率</th>
               <th style={{width: 150, boxSizing: 'border-box'}}>進度</th>

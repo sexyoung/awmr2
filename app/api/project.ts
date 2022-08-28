@@ -1,8 +1,9 @@
 import { Project } from "@prisma/client";
 import type { NewProjectForm } from "~/type/project";
 import { db } from "~/utils/db.server";
+import { cacheAll } from "./cache/project.cache";
 
-import { RecordCount, sumByPid } from "./record";
+import { RecordCount } from "./record";
 
 export async function create({ name, code, isActive }: NewProjectForm) {
   const project = await db.project.create({
@@ -35,37 +36,7 @@ export type ProjectData = Array<Project & {
 } & RecordCount>
 
 export async function query(take?: number) {
-  const projectListItems = await db.project.findMany({
-    take,
-    orderBy: { createdAt: "desc" },
-  });
-
-  const data: ProjectData = await Promise.all(projectListItems.map(async project => {
-    const meterListItems = await db.meter.findMany({
-      select: { id: true, isActive: true },
-      where: { projectId: project.id },
-    });
-    const meterIdList = meterListItems.map(({ id }) => id);
-    const notActiveCount = meterListItems.filter(({ isActive }) => !isActive).length;
-    const areaCount = (await db.meter.groupBy({
-      by: ['area'],
-      _count: { area: true },
-      where: { projectId: project.id }
-    })).length;
-    return {
-      ...project,
-      notActiveCount,
-      total: meterIdList.length,
-      ...await sumByPid(project.id),
-      areaCount,
-    }
-  }));
-
-  data.sort((a, b) => {
-    const ad = +(a.lastRecordTime || 0);
-    const bd = +(b.lastRecordTime || 0);
-    return bd - ad;
-  });
-
-  return take ? data.slice(0, take): data;
+  // 先取得快照裡的全部標案資料
+  const cacheProject = await cacheAll();
+  return take ? cacheProject.slice(0, take): cacheProject;
 }

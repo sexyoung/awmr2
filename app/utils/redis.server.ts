@@ -14,6 +14,9 @@ export class Redis {
   async get(key: string) {
     return await this.client.get(key);
   }
+  async set(key: string, value: any) {
+    return await this.client.set(key, value);
+  }
   async hGetAll(key: string) {
     return await this.client.hGetAll(key);
   }
