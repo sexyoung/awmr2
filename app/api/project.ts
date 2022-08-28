@@ -1,7 +1,7 @@
 import { Project } from "@prisma/client";
 import type { NewProjectForm } from "~/type/project";
 import { db } from "~/utils/db.server";
-import { cacheAll } from "./cache/project.cache";
+import { cache, cacheAll } from "./cache/project.cache";
 
 import { RecordCount } from "./record";
 
@@ -13,6 +13,7 @@ export async function create({ name, code, isActive }: NewProjectForm) {
       isActive: Boolean(isActive),
     },
   });
+  await cache();
   return project;
 }
 
@@ -21,12 +22,14 @@ export async function toggle({id, isActive}: {id: number, isActive: boolean}) {
     where: { id },
     data: { isActive },
   });
+  await cache();
 }
 
 export async function remove({id}: {id: number}) {
   await db.project.delete({
     where: { id },
   });
+  await cache();
 }
 
 export type ProjectData = Array<Project & {

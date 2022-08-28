@@ -1,11 +1,12 @@
 import { format } from 'date-fns';
 import { Record, Role, User } from "@prisma/client";
 import { json, LinksFunction, LoaderFunction } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
+import { Link, useFetcher, useLoaderData } from "@remix-run/react";
 import { query as areaQuery, AreaData } from "~/api/area";
 import { query as projectQuery, ProjectData } from "~/api/project";
 import { isAdmin } from "~/api/user";
 import { db } from "~/utils/db.server";
+export { action } from "./project/action";
 
 import stylesUrl from "~/styles/home-page.css";
 import RecordBar from "~/component/RecordBar";
@@ -56,7 +57,22 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 const HomePage = () => {
+  const fetcher = useFetcher();
   const { projectListItems, areaListItems, userListItems } = useLoaderData<LoaderData>();
+
+  const handleChange = (projectId: number) => {
+    const formData = new FormData(document.getElementById(`formToggle${projectId}`) as HTMLFormElement);
+    const _method = formData.get('_method') as string;
+    const isActive = (document.getElementById(`isActive${projectId}`) as HTMLInputElement).checked;
+  
+    fetcher.submit({
+      _method,
+      isActive: isActive ? '': '1',
+      id: projectId.toString(),
+    }, {
+      method: 'patch',
+    });
+  }
 
   return (
     <div className="Page HomePage">
@@ -124,7 +140,10 @@ const HomePage = () => {
             {projectListItems.map((project, index) =>
               <tr key={project.id}>
                 <td>
-                  <input type="checkbox" checked={project.isActive} value="1" />
+                  <fetcher.Form method="patch" id={`formToggle${project.id}`}>
+                    <input type="hidden" name="_method" value="toggle" />
+                    <input type="checkbox" name="isActive" id={`isActive${project.id}`} defaultChecked={project.isActive} value={project.isActive ? "1": ""} onChange={handleChange.bind(null, project.id)} />
+                  </fetcher.Form>
                 </td>
                 <td>{project.name}</td>
                 <td>{project.code}</td>
@@ -171,7 +190,7 @@ const HomePage = () => {
             {userListItems.map(user =>
               <tr key={user.id}>
                 <td>
-                  <input type="checkbox" checked={user.isActive} value="1" />
+                  <input type="checkbox" defaultChecked={user.isActive} value="1" />
                 </td>
                 <td>
                   {user.avatar && <div className='bgsc bgpc' style={{margin: `0 auto`, width: 20, height: 20, backgroundImage: `url(/avatar/${user.avatar})`}} />}
