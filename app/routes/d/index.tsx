@@ -10,19 +10,13 @@ export { action } from "./project/action";
 
 import stylesUrl from "~/styles/home-page.css";
 import RecordBar from "~/component/RecordBar";
+import { RoleMap } from '~/consts/role';
 
 const TAKE = 5;
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
 };
-
-const RoleMap = {
-  [Role.ENG]: '工程師',
-  [Role.ENM]: '工程師主管',
-  [Role.OFW]: '文書',
-  [Role.ADM]: '管理員',
-}
 
 type LoaderData = {
   projectListItems: ProjectData;
@@ -177,9 +171,7 @@ const HomePage = () => {
           <thead>
             <tr>
               <th style={{width: 40}}>啟用</th>
-              <th>頭像</th>
               <th>全名</th>
-              <th>帳號</th>
               <th>權限</th>
               <th>手機</th>
               <th>信箱</th>
@@ -189,14 +181,8 @@ const HomePage = () => {
           <tbody>
             {userListItems.map(user =>
               <tr key={user.id}>
-                <td>
-                  <input type="checkbox" defaultChecked={user.isActive} value="1" />
-                </td>
-                <td>
-                  {user.avatar && <div className='bgsc bgpc' style={{margin: `0 auto`, width: 20, height: 20, backgroundImage: `url(/avatar/${user.avatar})`}} />}
-                </td>
+                <td><input type="checkbox" defaultChecked={user.isActive} value="1" /></td>
                 <td>{user.fullname}</td>
-                <td>{user.name}</td>
                 <td>{RoleMap[user.title]}</td>
                 <td>{user.phone}</td>
                 <td>{user.email}</td>
@@ -206,7 +192,7 @@ const HomePage = () => {
           </tbody>
           <tfoot>
             <tr>
-              <td colSpan={8}>
+              <td colSpan={6}>
                 <Link to="/d/user">所有人事</Link>
               </td>
             </tr>

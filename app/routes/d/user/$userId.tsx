@@ -2,7 +2,7 @@ import { useRef } from "react";
 import type { Record, User, Project, Meter } from "@prisma/client";
 import { LoaderFunction } from "@remix-run/node";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
-import { Role } from "~/consts/role";
+import { Role, RoleMap } from "~/consts/role";
 import { db } from "~/utils/db.server";
 import { Avator } from "./avatar";
 import { isAdmin } from "~/api/user";
@@ -79,10 +79,10 @@ const UserRoute = () => {
           <div>本名: <input type="text" name="fullname" defaultValue={user.fullname || ""} /></div>
           <div>權限:
             <select name="title" defaultValue={user.title}>
-              <option value={Role.ENG}>工程師</option>
-              <option value={Role.ENM}>工程師主管</option>
-              <option value={Role.OFW}>文書</option>
-              <option value={Role.ADM}>管理員</option>
+              <option value={Role.ENG}>{RoleMap[Role.ENG]}</option>
+              <option value={Role.ENM}>{RoleMap[Role.ENM]}</option>
+              <option value={Role.OFW}>{RoleMap[Role.OFW]}</option>
+              <option value={Role.ADM}>{RoleMap[Role.ADM]}</option>
             </select>
           </div>
           <div>信箱: <input type="text" name="email" defaultValue={user.email || ""} /></div>
