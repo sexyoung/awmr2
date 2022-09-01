@@ -1,11 +1,12 @@
 import { format } from "date-fns";
-import { Meter, Record, User } from "@prisma/client";
+import { Meter, Record, Role, User } from "@prisma/client";
 import { LoaderFunction } from "@remix-run/node";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
 import { NotRecordReasonMap, Status } from "~/consts/reocrd";
+import { getUser } from "~/api/user";
 
 export { action } from "../meter/action";
 
@@ -25,11 +26,14 @@ type LoadData = {
 } & PaginationProps
 
 export const loader: LoaderFunction = async ({ request }) => {
+  const user = await getUser(request);
+
   const url = new URL(request.url);
   const page = +url.searchParams.get("page")! || 1;
   const search = url.searchParams.get("search") || '';
 
   const where = {
+    ...(user?.title === Role.ENG ? {userId: user.id}: {}),
     OR: [
       {
         meter: {

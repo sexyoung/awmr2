@@ -53,7 +53,7 @@ export default function DashBoard() {
             {user &&
               <div className="user-info">
                 <div className="avatar" style={{backgroundImage: `url(/avatar/${user.avatar})`}}/>
-                <div className="name">{user.name}</div>
+                <div className="name">{user.fullname || user.name}</div>
                 <Form action="/logout" method="post" onSubmit={handleLogout}>
                   <button type="submit" className="logout">
                     登出
