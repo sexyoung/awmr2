@@ -59,6 +59,34 @@
   border-radius: 100%;
 }
 
+.UserPage .user-box .avatar:before {
+  display: none;
+  cursor: pointer;
+}
+
+.UserPage .user-box .avatar:hover:before {
+  position: absolute;
+  display: flex;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  color: #fff;
+  font-size: 1.2rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.UserPage .user-box .avatar.enabled:before {
+  background-color: rgb(29 119 11 / 70%);
+  content: '啟用';
+}
+
+.UserPage .user-box .avatar.disabled:before {
+  background-color: rgb(174 54 54 / 70%);
+  content: '停用';
+}
+
 .UserPage .user-box.disabled {
   opacity: .3;
 }

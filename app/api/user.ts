@@ -117,3 +117,10 @@ export async function update(id: number, data: any) {
     data,
   });
 }
+
+export async function toggle({id, isActive}: {id: number, isActive: boolean}) {
+  await db.user.update({
+    where: { id },
+    data: { isActive },
+  });
+}

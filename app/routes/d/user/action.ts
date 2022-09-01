@@ -9,6 +9,7 @@ export const action: ActionFunction = async ({ request }) => {
   switch (form.get('_method')) {
     case 'update': return verb.update(form);
     case 'attach': return verb.attach(form);
+    case 'toggle': return verb.toggle(form);
     // case 'coordinate': return verb.coordinate();
   }
   return json(null);
@@ -58,5 +59,12 @@ const verb = {
     api.update(id, data);
     
     return json(user);
-  }
+  },
+  toggle: async (form: FormData): Promise<Response> => {
+    const id = +form.get('id')!;
+    const isActive = !form.get('isActive');
+    
+    await api.toggle({id, isActive});
+    return json(true);
+  },
 }

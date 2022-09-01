@@ -1,12 +1,13 @@
 import { Record, Role, User } from "@prisma/client";
 import { LinksFunction, LoaderFunction, redirect } from "@remix-run/node";
-import { Form, Link, useLoaderData } from "@remix-run/react";
+import { Form, Link, useFetcher, useLoaderData } from "@remix-run/react";
 import { isAdmin } from "~/api/user";
 import { db } from "~/utils/db.server";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
 
 import stylesUrl from "~/styles/user-page.css";
 import { RoleMap } from "~/consts/role";
+export { action } from "./action";
 
 const PAGE_SIZE = 20;
 const RoleArr = Object.keys(Role);
@@ -77,6 +78,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export default () => {
+  const fetcher = useFetcher();
   const { userListItems, pageTotal, href, search, title, showResign } = useLoaderData<LoadData>();
 
   const handleActive: React.ChangeEventHandler<HTMLInputElement> = ({currentTarget}) => {
@@ -99,6 +101,16 @@ export default () => {
     ).join('&')}`
   }
 
+  const toggleActive = (id: number, isActive: boolean) => {
+    fetcher.submit({
+      _method: 'toggle',
+      isActive: isActive ? '1': '',
+      id: id.toString(),
+    }, {
+      method: 'patch',
+    });
+  }
+
   return (
     <div className="Page UserPage">
       <div className="block">
@@ -117,28 +129,28 @@ export default () => {
         </div>
         <ul className={`filter ${title} df p0 m0 gap5`}>
           <li className="fx1 tac ENG">
-            <Link className="p10" to={`/d/user?title=ENG&search=${search}`}>{RoleMap.ENG}</Link>
+            <Link className="p10" to={`/d/user?title=ENG&search=${search}&showResign=${showResign ? 1: ''}`}>{RoleMap.ENG}</Link>
           </li>
           <li className="fx1 tac ENM">
-            <Link className="p10" to={`/d/user?title=ENM&search=${search}`}>{RoleMap.ENM}</Link>
+            <Link className="p10" to={`/d/user?title=ENM&search=${search}&showResign=${showResign ? 1: ''}`}>{RoleMap.ENM}</Link>
           </li>
           <li className="fx1 tac OFW">
-            <Link className="p10" to={`/d/user?title=OFW&search=${search}`}>{RoleMap.OFW}</Link>
+            <Link className="p10" to={`/d/user?title=OFW&search=${search}&showResign=${showResign ? 1: ''}`}>{RoleMap.OFW}</Link>
           </li>
           <li className="fx1 tac ADM">
-            <Link className="p10" to={`/d/user?title=ADM&search=${search}`}>{RoleMap.ADM}</Link>
+            <Link className="p10" to={`/d/user?title=ADM&search=${search}&showResign=${showResign ? 1: ''}`}>{RoleMap.ADM}</Link>
           </li>
           <li className="fx1 tac df jcc aic">
             <label>
               <input type="checkbox" name="isActive" value="1" onChange={handleActive} defaultChecked={showResign} />
-              顯示離職
+              顯示停用
             </label>
           </li>
         </ul>
         <div className="ph20 pb20 df fww gap10">
           {userListItems.map(user =>
             <div key={user.id} className={`user-box tac pr df fdc gap2 ${user.isActive ? 'enabled': 'disabled'}`}>
-              <div className="bgsc bgpc avatar" style={
+              <div onClick={toggleActive.bind(null, user.id, user.isActive)} className={`bgsc bgpc pr ovh avatar ${user.isActive ? 'disabled': 'enabled'}`} style={
                 user.avatar ?
                 {backgroundImage: `url(/avatar/${user.avatar})`}:
                 {backgroundColor: `#f6f6f6`}
