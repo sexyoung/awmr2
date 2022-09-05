@@ -40,12 +40,12 @@ export const Avator: FC<IAvatar> = (props) => {
     props.afterChange && props.afterChange();
   };
   return (
-    <label className={'style.avatar'}>
-      {props.picture && <img src={`/avatar/${props.picture}`} alt="" style={{width: 100}} />}
-      <div className={'style.text'}>
-        {preview ? '上傳中...': '上傳照片'}
-      </div>
-      {!preview && <input type="file" onChange={handleUpload} accept="image/*" />}
+    <label className="avatar db tac m0a">
+      {props.picture &&
+        <div className="img m0a" style={{backgroundImage: `url(/avatar/${props.picture})`}} />
+      }
+      <div className="btn primary dib">{preview ? '上傳中...': '上傳照片'}</div>
+      {!preview && <input className="dn" type="file" onChange={handleUpload} accept="image/*" />}
     </label>
   );
 };

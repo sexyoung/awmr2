@@ -1,12 +1,25 @@
-import { useRef } from "react";
+import { useEffect, useState } from "react";
 import type { Record, User, Project, Meter } from "@prisma/client";
-import { LoaderFunction } from "@remix-run/node";
-import { Form, useFetcher, useLoaderData } from "@remix-run/react";
+import { LinksFunction, LoaderFunction } from "@remix-run/node";
+import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 import { Role, RoleMap } from "~/consts/role";
 import { db } from "~/utils/db.server";
 import { Avator } from "./avatar";
 import { isAdmin } from "~/api/user";
+import { Toast } from "~/component/Toast";
+import stylesUrl from "~/styles/user-detail-page.css";
+import { format } from "date-fns";
+import { NotRecordReasonMap, Status } from "~/consts/reocrd";
 export { action } from "./action";
+
+type ActionData = {
+  type: string;
+  ts: number;
+};
+
+export const links: LinksFunction = () => {
+  return [{ rel: "stylesheet", href: stylesUrl }];
+};
 
 type LoaderData = { user: User & {
   Record: (Record & { meter: Meter })[];
@@ -42,85 +55,102 @@ export const loader: LoaderFunction = async ({ params: { userId = 0 }, request }
 };
 
 const UserRoute = () => {
-  const fetcher = useFetcher();
+  const [showUpdated, setShowUpdated] = useState(false);
+  const {type, ts} = (useActionData<ActionData>() || {}) as ActionData;
   const { user, projectListItems } = useLoaderData<LoaderData>();
 
-  const handleChange = (projectId: number) => {
-    const formData = new FormData(document.getElementById(`form${projectId}`) as HTMLFormElement);
-    const _method = formData.get('_method') as string;
-    const userId = formData.get('userId')! as string;
-    
-    fetcher.submit({
-      _method,
-      userId,
-      projectId: projectId.toString(),
-    }, {
-      method: 'patch',
-    });
-  }
+  useEffect(() => {
+    console.log(type, ts);
+    if(type === 'UPDATED') {
+      setShowUpdated(true);
+      setTimeout(setShowUpdated.bind(null, false), 1000);
+    }
+  }, [type, ts]);
   
   return (
     <div className="Page UserDetailPage">
+      {showUpdated && (
+        <Toast>已更新</Toast>
+      )}
       <div className="block">
         <div className="header">
-          <h2 className="title">使用者內頁</h2>
+          <h2 className="title">
+            <Link to="/d/user">人事查詢</Link> &gt; {user.fullname || user.name}
+          </h2>
         </div>
-        <Form method="put">
-          <input name="_method" type="hidden" value="update" />
-          <input name="id" type="hidden" value={user.id} />
-          <div>
-            {/* avatar: {user.avatar} */}
+        <div className="ph20">
+          <Form method="put">
+            <input name="_method" type="hidden" value="update" />
+            <input name="id" type="hidden" value={user.id} />
+            <div className="tac">帳號 {user.name}</div>
             <Avator id={user.id} picture={user.avatar} afterChange={() => location.reload()} />
-            {/* <input type="file" /> */}
-          </div>
-          <div>id: {user.id}</div>
-          <div>帳號: {user.name}</div>
-          <div>密碼: <input type="password" name="password" /></div>
-          <div>本名: <input type="text" name="fullname" defaultValue={user.fullname || ""} /></div>
-          <div>權限:
-            <select name="title" defaultValue={user.title}>
-              <option value={Role.ENG}>{RoleMap[Role.ENG]}</option>
-              <option value={Role.ENM}>{RoleMap[Role.ENM]}</option>
-              <option value={Role.OFW}>{RoleMap[Role.OFW]}</option>
-              <option value={Role.ADM}>{RoleMap[Role.ADM]}</option>
-            </select>
-          </div>
-          <div>信箱: <input type="text" name="email" defaultValue={user.email || ""} /></div>
-          <div>電話: <input type="text" name="phone" defaultValue={user.phone || ""} /></div>
-          <div>備註: <input type="text" name="note" defaultValue={user.note || ""} /></div>
-          <div>
-            line登入:
-            <input type="checkbox" name="isDailyLink" defaultChecked={user.isDailyLink} value="1" />
-          </div>
-          <button>update</button>
-        </Form>
-        <h2>所屬標案</h2>
-        <ul>
-          {projectListItems.map(project =>
-            <li key={project.id}>
-              <form method="patch" id={`form${project.id}`}>
-              <input type="hidden" name="_method" value="attach" />
-              <input type="hidden" name="userId" defaultValue={user.id} />
-              <input type="hidden" name="projectId" defaultValue={project.id} />
-                <label>
-                  <input type="checkbox" defaultChecked={user.projects.includes(project.id)} onChange={handleChange.bind(null, project.id)} />
-                  {project.name}
-                </label>
-              </form>
-            </li>
-          )}
-        </ul>
-        <h2>登錄記錄</h2>
-        <ul>
-          {user.Record.map(record =>
-            <li key={record.id}>
-              水號: {record.meter.waterId} /
-              錶號 {record.meter.meterId} /
-              登錄內容: {record.status} / {record.content} /
-              登錄時間: {new Date(record.createdAt).toLocaleString()}
-            </li>
-          )}
-        </ul>
+            <div className="df gap10" style={{maxWidth: 650, margin: '10px auto'}}>
+              <div className="df aic fx1 gap10">密碼 <input className="input fx1" type="password" name="password" /></div>
+              <div className="df aic fx1 gap10">本名 <input className="input fx1" type="text" name="fullname" defaultValue={user.fullname || ""} /></div>
+              <div className="df aic fx1 gap10">權限 <select className="input fx1" name="title" defaultValue={user.title}>
+                  <option value={Role.ENG}>{RoleMap[Role.ENG]}</option>
+                  <option value={Role.ENM}>{RoleMap[Role.ENM]}</option>
+                  <option value={Role.OFW}>{RoleMap[Role.OFW]}</option>
+                  <option value={Role.ADM}>{RoleMap[Role.ADM]}</option>
+                </select>
+              </div>
+            </div>
+            <div className="df gap10" style={{maxWidth: 650, margin: '10px auto'}}>
+              <div className="df aic fx1 gap10">信箱 <input className="input fx1" type="text" name="email" defaultValue={user.email || ""} /></div>
+              <div className="df aic fx1 gap10">電話 <input className="input fx1" type="text" name="phone" defaultValue={user.phone || ""} /></div>
+              <div className="df aic fx1 gap10">備註 <input className="input fx1" type="text" name="note" defaultValue={user.note || ""} /></div>
+            </div>
+            <div className="df gap10" style={{maxWidth: 650, margin: '10px auto'}}>
+              <div className="df aic fx2 gap10">
+                line登入:
+                <input type="checkbox" name="isDailyLink" defaultChecked={user.isDailyLink} value="1" />
+              </div>
+              <div className="df aic fx1 gap10 jce">
+                <button className="btn primary">更新</button>
+              </div>
+            </div>
+          </Form>
+          <h2 className="tac">所屬標案</h2>
+          <ul className="project-list p0 m0">
+            {projectListItems.map(project =>
+              <li key={project.id}>
+                <Form method="patch" id={`form${project.id}`}>
+                <input type="hidden" name="_method" value="attach" />
+                <input type="hidden" name="userId" defaultValue={user.id} />
+                <input type="hidden" name="projectId" defaultValue={project.id} />
+                  <label>
+                    <input type="checkbox" defaultChecked={user.projects.includes(project.id)} onChange={() => document.getElementById(`submit-${project.id}`)?.click()} />
+                    {project.name}
+                    <button className="dn" id={`submit-${project.id}`}>update</button>
+                  </label>
+                </Form>
+              </li>
+            )}
+          </ul>
+          <h2 className="tac">登錄記錄最新10筆</h2>
+          <table className="wp100" style={{tableLayout: 'fixed'}}>
+            <thead>
+              <tr>
+                <th style={{width: 130, boxSizing: 'border-box'}}>水號</th>
+                <th style={{width: 120, boxSizing: 'border-box'}}>錶號</th>
+                <th style={{boxSizing: 'border-box'}}>內容</th>
+                <th style={{width: 180, boxSizing: 'border-box'}}>時間</th>
+              </tr>
+            </thead>
+            <tbody>
+              {user.Record.map(record =>
+                <tr key={record.id}>
+                  <td className="tac">{record.meter.waterId}</td>
+                  <td className="tac">{record.meter.meterId}</td>
+                  <td className={`tac ${record.status === Status.success ? 'color-mantis': 'color-zombie'}`}>
+                    {record.status === Status.success ? record.content : NotRecordReasonMap[record.content as keyof typeof NotRecordReasonMap]}
+                  </td>
+                  <td className="tac">{format(new Date(+new Date(record.createdAt)), 'MM-dd HH:mm')}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )

@@ -78,14 +78,14 @@ export const action: ActionFunction = async ({
   };
   if (Object.values(fieldErrors).some(Boolean)) return badRequest({ fieldErrors, fields });
 
-    const user = await login({ name, password });
-    if (!user) {
-      return badRequest({
-        fields,
-        formError: `Username/Password combination is incorrect`,
-      });
-    }
-    return createUserSession(user.id, redirectTo);
+  const user = await login({ name, password });
+  if (!user) {
+    return badRequest({
+      fields,
+      formError: `Username/Password combination is incorrect`,
+    });
+  }
+  return createUserSession(user.id, redirectTo);
 };
 
 export default () => {

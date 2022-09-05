@@ -30,11 +30,14 @@ const verb = {
     } else {
       await db.projectsOnUsers.deleteMany({ where: data });
     }
-    return json(true);
+    return json({type: 'UPDATED', ts: +new Date()});
   },
   update: async (form: FormData): Promise<Response> => {
     const id = +form.get('id')!;
     const user = await db.user.findFirst({ where: { id }});
+
+    if(!user) return json({type: 'NO_USER', ts: +new Date()});
+
     const data: {
       password?: string;
       fullname: string;
@@ -58,7 +61,7 @@ const verb = {
 
     api.update(id, data);
     
-    return json(user);
+    return json({type: 'UPDATED', ts: +new Date()});
   },
   toggle: async (form: FormData): Promise<Response> => {
     const id = +form.get('id')!;

@@ -81,11 +81,6 @@ export const loader: LoaderFunction = async ({ request }) => {
 }
 
 const isNewMeter = (record: ItemType) => {
-  // console.log(
-  //   record.meter.createdAt,
-  //   record.createdAt,
-  // );
-  
   const t = (
     +new Date(record.createdAt) -
     +new Date(record.meter.createdAt));
@@ -124,7 +119,7 @@ const HistoryPage = () => {
                 <td>{record.meter.waterId}</td>
                 <td>{record.meter.meterId}</td>
                 <td>{record.user.fullname}</td>
-                <td>
+                <td className={record.status === Status.success ? 'color-mantis': 'color-zombie'}>
                   {record.status === Status.success ? record.content : NotRecordReasonMap[record.content as keyof typeof NotRecordReasonMap]}
                 </td>
                 <td>{format(new Date(+new Date(record.createdAt)), 'MM-dd HH:mm')}</td>
