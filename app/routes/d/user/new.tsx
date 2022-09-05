@@ -1,12 +1,13 @@
 import { LoaderFunction, redirect } from "@remix-run/node";
 import type { ActionFunction } from "@remix-run/node";
-import { Form, useActionData, useSearchParams } from "@remix-run/react";
+import { Form, Link, useActionData, useSearchParams } from "@remix-run/react";
 
 import { Role } from "~/consts/role";
 import { isAdmin, register } from "~/api/user";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request";
 import type { ActionDataGen } from "~/type/action.data";
+import { UserForm } from "./form";
 
 type ActionData = ActionDataGen<{
   name: string;
@@ -35,6 +36,10 @@ export const action: ActionFunction = async ({ request }) => {
   
   const name = form.get("name");
   const password = form.get("password");
+  const fullname = form.get("fullname") as string;
+  const email = form.get("email") as string;
+  const phone = form.get("phone") as string;
+  const note = form.get("note") as string;
   const title = form.get("title") as Role;
 
   const redirectTo = form.get("redirectTo") || "/d/user";
@@ -64,7 +69,15 @@ export const action: ActionFunction = async ({ request }) => {
       formError: `User with name ${name} already exists`,
     });
   }
-  const user = await register({ name, password, title });
+  const user = await register({
+    name,
+    fullname,
+    password,
+    title,
+    email,
+    phone,
+    note,
+  });
   if (!user) {
     return badRequest<ActionData>({
       fields,
@@ -78,24 +91,29 @@ const NewUserPage = () => {
   const [searchParams] = useSearchParams();
   const actionData = useActionData<ActionData>();
   return (
-    <div>
-      <h2>NewUserPage</h2>
-      <Form method="post">
-          <input type="hidden" name="redirectTo" value={searchParams.get("redirectTo") ?? undefined} />
-          <input type="text" id="name-input" name="name" />
-          {actionData?.fieldErrors?.name && <p>{actionData.fieldErrors.name}</p>}
-          <input id="password-input" name="password" defaultValue={actionData?.fields?.password} type="password" />
-          {actionData?.fieldErrors?.password && <p>{actionData.fieldErrors.password}</p>}
-          <select name="title" id="title">
-            {Object.values(Role).map(role =>
-              <option key={role}>{role}</option>
-            )}
-          </select>
-          <div id="form-error-message">
+    <div className="Page UserNewPage">
+      <div className="block">
+        <div className="header">
+          <h2 className="title">
+            <Link to="/d/user">人事查詢</Link> &gt; 新增人事
+          </h2>
+        </div>
+        <div className="ph20">
+          {actionData?.fieldErrors?.name && <p style={{color: '#f00'}}>{actionData.fieldErrors.name}</p>}
+          {actionData?.fieldErrors?.password && <p style={{color: '#f00'}}>{actionData.fieldErrors.password}</p>}
+          <p style={{color: '#f00'}}>
             {actionData?.formError && <p>{actionData.formError}</p>}
-          </div>
-          <button type="submit" className="button">Submit</button>
-      </Form>
+          </p>
+          <Form method="post">
+            <input type="hidden" name="redirectTo" value={searchParams.get("redirectTo") ?? undefined} />
+
+            <div className="df gap10" style={{maxWidth: 650, margin: '10px auto'}}>
+              <div className="df aic fx1 gap10">帳號 <input className="input fx1" type="text" name="name" required /></div>
+            </div>
+            <UserForm />
+          </Form>
+        </div>
+      </div>
     </div>
   )
 }

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import type { Record, User, Project, Meter } from "@prisma/client";
 import { LinksFunction, LoaderFunction } from "@remix-run/node";
 import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
-import { Role, RoleMap } from "~/consts/role";
 import { db } from "~/utils/db.server";
 import { Avator } from "./avatar";
 import { isAdmin } from "~/api/user";
@@ -10,6 +9,7 @@ import { Toast } from "~/component/Toast";
 import stylesUrl from "~/styles/user-detail-page.css";
 import { format } from "date-fns";
 import { NotRecordReasonMap, Status } from "~/consts/reocrd";
+import { UserForm } from "./form";
 export { action } from "./action";
 
 type ActionData = {
@@ -84,31 +84,7 @@ const UserRoute = () => {
             <input name="id" type="hidden" value={user.id} />
             <div className="tac">帳號 {user.name}</div>
             <Avator id={user.id} picture={user.avatar} afterChange={() => location.reload()} />
-            <div className="df gap10" style={{maxWidth: 650, margin: '10px auto'}}>
-              <div className="df aic fx1 gap10">密碼 <input className="input fx1" type="password" name="password" /></div>
-              <div className="df aic fx1 gap10">本名 <input className="input fx1" type="text" name="fullname" defaultValue={user.fullname || ""} /></div>
-              <div className="df aic fx1 gap10">權限 <select className="input fx1" name="title" defaultValue={user.title}>
-                  <option value={Role.ENG}>{RoleMap[Role.ENG]}</option>
-                  <option value={Role.ENM}>{RoleMap[Role.ENM]}</option>
-                  <option value={Role.OFW}>{RoleMap[Role.OFW]}</option>
-                  <option value={Role.ADM}>{RoleMap[Role.ADM]}</option>
-                </select>
-              </div>
-            </div>
-            <div className="df gap10" style={{maxWidth: 650, margin: '10px auto'}}>
-              <div className="df aic fx1 gap10">信箱 <input className="input fx1" type="text" name="email" defaultValue={user.email || ""} /></div>
-              <div className="df aic fx1 gap10">電話 <input className="input fx1" type="text" name="phone" defaultValue={user.phone || ""} /></div>
-              <div className="df aic fx1 gap10">備註 <input className="input fx1" type="text" name="note" defaultValue={user.note || ""} /></div>
-            </div>
-            <div className="df gap10" style={{maxWidth: 650, margin: '10px auto'}}>
-              <div className="df aic fx2 gap10">
-                line登入:
-                <input type="checkbox" name="isDailyLink" defaultChecked={user.isDailyLink} value="1" />
-              </div>
-              <div className="df aic fx1 gap10 jce">
-                <button className="btn primary">更新</button>
-              </div>
-            </div>
+            <UserForm {...{user}} />
           </Form>
           <h2 className="tac">所屬標案</h2>
           <ul className="project-list p0 m0">
