@@ -114,6 +114,10 @@ html, body {
   font-size: 1rem;
 }
 
+.f1\.5r {
+  font-size: 1.5rem;
+}
+
 .f2r {
   font-size: 2rem;
 }
@@ -124,6 +128,10 @@ html, body {
 
 .mt5 {
   margin-top: 5px;
+}
+
+.mt10 {
+  margin-top: 10px;
 }
 
 .db {
@@ -152,6 +160,10 @@ html, body {
 
 .fx2 {
   flex: 2;
+}
+
+.wsn {
+  white-space: nowrap;
 }
 
 .dn {
@@ -559,12 +571,24 @@ label.avatar .img {
     flex-basis: 100%;
   }
   
+  .xs\:wp100 {
+    width: 100%;
+  }
+  
   .xs\:mwp100 {
     max-width: 100%;
   }
 
   .xs\:fdc {
     flex-direction: column;
+  }
+
+  .xs\:f1\.2r {
+    font-size: 1.2rem;
+  }
+
+  .input {
+    font-size: 1.2rem;
   }
 
   .Page {

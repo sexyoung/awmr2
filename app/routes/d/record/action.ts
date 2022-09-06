@@ -1,5 +1,5 @@
 import { Meter} from "@prisma/client";
-import { ActionFunction, json } from "@remix-run/node";
+import { ActionFunction, json, redirect } from "@remix-run/node";
 import * as api from "~/api/record";
 import { Status } from "~/consts/reocrd";
 import { requireUserId } from "~/api/user";
@@ -58,7 +58,7 @@ const verb = {
 
     await db.record.create({ data: {userId, meterId: meter.id, status, content}});
 
-    return json(true);
+    return redirect(`/d/record`);;
 
     // return json({...fields, ...latlng});
     // return json({status, content});

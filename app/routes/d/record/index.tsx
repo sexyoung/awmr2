@@ -14,6 +14,7 @@ import { cache } from "./cache";
 import stylesUrl from "~/styles/record-page.css";
 import { getUser } from "~/api/user";
 import { Role } from "~/consts/role";
+import Modal from "~/component/Modal";
 
 export { action } from "./action";
 
@@ -95,6 +96,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 const RecordPage = () => {
   const fetcher = useFetcher();
+  const [showModal, setShowModal] = useState(false);
   const [status, setStatus] = useState<Status>(Status.success);
   const { meterCountSummary, successCount, notRecordCount, search, href, pageTotal, meterListItem, projectListItems, showRecord } = useLoaderData<LoadData>();
 
@@ -242,59 +244,64 @@ const RecordPage = () => {
                 <div className="break" />
               </Fragment>
             ):
-            <div>
-              找不到水錶來新增水錶
-              <fetcher.Form method="post">
-              <input type="hidden" name="_method" value={'create'} />
-                <div>
-                  <select name="projectId" defaultValue={fetcher.data?.fields?.projectId}>
-                    {projectListItems.map(project =>
-                      <option key={project.id} value={project.id}>{project.name}</option>
-                    )}
-                  </select>
+            <div className="m0a xs:wp100">
+              <h3 className="tac">新增未存在水錶</h3>
+              <fetcher.Form method="post" onSubmit={setShowModal.bind(null, true)}>
+                <input type="hidden" name="_method" value={'create'} />
+                <div className="df gap10 xs:fdc xs:f1.2r">
+                  <div className="fx1 df fdc gap10">
+                    <div className="df aic gap10">
+                      標案: <select name="projectId" className="input fx1" defaultValue={fetcher.data?.fields?.projectId}>
+                        {projectListItems.map(project =>
+                          <option key={project.id} value={project.id}>{project.name}</option>
+                        )}
+                      </select>
+                    </div>
+                    <div className="df aic gap10">水號: <input type="text" className="input fx1" name="waterId" defaultValue={fetcher.data?.fields?.waterId} placeholder="waterId" required /></div>
+                    {fetcher.data?.fieldErrors?.waterId && <p>{fetcher.data?.fieldErrors.waterId}</p>}
+                    <div className="df aic gap10">錶號: <input type="text" className="input fx1" name="meterId" defaultValue={fetcher.data?.fields?.meterId} placeholder="meterId" required /></div>
+                    {fetcher.data?.fieldErrors?.meterId && <p>{fetcher.data?.fieldErrors.meterId}</p>}
+                    <div className="df aic gap10">小區: <input type="text" className="input fx1" name="area" defaultValue={fetcher.data?.fields?.area} placeholder="area" /></div>
+                    <div className="df aic gap10">地址: <input type="text" className="input fx1" name="address" defaultValue={fetcher.data?.fields?.address} placeholder="address" /></div>
+                  </div>
+                  <div className="fx1 df fdc gap10">
+                    <div className="df aic gap10">供水: <select className="input fx1" name="type" required>
+                        <option value={Suppy.NOM}>正常</option>
+                        <option value={Suppy.END}>中止</option>
+                        <option value={Suppy.PAU}>停水</option>
+                      </select>
+                    </div>
+                    <div className="df aic gap10">錶種: <select className="input fx1" name="suppy" required>
+                        <option value={Type.DRT}>直接錶</option>
+                        <option value={Type.TTL}>總錶</option>
+                        <option value={Type.BCH}>分錶</option>
+                      </select>
+                    </div>
+                    <div className="df aic gap10">錶位: <input type="text" className="input fx1" name="location" defaultValue={fetcher.data?.fields?.location} placeholder="location" /></div>
+                    <div className="df aic gap10">備註: <input type="text" className="input fx1" name="note" defaultValue={fetcher.data?.fields?.note} placeholder="note" /></div>
+                    <div className="df aic gap10">
+                      <button className="btn bg-mantis wsn cf xs:f1.2r" type="button" onClick={setStatus.bind(null, Status.success)}>成功</button>
+                      <button className="btn bg-zombie wsn xs:f1.2r" type="button" onClick={setStatus.bind(null, Status.notRecord)}>未記</button>
+                      {status === Status.success && <>
+                        <input type="hidden" name="status" value={Status.success} readOnly />
+                        <input className="input fx1" style={{width: 70}} type="tel" name="content" defaultValue={fetcher.data?.fields?.content} placeholder="度數" required />
+                      </>}
+                      {status === Status.notRecord && <>
+                        <input type="hidden" name="status" value={Status.notRecord} readOnly />
+                        <select className="input fx1" name="content" defaultValue={fetcher.data?.fields?.content} required>
+                          {Object.keys(NotRecordReasonMap).map(key =>
+                            <option key={key} value={key}>
+                              {NotRecordReasonMap[key as keyof typeof NotRecordReasonMap]}
+                            </option>
+                          )}
+                        </select>
+                      </>}
+                    </div>
+                  </div>
                 </div>
-                <div><input type="text" name="waterId" defaultValue={fetcher.data?.fields?.waterId} placeholder="waterId" required /></div>
-                {fetcher.data?.fieldErrors?.waterId && <p>{fetcher.data?.fieldErrors.waterId}</p>}
-                <div><input type="text" name="meterId" defaultValue={fetcher.data?.fields?.meterId} placeholder="meterId" required /></div>
-                {fetcher.data?.fieldErrors?.meterId && <p>{fetcher.data?.fieldErrors.meterId}</p>}
-                <div><input type="text" name="area" defaultValue={fetcher.data?.fields?.area} placeholder="area" /></div>
-                <div><input type="text" name="address" defaultValue={fetcher.data?.fields?.address} placeholder="address" /></div>
-                <div>
-                  <select name="type" required>
-                    <option value={Suppy.NOM}>正常</option>
-                    <option value={Suppy.END}>中止</option>
-                    <option value={Suppy.PAU}>停水</option>
-                  </select>
-                </div>
-                <div>
-                  <select name="suppy" required>
-                    <option value={Type.DRT}>直接錶</option>
-                    <option value={Type.TTL}>總錶</option>
-                    <option value={Type.BCH}>分錶</option>
-                  </select>
-                </div>
-                <div><input type="text" name="location" defaultValue={fetcher.data?.fields?.location} placeholder="location" /></div>
-                <div><input type="text" name="note" defaultValue={fetcher.data?.fields?.note} placeholder="note" /></div>
-
-                <button type="button" onClick={setStatus.bind(null, Status.success)}>成功</button>
-                <button type="button" onClick={setStatus.bind(null, Status.notRecord)}>未記</button>
-                {status === Status.success && <>
-                  <input type="text" name="status" value={Status.success} readOnly />
-                  <input type="tel" name="content" defaultValue={fetcher.data?.fields?.content} placeholder="度數" required />
-                </>}
-
-                {status === Status.notRecord && <>
-                  <input type="text" name="status" value={Status.notRecord} readOnly />
-                  <select name="content" defaultValue={fetcher.data?.fields?.content} required>
-                    {Object.keys(NotRecordReasonMap).map(key =>
-                      <option key={key} value={key}>
-                        {NotRecordReasonMap[key as keyof typeof NotRecordReasonMap]}
-                      </option>
-                    )}
-                  </select>
-                </>}
-                <button>登記</button>
+                <button className="btn primary wp100 mt10 p10 f1.5r">登記</button>
               </fetcher.Form>
+              {showModal && <Modal onClose={setShowModal.bind(null, false)}>新增水錶中</Modal>}
             </div>
           }
         </div>
