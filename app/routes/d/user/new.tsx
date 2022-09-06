@@ -66,7 +66,7 @@ export const action: ActionFunction = async ({ request }) => {
   if (userExists) {
     return badRequest<ActionData>({
       fields,
-      formError: `User with name ${name} already exists`,
+      formError: `帳號 ${name} 已存在，請用別的`,
     });
   }
   const user = await register({
@@ -84,7 +84,7 @@ export const action: ActionFunction = async ({ request }) => {
       formError: `Something went wrong trying to create a new user.`,
     });
   }
-  return redirect('/d/user');
+  return redirect(`/d/user?title=${title}`);
 };
 
 const NewUserPage = () => {

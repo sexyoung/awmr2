@@ -31,7 +31,7 @@ const verb = {
       if(projectExists) {
         return badRequest<ActionData>({
           fields: fields as NewProjectForm,
-          formError: `User with code ${fields.code} already exists`,
+          formError: `標案代號 ${fields.code} 已存在，請用別的`,
         });
       }
     }

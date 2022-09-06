@@ -60,7 +60,6 @@ const UserRoute = () => {
   const { user, projectListItems } = useLoaderData<LoaderData>();
 
   useEffect(() => {
-    console.log(type, ts);
     if(type === 'UPDATED') {
       setShowUpdated(true);
       setTimeout(setShowUpdated.bind(null, false), 1000);

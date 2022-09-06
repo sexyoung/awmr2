@@ -156,7 +156,7 @@ export default () => {
                 {backgroundColor: `#f6f6f6`}
               } />
               <div>{user.name} - {user.fullname}</div>
-              <div>{user.phone}</div>
+              <div>{user.phone || '　'}</div>
               <Link className="edit" to={`/d/user/${user.id}`}>編輯資料</Link>
               <div className={`title pa ${user.title}`}>{RoleMap[user.title]}</div>
             </div>

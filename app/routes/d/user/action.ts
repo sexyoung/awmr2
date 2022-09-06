@@ -41,8 +41,8 @@ const verb = {
     const data: {
       password?: string;
       fullname: string;
-      title: string;
-      email: string;
+      title: Role;
+      email?: string;
       phone: string;
       note: string;
       isDailyLink: boolean;
@@ -53,6 +53,10 @@ const verb = {
       phone: form.get('phone') as string,
       note: form.get('note') as string,
       isDailyLink: !!form.get('isDailyLink'),
+    };
+
+    if(!data.email) {
+      delete data.email;
     }
 
     if(form.get('password')) {
