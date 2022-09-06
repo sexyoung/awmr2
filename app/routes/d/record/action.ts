@@ -17,7 +17,7 @@ export const action: ActionFunction = async ({ request }) => {
     case 'create': return verb.create(form, userId);
     case 'changeArea': return verb.changeArea(form);
     case 'deleteOut': return verb.deleteOut(form);
-    default:
+    default: // 新增水錶
       await api.create({
         userId,
         meterId: +form.get('meterId')!,

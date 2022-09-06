@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { useState, Fragment, MouseEventHandler } from "react";
+import { useState, Fragment, MouseEventHandler, FormEvent } from "react";
 import { LinksFunction, LoaderFunction } from "@remix-run/node";
 import { Meter, Project, Record, User } from "@prisma/client";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
@@ -19,6 +19,13 @@ export { action } from "./action";
 
 const PAGE_SIZE = 30;
 
+type MeterWithPR = Meter & {
+  project: Project;
+  Record: (Record & {
+    user: User;
+  })[];
+}
+
 type LoadData = {
   href: string;
   meterCount: number;
@@ -28,14 +35,7 @@ type LoadData = {
   searchString: string;
   showRecord: boolean;
   projectListItems: Project[];
-  meterListItem: (
-    Meter & {
-      project: Project;
-      Record: (Record & {
-        user: User;
-      })[];
-    }
-  )[];
+  meterListItem: MeterWithPR[];
   search: string;
 } & PaginationProps
 
@@ -104,9 +104,20 @@ const RecordPage = () => {
     otherDOM.checked = false;
   }
 
-  const handleSubmit = (id: number) => {
-    (document.getElementById(`success-${id}`) as HTMLInputElement).checked = false;
-    (document.getElementById(`notRecord-${id}`) as HTMLInputElement).checked = false;
+  const handleSubmit = (meter: MeterWithPR, event: FormEvent<HTMLFormElement>) => {
+    const formData = new FormData(event.currentTarget);
+    if(formData.get('_method') === Status.success) {
+      const inputContent = formData.has('content') ? +(formData.get('content') as string): 0;
+      const lastRecord = meter.Record.shift();
+      const lastContent = lastRecord ? +lastRecord.content: 0;
+      const degree = inputContent - lastContent;
+      if(degree >= 100 || degree <= -2) {
+        alert("登錄度數超過100度 或 -2度");
+      }
+    }
+    
+    (document.getElementById(`success-${meter.id}`) as HTMLInputElement).checked = false;
+    (document.getElementById(`notRecord-${meter.id}`) as HTMLInputElement).checked = false;
   }
 
   const toggleShowRecord = () => {
@@ -208,13 +219,13 @@ const RecordPage = () => {
                       <label className="fx1 tac p10 color-mantis cp cf border-mantis" htmlFor={`success-${meter.id}`}>正常</label>
                       <label className="fx1 tac p10 color-zombie cp cf border-zombie" htmlFor={`notRecord-${meter.id}`}>異常</label>
                     </div>
-                    <fetcher.Form onSubmit={handleSubmit.bind(null, meter.id)} method="post" className="success-form pa fill ttxp-100 tt150ms df fdc jcc p10 gap10">
+                    <fetcher.Form onSubmit={handleSubmit.bind(null, meter)} method="post" className="success-form pa fill ttxp-100 tt150ms df fdc jcc p10 gap10">
                       <input type="hidden" name="_method" value={Status.success} />
                       <input type="hidden" name="meterId" defaultValue={meter.id} />
                       <input className="input f3r" type="tel" name="content" placeholder="度數" required />
                       <button className="btn primary f2r">登錄</button>
                     </fetcher.Form>
-                    <fetcher.Form onSubmit={handleSubmit.bind(null, meter.id)} method="post" className="notRecord-form pa fill ttxp100 tt150ms df fdc jcc p10 gap10">
+                    <fetcher.Form onSubmit={handleSubmit.bind(null, meter)} method="post" className="notRecord-form pa fill ttxp100 tt150ms df fdc jcc p10 gap10">
                       <input type="hidden" name="_method" value={Status.notRecord} />
                       <input type="hidden" name="meterId" defaultValue={meter.id} />
                       <select className="input f3r" name="content" required>
