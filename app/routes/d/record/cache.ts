@@ -2,13 +2,25 @@ import { db } from "~/utils/db.server";
 import { Redis } from "~/utils/redis.server";
 import { formatYmd, getTomorrow } from "~/utils/time";
 
-const REDIS_PREFIX = 'record:summary:search';
+/** record:summary:{projIdList}:search:${keyword} */
+const REDIS_PREFIX = 'record:summary';
+
+type Cache = {
+  search?: string;
+  isForce?: boolean;
+  showRecord?: boolean;
+  projectIdList?: number[];
+}
 
 export async function cache({
   search = '',
   isForce = false,
-  showRecord = false
-}) {
+  showRecord = false,
+  projectIdList = [],
+}: Cache) {
+
+  const projStr = projectIdList.join(',');
+
   // 預設排除今日登記
   const where = {
     ...(showRecord ? {}: {
@@ -22,6 +34,9 @@ export async function cache({
     }),
     AND: [
       {isActive: true},
+      (projectIdList.length ? {
+        projectId: { in: projectIdList }
+      } : {}),
     ],
     OR: [
       {area: { contains: search }},
@@ -37,7 +52,7 @@ export async function cache({
   await redis.connect();
 
   if(!isForce) {
-    const sammary = await redis.hGetAll(`${REDIS_PREFIX}:${search}`);
+    const sammary = await redis.hGetAll(`${REDIS_PREFIX}:${projStr}:search:${search}`);
     if(Object.entries(sammary).length) {
       await redis.disconnect();
       return {
@@ -78,10 +93,10 @@ export async function cache({
     _count: { meterId: true }
   })).length;
 
-  await redis.hSet(`${REDIS_PREFIX}:${search}`, 'meterCount', meterCount, 60 * 60 * 24);
-  await redis.hSet(`${REDIS_PREFIX}:${search}`, 'meterCountSummary', meterCountSummary, 60 * 60 * 24);
-  await redis.hSet(`${REDIS_PREFIX}:${search}`, 'successCount', successCount, 60 * 60 * 24);
-  await redis.hSet(`${REDIS_PREFIX}:${search}`, 'notRecordCount', notRecordCount, 60 * 60 * 24);
+  await redis.hSet(`${REDIS_PREFIX}:${projStr}:search:${search}`, 'meterCount', meterCount, 60 * 60 * 24);
+  await redis.hSet(`${REDIS_PREFIX}:${projStr}:search:${search}`, 'meterCountSummary', meterCountSummary, 60 * 60 * 24);
+  await redis.hSet(`${REDIS_PREFIX}:${projStr}:search:${search}`, 'successCount', successCount, 60 * 60 * 24);
+  await redis.hSet(`${REDIS_PREFIX}:${projStr}:search:${search}`, 'notRecordCount', notRecordCount, 60 * 60 * 24);
   
   await redis.disconnect();
   return {

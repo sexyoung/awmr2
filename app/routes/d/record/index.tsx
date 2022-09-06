@@ -1,17 +1,19 @@
 import { format } from "date-fns";
-import { useState, Fragment, MouseEventHandler, useRef } from "react";
+import { useState, Fragment, MouseEventHandler } from "react";
 import { LinksFunction, LoaderFunction } from "@remix-run/node";
 import { Meter, Project, Record, User } from "@prisma/client";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 import { Suppy, Type } from "~/consts/meter";
-import { NotRecordReason, NotRecordReasonMap, Status } from "~/consts/reocrd";
+import { NotRecordReasonMap, Status } from "~/consts/reocrd";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
 
 import RecordBar from "~/component/RecordBar";
 import { cache } from "./cache";
 import stylesUrl from "~/styles/record-page.css";
+import { getUser } from "~/api/user";
+import { Role } from "~/consts/role";
 
 export { action } from "./action";
 
@@ -42,6 +44,11 @@ export const links: LinksFunction = () => {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
+  const user = await getUser(request);
+  if(!user) return;
+  let projectIdList = user.title === Role.ENG ?
+    (await db.projectsOnUsers.findMany({where: {userId: user.id}})).map(({ projectId }) => projectId): [];
+
   const url = new URL(request.url);
   const projectListItems = await db.project.findMany({
     orderBy: { createdAt: "desc" },
@@ -56,7 +63,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     meterCountSummary,
     successCount,
     notRecordCount,
-  } = await cache({ search, showRecord });
+  } = await cache({ search, showRecord, projectIdList });
 
   const pageTotal = ~~((meterCount && (meterCount - 1)) / PAGE_SIZE) + 1;
   const meterListItem = await db.meter.findMany({
@@ -211,17 +218,11 @@ const RecordPage = () => {
                       <input type="hidden" name="_method" value={Status.notRecord} />
                       <input type="hidden" name="meterId" defaultValue={meter.id} />
                       <select className="input f3r" name="content" required>
-                        <option key={NotRecordReason.Abort} value={NotRecordReason.Abort}>中止</option>
-                        <option key={NotRecordReason.Stop} value={NotRecordReason.Stop}>停水</option>
-                        <option key={NotRecordReason.NoOne} value={NotRecordReason.NoOne}>無人</option>
-                        <option key={NotRecordReason.Empty} value={NotRecordReason.Empty}>空屋</option>
-                        <option key={NotRecordReason.Car} value={NotRecordReason.Car}>車擋</option>
-                        <option key={NotRecordReason.Heavy} value={NotRecordReason.Heavy}>重壓</option>
-                        <option key={NotRecordReason.NoExist} value={NotRecordReason.NoExist}>查無</option>
-                        <option key={NotRecordReason.EvilDog} value={NotRecordReason.EvilDog}>惡犬</option>
-                        <option key={NotRecordReason.OutOfArea} value={NotRecordReason.OutOfArea}>區域外</option>
-                        <option key={NotRecordReason.NoEntrance} value={NotRecordReason.NoEntrance}>無法進入</option>
-                        <option key={NotRecordReason.Other} value={NotRecordReason.Other}>其他</option>
+                        {Object.keys(NotRecordReasonMap).map(key =>
+                          <option key={key} value={key}>
+                            {NotRecordReasonMap[key as keyof typeof NotRecordReasonMap]}
+                          </option>
+                        )}
                       </select>
                       <button className="btn primary f2r">登錄</button>
                     </fetcher.Form>
@@ -274,17 +275,11 @@ const RecordPage = () => {
                 {status === Status.notRecord && <>
                   <input type="text" name="status" value={Status.notRecord} readOnly />
                   <select name="content" defaultValue={fetcher.data?.fields?.content} required>
-                    <option key={NotRecordReason.Abort} value={NotRecordReason.Abort}>中止</option>
-                    <option key={NotRecordReason.Stop} value={NotRecordReason.Stop}>停水</option>
-                    <option key={NotRecordReason.NoOne} value={NotRecordReason.NoOne}>無人</option>
-                    <option key={NotRecordReason.Empty} value={NotRecordReason.Empty}>空屋</option>
-                    <option key={NotRecordReason.Car} value={NotRecordReason.Car}>車擋</option>
-                    <option key={NotRecordReason.Heavy} value={NotRecordReason.Heavy}>重壓</option>
-                    <option key={NotRecordReason.NoExist} value={NotRecordReason.NoExist}>查無</option>
-                    <option key={NotRecordReason.EvilDog} value={NotRecordReason.EvilDog}>惡犬</option>
-                    <option key={NotRecordReason.OutOfArea} value={NotRecordReason.OutOfArea}>區域外</option>
-                    <option key={NotRecordReason.NoEntrance} value={NotRecordReason.NoEntrance}>無法進入</option>
-                    <option key={NotRecordReason.Other} value={NotRecordReason.Other}>其他</option>
+                    {Object.keys(NotRecordReasonMap).map(key =>
+                      <option key={key} value={key}>
+                        {NotRecordReasonMap[key as keyof typeof NotRecordReasonMap]}
+                      </option>
+                    )}
                   </select>
                 </>}
                 <button>登記</button>
