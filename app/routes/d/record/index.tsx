@@ -52,6 +52,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   const url = new URL(request.url);
   const projectListItems = await db.project.findMany({
+    ...(user.title === Role.ENG ? {where: { id: {in: projectIdList}}}: {}),
     orderBy: { createdAt: "desc" },
   });
   const page = +url.searchParams.get("page")! || 1;
