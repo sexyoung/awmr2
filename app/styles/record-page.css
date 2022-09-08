@@ -98,7 +98,7 @@
 }
 
 .RecordPage .item-list .item > form {
-  bottom: 78px;
+  bottom: 45px;
   background-color: #eee;
 }
 
@@ -155,5 +155,10 @@
 @media screen and (max-width: 768px) {
   .RecordPage .break:nth-of-type(4n+2) {
     display: block;
+  }
+
+  .RecordPage .item-list .item > form {
+    bottom: 78px;
+    background-color: #eee;
   }
 }

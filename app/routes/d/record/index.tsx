@@ -148,7 +148,7 @@ const RecordPage = () => {
         </div>
         <div className="search-form">
           <Form method="get">
-            <input type="text" name="search" defaultValue={search} placeholder="搜尋小區、地址、錶號、水號、位置或備註..." />
+            <input type="text" className="xs:f1.2r" name="search" defaultValue={search} placeholder="搜尋小區、地址、錶號、水號、位置..." />
           </Form>
         </div>
         <div className="df gap10 ph20 xs:fdc">
@@ -189,11 +189,21 @@ const RecordPage = () => {
                     <input type="checkbox" id={`toggle-record-${meter.id}`} className="toggle-record" />
                     <input onClick={handleChecked} data-other={`notRecord-${meter.id}`} type="checkbox" id={`success-${meter.id}`} className="toggle-success" />
                     <input onClick={handleChecked} data-other={`success-${meter.id}`} type="checkbox" id={`notRecord-${meter.id}`} className="toggle-notRecord" />
-                    <div>水號 <span className="value">{meter.waterId}</span></div>
-                    <div>錶號 <span className="value">{meter.meterId}</span></div>
-                    <div>地址 <span className="value">{meter.address}</span></div>
-                    <div>錶位 <span className="value">{meter.location}</span></div>
-                    <div>備註 <span className="value">{meter.note}</span></div>
+                    <div className="df aic gap10">
+                      <span className="wsn">水號</span> <span className="value">{meter.waterId}</span>
+                    </div>
+                    <div className="df aic gap10">
+                      <span className="wsn">錶號</span> <span className="value">{meter.meterId}</span>
+                    </div>
+                    <div className="df aic gap10">
+                      <span className="wsn">地址</span> <span className="value">{meter.address}</span>
+                    </div>
+                    <div className="df aic gap10">
+                      <span className="wsn">錶位</span> <span className="value">{meter.location}</span>
+                    </div>
+                    <div className="df aic gap10">
+                      <span className="wsn">備註</span> <span className="value">{meter.note}</span>
+                    </div>
                     {!!meter.Record.length &&
                       <>
                         <label className={`last-record pa bg-${meter.Record[0].status}`} htmlFor={`toggle-record-${meter.id}`}>
@@ -201,7 +211,7 @@ const RecordPage = () => {
                         </label>
                         <div className="record-list pa fill ova ttyp-100 tt150ms">
                           <div className="tar">
-                            <label className="close" htmlFor={`toggle-record-${meter.id}`}>
+                            <label className="close cp" htmlFor={`toggle-record-${meter.id}`}>
                               <span>×</span>
                             關閉
                             </label>
@@ -218,27 +228,27 @@ const RecordPage = () => {
                         </div>
                       </>
                     }
-                    <div className="btn-block df gap5 f2r">
-                      <label className="fx1 tac p10 color-mantis cp cf border-mantis" htmlFor={`success-${meter.id}`}>正常</label>
-                      <label className="fx1 tac p10 color-zombie cp cf border-zombie" htmlFor={`notRecord-${meter.id}`}>異常</label>
+                    <div className="btn-block df gap5 f1r xs:f2r">
+                      <label className="fx1 tac p4 color-mantis cp cf border-mantis xs:p10" htmlFor={`success-${meter.id}`}>正常</label>
+                      <label className="fx1 tac p4 color-zombie cp cf border-zombie xs:p10" htmlFor={`notRecord-${meter.id}`}>異常</label>
                     </div>
-                    <fetcher.Form onSubmit={handleSubmit.bind(null, meter)} method="post" className="success-form pa fill ttxp-100 tt150ms df fdc jcc p10 gap10">
+                    <fetcher.Form onSubmit={handleSubmit.bind(null, meter)} method="post" className="success-form pa fill p10p50 ttxp-100 tt150ms df fdc jcc xs:p10 gap10">
                       <input type="hidden" name="_method" value={Status.success} />
                       <input type="hidden" name="meterId" defaultValue={meter.id} />
-                      <input className="input f3r" type="tel" name="content" placeholder="度數" required />
-                      <button className="btn primary f2r">登錄</button>
+                      <input className="input f1r xs:f3r" type="tel" name="content" placeholder="度數" required />
+                      <button className="btn primary f1r xs:f2r">登錄</button>
                     </fetcher.Form>
-                    <fetcher.Form onSubmit={handleSubmit.bind(null, meter)} method="post" className="notRecord-form pa fill ttxp100 tt150ms df fdc jcc p10 gap10">
+                    <fetcher.Form onSubmit={handleSubmit.bind(null, meter)} method="post" className="notRecord-form pa fill p10p50 ttxp100 tt150ms df fdc jcc xs:p10 gap10">
                       <input type="hidden" name="_method" value={Status.notRecord} />
                       <input type="hidden" name="meterId" defaultValue={meter.id} />
-                      <select className="input f3r" name="content" required>
+                      <select className="input f1r xs:f3r" name="content" required>
                         {Object.keys(NotRecordReasonMap).map(key =>
                           <option key={key} value={key}>
                             {NotRecordReasonMap[key as keyof typeof NotRecordReasonMap]}
                           </option>
                         )}
                       </select>
-                      <button className="btn primary f2r">登錄</button>
+                      <button className="btn primary f1r xs:f2r">登錄</button>
                     </fetcher.Form>
                   </div>
                 </div>

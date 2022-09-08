@@ -13,6 +13,12 @@ html, body {
   margin: 0;
   height: 100%;
   background-color: #f3f7f9;
+  font-family: 'Ubuntu', sans-serif;
+}
+
+select {
+  color: #000;
+  background-color: #fff;
 }
 
 .pr {
@@ -52,6 +58,14 @@ html, body {
 
 .lsn {
   list-style: none;
+}
+
+.color-black {
+  color: #000;
+}
+
+.bg-white {
+  background-color: #fff;
 }
 
 .bg-gallery {
@@ -313,8 +327,16 @@ html, body {
   justify-content: space-between;
 }
 
+.p4 {
+  padding: 4px;
+}
+
 .p10 {
   padding: 10px;
+}
+
+.p10p50 {
+  padding: 10px 50px;
 }
 
 .ph20 {
@@ -585,6 +607,14 @@ label.avatar .img {
 
   .xs\:f1\.2r {
     font-size: 1.2rem;
+  }
+
+  .xs\:f2r {
+    font-size: 2rem;
+  }
+
+  .xs\:f3r.xs\:f3r {
+    font-size: 3rem;
   }
 
   .input {
