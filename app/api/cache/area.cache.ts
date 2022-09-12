@@ -2,6 +2,7 @@ import { Meter, Prisma, Project } from "@prisma/client";
 import { db } from "~/utils/db.server";
 // import { showCostTime, startTime } from "~/utils/helper";
 import { Redis } from "~/utils/redis.server";
+import { getUntilTomorrowSecond } from "~/utils/time";
 import { sum } from "../record";
 
 const REDIS_PREFIX = 'area';
@@ -22,7 +23,8 @@ export async function cacheAll() {
   return result;
 }
 
-export async function cache(area: string, total: number) {
+// 每日 00:00 時需執行 isCount0 = true 的指令 約花1分半
+export async function cache(area: string, total: number, isCount0: boolean = false) {
   const redis = new Redis(process.env.REDIS_URL);
   await redis.connect();
 
@@ -39,7 +41,7 @@ export async function cache(area: string, total: number) {
   }) as Project;
   // showCostTime('找標案');
 
-  const meterIdList = (await db.meter.findMany({
+  const meterIdList = isCount0 ? []: (await db.meter.findMany({
     where: { area },
     orderBy: { createdAt: 'desc' },
     select: { id: true }
@@ -53,7 +55,9 @@ export async function cache(area: string, total: number) {
     ...await sum(meterIdList), // <--- 花時間
   }
 
-  await redis.hSet(`${REDIS_PREFIX}:record`, area as string, JSON.stringify(areaSummary));
+  const expireTime = getUntilTomorrowSecond();
+
+  await redis.hSet(`${REDIS_PREFIX}:record`, area as string, JSON.stringify(areaSummary), expireTime);
   await redis.disconnect();
   return areaSummary;
 }

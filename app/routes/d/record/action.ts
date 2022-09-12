@@ -11,6 +11,7 @@ import * as meterApi from "~/api/meter";
 import { cache, REDIS_PREFIX } from "./cache";
 import { cache as areaCache } from "~/api/cache/area.cache";
 import { cache as projCache } from "~/api/cache/project.cache";
+import { showCostTime, startTime } from "~/utils/helper";
 
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData();
@@ -92,10 +93,12 @@ const verb = {
     const keys = [...new Set([
       `${REDIS_PREFIX}:${projectIdList}:search:${search}`,
       `${REDIS_PREFIX}:${projectIdList}:search:`,
+      // `${REDIS_PREFIX}::search:`, // ← 加了這個會花8秒 (但非工程師會用到，需找時間批次處理)
     ])];
     // 先把特定搜尋與全域的 summary 先更新
     // 然後要在排程中把 record:summary:{包括18的}:search:* 全部更新 (每個約 0.5s)
 
+    // startTime();
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       const projectIdListStr = key.split(':')[2];
@@ -104,8 +107,9 @@ const verb = {
         search,
         showRecord,
         isForce: true,
-        projectIdList: projectIdListStr.split(',').map(Number),
+        projectIdList: projectIdListStr ? projectIdListStr.split(',').map(Number): [],
       });
+      // showCostTime(`${key} 總耗時: `);
     }
 
     db.meter.findUnique({where: {id: meterId}}).then(async meter => {

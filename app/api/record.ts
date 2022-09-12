@@ -58,6 +58,13 @@ export const sumByPid: SumByPidFunc = async (projectId: number) => {
 }
 
 export const sum: SumFunc = async (meterIdList, isAllDate = false) => {
+  if(!meterIdList.length) {
+    return {
+      success: 0,
+      notRecord: 0,
+    }
+  }
+
   const recordCount = await db.record.groupBy({
     by: ['status'],
     _count: { status: true },

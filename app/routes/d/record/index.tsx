@@ -28,6 +28,7 @@ type MeterWithPR = Meter & {
 }
 
 type LoadData = {
+  userTitle: Role;
   href: string;
   meterCount: number;
   meterCountSummary: number;
@@ -83,6 +84,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     }
   });
   return {
+    userTitle: user.title,
     search,
     pageTotal,
     showRecord,
@@ -99,7 +101,7 @@ const RecordPage = () => {
   const fetcher = useFetcher();
   const [showModal, setShowModal] = useState(false);
   const [status, setStatus] = useState<Status>(Status.success);
-  const { meterCountSummary, successCount, notRecordCount, search, href, pageTotal, meterListItem, projectListItems, showRecord } = useLoaderData<LoadData>();
+  const { meterCountSummary, successCount, notRecordCount, search, href, pageTotal, meterListItem, projectListItems, showRecord, userTitle } = useLoaderData<LoadData>();
 
   const handleChecked: MouseEventHandler = ({ target }) => {
     const DOM = (target as HTMLInputElement);
@@ -236,7 +238,7 @@ const RecordPage = () => {
                       <input type="hidden" name="meterId" defaultValue={meter.id} />
                       <input type="hidden" name="search" defaultValue={search} />
                       <input type="hidden" name="showRecord" defaultValue={showRecord ? "1": ""} />
-                      <input type="hidden" name="projectIdList" defaultValue={projectListItems.map(({ id }) => id).join(',')} />
+                      <input type="hidden" name="projectIdList" defaultValue={userTitle === Role.ENG ? projectListItems.map(({ id }) => id).join(','): ""} />
                       <input className="input f1r xs:f3r" type="tel" name="content" placeholder="度數" required />
                       <button className="btn primary f1r xs:f2r">登錄</button>
                     </fetcher.Form>
@@ -245,7 +247,7 @@ const RecordPage = () => {
                       <input type="hidden" name="meterId" defaultValue={meter.id} />
                       <input type="hidden" name="search" defaultValue={search} />
                       <input type="hidden" name="showRecord" defaultValue={showRecord ? "1": ""} />
-                      <input type="hidden" name="projectIdList" defaultValue={projectListItems.map(({ id }) => id).join(',')} />
+                      <input type="hidden" name="projectIdList" defaultValue={userTitle === Role.ENG ? projectListItems.map(({ id }) => id).join(','): ""} />
                       <select className="input f1r xs:f3r" name="content" required>
                         {Object.keys(NotRecordReasonMap).map(key =>
                           <option key={key} value={key}>

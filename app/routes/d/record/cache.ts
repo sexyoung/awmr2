@@ -1,6 +1,6 @@
 import { db } from "~/utils/db.server";
 import { Redis } from "~/utils/redis.server";
-import { formatYmd, getTomorrow } from "~/utils/time";
+import { formatYmd, getTomorrow, getUntilTomorrowSecond } from "~/utils/time";
 
 /** record:summary:{projIdList}:search:${keyword} */
 export const REDIS_PREFIX = 'record:summary';
@@ -93,9 +93,7 @@ export async function cache({
     _count: { meterId: true }
   })).length;
 
-  const nowTs = +new Date();
-  const tomorrowTs = +new Date(formatYmd(getTomorrow()));
-  const expireTime = ~~((tomorrowTs - nowTs) / 1000);
+  const expireTime = getUntilTomorrowSecond();
   /** 到了明天00:00 會自已清掉 */
   await redis.hSet(`${REDIS_PREFIX}:${projStr}:search:${search}`, 'meterCount', meterCount, expireTime);
   await redis.hSet(`${REDIS_PREFIX}:${projStr}:search:${search}`, 'meterCountSummary', meterCountSummary, expireTime);
