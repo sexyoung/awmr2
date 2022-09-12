@@ -52,7 +52,7 @@ export default () => {
         </div>
         {showModal &&
           <Modal onClose={setShowModal.bind(null, false)}>
-            <Form method="post" className="NewForm">
+            <Form method="post" className="NewForm" onSubmit={setShowModal.bind(null, false)}>
               <div className="title">新增標案</div>
               <input type="hidden" name="_method" value="create" />
               <input className="input" type="text" name="name" placeholder="標案名稱" required />

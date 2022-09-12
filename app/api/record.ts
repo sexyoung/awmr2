@@ -17,14 +17,22 @@ type SumByPidFunc = {
 }
 
 export const sumByPid: SumByPidFunc = async (projectId: number) => {
+
+  // const t = +new Date();
+  const uniRecordIdList = (await db.record.groupBy({
+    by: ['meterId'],
+    _max: { id: true },
+    where: {meter: {projectId}}
+  })).map(rc => rc._max.id || 0);
+
   const recordCount = await db.record.groupBy({
     by: ['status'],
     _count: { status: true },
-    where: {meter: {projectId}}
+    where: {id: {in: uniRecordIdList}},
   });
 
   const lastRecord = await db.record.findFirst({
-    where: {meter: {projectId}},
+    where: {id: {in: uniRecordIdList}},
     orderBy: { createdAt: 'desc'}
   });
 
@@ -34,6 +42,8 @@ export const sumByPid: SumByPidFunc = async (projectId: number) => {
       [status.status]: status._count.status
     }
   }, {} as RecordCount);
+  // 這整體下來要3秒
+  // console.log('t', +new Date() - t);
 
   const {
     success = 0,

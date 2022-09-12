@@ -110,7 +110,7 @@ const verb = {
 
     db.meter.findUnique({where: {id: meterId}}).then(async meter => {
       // 更新 project
-      projCache();
+      projCache(meter!.projectId);
 
       // 更新小區抄錶成功/失敗數字
       const areaListItems = await db.meter.groupBy({

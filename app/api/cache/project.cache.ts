@@ -22,12 +22,13 @@ export type ProjectData = Array<Project & {
   notActiveCount: number;
 } & RecordCount>
 
-export async function cache() {
+export async function cache(projectId: number = 0) {
   const redis = new Redis(process.env.REDIS_URL);
   await redis.connect();
 
   const projectListItems = await db.project.findMany({
     orderBy: { createdAt: "desc" },
+    ...(projectId ? { where: { id: projectId }}: {}),
   });
 
   const data: ProjectData = await Promise.all(projectListItems.map(async project => {
@@ -50,6 +51,25 @@ export async function cache() {
       areaCount,
     }
   }));
+
+  if(projectId) {
+    let allRecord: ProjectData = JSON.parse(await redis.get(`${REDIS_PREFIX}:record`) as string);
+    const projectIndex = allRecord.findIndex(project => project.id === projectId);
+    allRecord = projectIndex === -1 ? [data[0], ...allRecord]: [
+      ...allRecord.slice(0, projectIndex),
+      data[0],
+      ...allRecord.slice(projectIndex+1),
+    ];
+
+    allRecord.sort((a, b) => {
+      const ad = +(a.lastRecordTime || 0);
+      const bd = +(b.lastRecordTime || 0);
+      return bd - ad;
+    });
+
+    await redis.set(`${REDIS_PREFIX}:record`, JSON.stringify(allRecord));
+    return allRecord;
+  }
 
   data.sort((a, b) => {
     const ad = +(a.lastRecordTime || 0);

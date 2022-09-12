@@ -13,7 +13,7 @@ export async function create({ name, code, isActive }: NewProjectForm) {
       isActive: Boolean(isActive),
     },
   });
-  await cache();
+  await cache(project.id);
   return project;
 }
 
@@ -22,14 +22,14 @@ export async function toggle({id, isActive}: {id: number, isActive: boolean}) {
     where: { id },
     data: { isActive },
   });
-  await cache();
+  await cache(id);
 }
 
 export async function remove({id}: {id: number}) {
   await db.project.delete({
     where: { id },
   });
-  await cache();
+  await cache(id);
 }
 
 export type ProjectData = Array<Project & {
