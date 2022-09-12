@@ -27,5 +27,8 @@ export class Redis {
     await this.client.hSet(key, field, value);
     await this.client.expire(key, expire);
   }
+  async keys(key: string) {
+    return await this.client.keys(key);
+  }
 }
 

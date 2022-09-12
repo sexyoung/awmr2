@@ -135,10 +135,9 @@ const RecordPage = () => {
     } else {
       paramsObj.showRecord = "1";
     }
-
     location.href = `/d/record?${(Object.keys(paramsObj).map(key => `${key}=${paramsObj[key]}`).join('&'))}`;
   }
-  
+
   return (
     <div className="Page RecordPage">
       <div className="block">
@@ -235,12 +234,18 @@ const RecordPage = () => {
                     <fetcher.Form onSubmit={handleSubmit.bind(null, meter)} method="post" className="success-form pa fill p10p50 ttxp-100 tt150ms df fdc jcc xs:p10 gap10">
                       <input type="hidden" name="_method" value={Status.success} />
                       <input type="hidden" name="meterId" defaultValue={meter.id} />
+                      <input type="hidden" name="search" defaultValue={search} />
+                      <input type="hidden" name="showRecord" defaultValue={showRecord ? "1": ""} />
+                      <input type="hidden" name="projectIdList" defaultValue={projectListItems.map(({ id }) => id).join(',')} />
                       <input className="input f1r xs:f3r" type="tel" name="content" placeholder="度數" required />
                       <button className="btn primary f1r xs:f2r">登錄</button>
                     </fetcher.Form>
                     <fetcher.Form onSubmit={handleSubmit.bind(null, meter)} method="post" className="notRecord-form pa fill p10p50 ttxp100 tt150ms df fdc jcc xs:p10 gap10">
                       <input type="hidden" name="_method" value={Status.notRecord} />
                       <input type="hidden" name="meterId" defaultValue={meter.id} />
+                      <input type="hidden" name="search" defaultValue={search} />
+                      <input type="hidden" name="showRecord" defaultValue={showRecord ? "1": ""} />
+                      <input type="hidden" name="projectIdList" defaultValue={projectListItems.map(({ id }) => id).join(',')} />
                       <select className="input f1r xs:f3r" name="content" required>
                         {Object.keys(NotRecordReasonMap).map(key =>
                           <option key={key} value={key}>
@@ -315,6 +320,7 @@ const RecordPage = () => {
               {showModal && <Modal onClose={setShowModal.bind(null, false)}>新增水錶中</Modal>}
             </div>
           }
+          {(fetcher.state === 'submitting') && <Modal>登錄中</Modal>}
         </div>
       </div>
     </div>

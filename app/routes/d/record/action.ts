@@ -2,11 +2,15 @@ import { Meter} from "@prisma/client";
 import { ActionFunction, json, redirect } from "@remix-run/node";
 import * as api from "~/api/record";
 import { Status } from "~/consts/reocrd";
+import { Redis } from "~/utils/redis.server";
 import { requireUserId } from "~/api/user";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request";
 import { toSBC, verb as MeterUploadAction } from "~/routes/d/meter/upload/action";
 import * as meterApi from "~/api/meter";
+import { cache, REDIS_PREFIX } from "./cache";
+import { cache as areaCache } from "~/api/cache/area.cache";
+import { cache as projCache } from "~/api/cache/project.cache";
 
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData();
@@ -14,22 +18,18 @@ export const action: ActionFunction = async ({ request }) => {
   const method = form.get('_method');
   form.delete('_method');
   switch (method) {
-    case 'create': return verb.create(form, userId);
+    case 'create': return verb.createWithMeter(form, userId); // 新增未存在水錶
     case 'changeArea': return verb.changeArea(form);
     case 'deleteOut': return verb.deleteOut(form);
-    default: // 新增水錶
-      await api.create({
-        userId,
-        meterId: +form.get('meterId')!,
-        status: method as Status,
-        content: form.get('content') as string,
-      });
+    case Status.success:
+    case Status.notRecord:
+      return verb.record(form, userId, method);
   }
   return json(true);
 }
 
 const verb = {
-  create: async (form: FormData, userId: number): Promise<Response> => {
+  createWithMeter: async (form: FormData, userId: number): Promise<Response> => {
     const meterId = form.get('meterId') as string;
     const waterId = form.get('waterId') as string;
     const projectId = +form.get('projectId')! as number;
@@ -74,4 +74,62 @@ const verb = {
     api.destroy(+form.get('recordId')!);
     return json(true);
   },
+  record: async (form: FormData, userId: number, status: Status) => {
+    const meterId = +form.get('meterId')!
+
+    await api.create({
+      userId,
+      status,
+      meterId,
+      content: form.get('content') as string,
+    });
+
+    const search = (form.get('search') || "") as string;
+    const showRecord = !!form.get('showRecord');
+    const projectIdList = (form.get('projectIdList') || "") as string;
+    const redis = new Redis(process.env.REDIS_URL);
+    await redis.connect();
+    const keys = [...new Set([
+      `${REDIS_PREFIX}:${projectIdList}:search:${search}`,
+      `${REDIS_PREFIX}:${projectIdList}:search:`,
+    ])];
+    // 先把特定搜尋與全域的 summary 先更新
+    // 然後要在排程中把 record:summary:{包括18的}:search:* 全部更新 (每個約 0.5s)
+
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const projectIdListStr = key.split(':')[2];
+      const search = key.split(':')[4];
+      await cache({
+        search,
+        showRecord,
+        isForce: true,
+        projectIdList: projectIdListStr.split(',').map(Number),
+      });
+    }
+
+    db.meter.findUnique({where: {id: meterId}}).then(async meter => {
+      // 更新 project
+      projCache();
+
+      // 更新小區抄錶成功/失敗數字
+      const areaListItems = await db.meter.groupBy({
+        by: ['area'],
+        _count: {
+          area: true,
+        },
+        where: { area: meter!.area! },
+      });
+      await areaCache(meter!.area!, areaListItems[0]._count.area);
+    });
+
+    const summary = await redis.hGetAll(`${REDIS_PREFIX}:${projectIdList}:search:${search}`);
+    await redis.disconnect();
+    return {
+      meterCount: +summary.meterCount,
+      meterCountSummary: +summary.meterCountSummary,
+      successCount: +summary.successCount,
+      notRecordCount: +summary.notRecordCount,
+    };
+  }
 }

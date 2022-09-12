@@ -36,7 +36,7 @@ export async function query({ take = 0, where = {}, skip = 0 }: Params) {
   for (let i = 0; i < areaListItems.length; i++) {
     const area = areaListItems[i];
     if(!cacheArea[area.area as string]) {
-      data.push(await cache(area));
+      data.push(await cache(area.area!, area._count.area));
     } else {
       data.push(cacheArea[area.area as string]);
     }

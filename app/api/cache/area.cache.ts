@@ -6,12 +6,6 @@ import { sum } from "../record";
 
 const REDIS_PREFIX = 'area';
 
-type Area = Prisma.PickArray<Prisma.MeterGroupByOutputType, "area"[]> & {
-  _count: {
-      area: number;
-  };
-};
-
 /** @todo: 屆時可能會有很多沒用到的小區，需要定期刪除 */
 export async function cacheAll() {
   const redis = new Redis(process.env.REDIS_URL);
@@ -28,14 +22,14 @@ export async function cacheAll() {
   return result;
 }
 
-export async function cache(area: Area) {
+export async function cache(area: string, total: number) {
   const redis = new Redis(process.env.REDIS_URL);
   await redis.connect();
 
   // startTime();
 
   const m = await db.meter.findFirst({
-    where: { area: area.area },
+    where: { area },
     orderBy: { createdAt: 'desc' }
   }) as Meter;
   // showCostTime('找第一個水錶'); // <--- 花時間
@@ -46,7 +40,7 @@ export async function cache(area: Area) {
   // showCostTime('找標案');
 
   const meterIdList = (await db.meter.findMany({
-    where: { area: area.area },
+    where: { area },
     orderBy: { createdAt: 'desc' },
     select: { id: true }
   })).map(m => m.id);
@@ -55,11 +49,11 @@ export async function cache(area: Area) {
   const areaSummary = {
     projectName: p.name,
     area: m.area || "",
-    total: area._count.area,
+    total,
     ...await sum(meterIdList), // <--- 花時間
   }
 
-  await redis.hSet(`${REDIS_PREFIX}:record`, area.area as string, JSON.stringify(areaSummary));
+  await redis.hSet(`${REDIS_PREFIX}:record`, area as string, JSON.stringify(areaSummary));
   await redis.disconnect();
   return areaSummary;
 }
