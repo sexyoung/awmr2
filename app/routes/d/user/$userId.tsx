@@ -15,6 +15,8 @@ export { action } from "./action";
 type ActionData = {
   type: string;
   ts: number;
+  code?: string;
+  target?: string;
 };
 
 export const links: LinksFunction = () => {
@@ -55,14 +57,18 @@ export const loader: LoaderFunction = async ({ params: { userId = 0 }, request }
 };
 
 const UserRoute = () => {
+  const [error, setError] = useState('');
   const [showUpdated, setShowUpdated] = useState(false);
-  const {type, ts} = (useActionData<ActionData>() || {}) as ActionData;
+  const {type, ts, code, target} = (useActionData<ActionData>() || {}) as ActionData;
   const { user, projectListItems } = useLoaderData<LoaderData>();
 
   useEffect(() => {
     if(type === 'UPDATED') {
       setShowUpdated(true);
       setTimeout(setShowUpdated.bind(null, false), 1000);
+    } else if (type === 'ERROR') {
+      setError(JSON.stringify({code, target}));
+      setTimeout(setError.bind(null, ''), 3000);
     }
   }, [type, ts]);
   
@@ -70,6 +76,9 @@ const UserRoute = () => {
     <div className="Page UserDetailPage">
       {showUpdated && (
         <Toast>已更新</Toast>
+      )}
+      {error && (
+        <Toast error>錯誤: {error}</Toast>
       )}
       <div className="block">
         <div className="header">

@@ -550,6 +550,10 @@ label.avatar .img {
   animation: toast-animation .15s ease-out forwards;
 }
 
+.toast.error {
+  background: #c07272d1;
+}
+
 .input {
   outline: none;
   padding: 5px 7px;

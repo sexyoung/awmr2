@@ -4,6 +4,7 @@ import { redirect} from "@remix-run/node";
 import { Role } from "~/consts/role";
 import { db } from "~/utils/db.server";
 import { storage } from "~/utils/session.server";
+import { Prisma } from "@prisma/client";
 
 type LoginForm = {
   name: string;
@@ -116,10 +117,18 @@ export async function createUserSession(
 }
 
 export async function update(id: number, data: any) {
-  await db.user.update({
-    where: { id },
-    data,
-  });
+  try {
+    await db.user.update({
+      where: { id },
+      data,
+    });
+    return {isUpated: true};
+  } catch (err) {
+    if(err instanceof Prisma.PrismaClientKnownRequestError) {
+      return {isUpated: false, code: err.code, target: err?.meta?.target};
+    }
+    return {isUpated: false};
+  }
 }
 
 export async function toggle({id, isActive}: {id: number, isActive: boolean}) {

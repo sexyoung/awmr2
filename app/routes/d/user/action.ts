@@ -63,9 +63,13 @@ const verb = {
       data.password = await bcrypt.hash(form.get('password') as string, 10);
     }
 
-    api.update(id, data);
-    
-    return json({type: 'UPDATED', ts: +new Date()});
+    const {isUpated, ...result} = await api.update(id, data);
+
+    return json({
+      ts: +new Date(),
+      type: isUpated ? 'UPDATED': 'ERROR',
+      ...(isUpated ? {}: {...result}),
+    });
   },
   toggle: async (form: FormData): Promise<Response> => {
     const id = +form.get('id')!;
