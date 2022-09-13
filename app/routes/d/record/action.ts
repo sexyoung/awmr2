@@ -90,11 +90,12 @@ const verb = {
     const projectIdList = (form.get('projectIdList') || "") as string;
     const redis = new Redis(process.env.REDIS_URL);
     await redis.connect();
-    const keys = [...new Set([
-      `${REDIS_PREFIX}:${projectIdList}:search:${search}`,
-      `${REDIS_PREFIX}:${projectIdList}:search:`,
-      // `${REDIS_PREFIX}::search:`, // ← 加了這個會花8秒 (但非工程師會用到，需找時間批次處理)
-    ])];
+    const keys = await redis.keys(`${REDIS_PREFIX}:*${projectIdList}*:search:`);
+    // const keys = [...new Set([
+    //   `${REDIS_PREFIX}:*${projectIdList}*:search:${search}`,
+    //   `${REDIS_PREFIX}:*${projectIdList}*:search:`,
+    //   // `${REDIS_PREFIX}::search:`, // ← 加了這個會花8秒 (但非工程師會用到，需找時間批次處理)
+    // ])];
     // 先把特定搜尋與全域的 summary 先更新
     // 然後要在排程中把 record:summary:{包括18的}:search:* 全部更新 (每個約 0.5s)
 

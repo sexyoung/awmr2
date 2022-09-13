@@ -33,20 +33,29 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData();
+
+  const newUserData = {
+    name: form.get("name") as string,
+    password: form.get("password") as string,
+    fullname: form.get("fullname") as string,
+    email: form.get("email") as string,
+    phone: form.get("phone") as string,
+    note: form.get("note") as string,
+    title: form.get("title") as Role,
+  }
   
-  const name = form.get("name");
-  const password = form.get("password");
-  const fullname = form.get("fullname") as string;
-  const email = form.get("email") as string;
-  const phone = form.get("phone") as string;
-  const note = form.get("note") as string;
-  const title = form.get("title") as Role;
+  for (const key in newUserData) {
+    if (Object.prototype.hasOwnProperty.call(newUserData, key)) {
+      const element = newUserData[key as keyof typeof newUserData];
+      if(!element) delete newUserData[key as keyof typeof newUserData];
+    }
+  }
 
   const redirectTo = form.get("redirectTo") || "/d/user";
   if (
-    typeof name !== "string" ||
-    typeof password !== "string" ||
-    typeof title !== "string" ||
+    typeof newUserData.name !== "string" ||
+    typeof newUserData.password !== "string" ||
+    typeof newUserData.title !== "string" ||
     typeof redirectTo !== "string"
   ) {
     return badRequest<ActionData>({
@@ -54,37 +63,29 @@ export const action: ActionFunction = async ({ request }) => {
     });
   }
 
-  const fields = { name, password };
+  const fields = { name: newUserData.name, password: newUserData.password };
   const fieldErrors = {
-    name: validateName(name),
-    password: validatePassword(password),
+    name: validateName(newUserData.name),
+    password: validatePassword(newUserData.password),
   };
   if (Object.values(fieldErrors).some(Boolean))
     return badRequest<ActionData>({ fieldErrors, fields });
 
-  const userExists = await db.user.findFirst({ where: { name }});
+  const userExists = await db.user.findFirst({ where: { name: newUserData.name }});
   if (userExists) {
     return badRequest<ActionData>({
       fields,
       formError: `帳號 ${name} 已存在，請用別的`,
     });
   }
-  const user = await register({
-    name,
-    fullname,
-    password,
-    title,
-    email,
-    phone,
-    note,
-  });
+  const user = await register(newUserData);
   if (!user) {
     return badRequest<ActionData>({
       fields,
       formError: `Something went wrong trying to create a new user.`,
     });
   }
-  return redirect(`/d/user?title=${title}`);
+  return redirect(`/d/user?title=${newUserData.title}`);
 };
 
 const NewUserPage = () => {

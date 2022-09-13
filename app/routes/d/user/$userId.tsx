@@ -93,7 +93,7 @@ const UserRoute = () => {
                 <input type="hidden" name="_method" value="attach" />
                 <input type="hidden" name="userId" defaultValue={user.id} />
                 <input type="hidden" name="projectId" defaultValue={project.id} />
-                  <label>
+                  <label className={project.isActive ? '': 'color-gray'}>
                     <input type="checkbox" defaultChecked={user.projects.includes(project.id)} onChange={() => document.getElementById(`submit-${project.id}`)?.click()} />
                     {project.name}
                     <button className="dn" id={`submit-${project.id}`}>update</button>

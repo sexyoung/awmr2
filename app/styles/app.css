@@ -76,6 +76,14 @@ select {
   color: var(--color-gallery);
 }
 
+.bg-gray {
+  background-color: var(--color-gray);
+}
+
+.color-gray {
+  color: var(--color-gray);
+}
+
 .bg-blue-bayoux {
   background-color: var(--color-blue-bayoux);
 }
