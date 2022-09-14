@@ -1,8 +1,8 @@
-import { from, concatMap, scan, distinctUntilChanged, map } from "rxjs";
+import { from, concatMap, scan, distinctUntilChanged, map, tap } from "rxjs";
 import { useState } from "react";
 import { read, utils } from "xlsx";
 import { useParams, useFetcher, useLoaderData } from "@remix-run/react"
-import { Caliber } from "~/consts/meter";
+import { Toast } from "~/component/Toast";
 import { LinksFunction, LoaderFunction } from "@remix-run/node";
 import { isAdmin } from "~/api/user";
 import { db } from "~/utils/db.server";
@@ -27,7 +27,7 @@ type LoaderData = {
 
 let data: UploadMeter[];
 let fileName: string = '';
-const caliber = Object.values(Caliber).filter(v => typeof v === 'string');
+let uploadError: {waterId: string; meterId: string; message: string;}[] = [];
 const sheetHeader = ["waterID", "area", "meterID", "address", "status", "type", "location"];
 
 export const links: LinksFunction = () => {
@@ -46,6 +46,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 const UploadPage = () => {
   const params = useParams();
+  const [error, setError] = useState('');
   const [percent, setPercent] = useState(0);
   const [isUpLoading, setIsUpLoading] = useState(false);
   const fetcher = useFetcher<string[]>(); // meterId list
@@ -55,26 +56,37 @@ const UploadPage = () => {
     location.href = `/d/meter/upload/${currentTarget.value}`;
   }
 
+  const showError = (text: string) => {
+    setError(text);
+    data = [];
+    setTimeout(setError.bind(null, ''), 3000);
+  }
+
   const handleChooseFile: React.ChangeEventHandler<HTMLInputElement> = async ({ currentTarget }) => {
     const [ file = null ] = currentTarget.files as FileList;
-    if(!file) return console.log('no file');
+    if(!file) {
+      return showError('no file');
+    }
 
     const workbook = read(await file.arrayBuffer());
-    data = utils.sheet_to_json(workbook.Sheets.data);
-    if(!data.length) return console.log('no data');
+    utils.sheet_add_aoa(workbook.Sheets, [sheetHeader]);
+
+    data = utils.sheet_to_json(workbook.Sheets.data, {defval: ""});
+    if(!data.length) {
+      return showError('no data');
+    }
 
     const cols = Object.keys(data[0]);
     for (let i = 0; i < sheetHeader.length; i++) {
       if(!cols.includes(sheetHeader[i])) {
-        return console.log(`invalid field: ${sheetHeader[i]}`);
+        return showError(`invalid field: ${sheetHeader[i]}`);
       }
     }
 
     const validList = [];
-
     for (let i = 0; i < data.length; i++) {
-      if(!caliber.includes(data[i].meterID[0])) {
-        return console.log(`meterId: ${data[i].meterID} is not correct!`);
+      if(!/(^[A-K]\d{9}$)|(^\d{3}[A-K]\d{6}$)/.test(data[i].meterID)) {
+        return showError(`meterId: ${data[i].meterID} is not correct!`);
       }
       validList.push({
         waterId: data[i].waterID,
@@ -83,6 +95,7 @@ const UploadPage = () => {
     };
 
     fileName = file.name;
+    uploadError = [];
 
     fetcher.submit({
       _method: 'check',
@@ -109,7 +122,8 @@ const UploadPage = () => {
           formData.append('_method', 'upload');
           formData.append('data', JSON.stringify({
             projectId: +params.projectId!,
-            waterId,
+            // waterId,
+            waterId: waterId.toString(),
             meterId,
             area: meter.area,
             address: meter.address,
@@ -117,12 +131,19 @@ const UploadPage = () => {
             type: +meter.type,
             location: meter.location,
           }));
-          return (
-            await (await fetch(`${location.href}?_data=routes%2Fd%2Fmeter%2Fupload%2F%24projectId`, {
+          return ({
+            waterId,
+            meterId,
+            ...await (await fetch(`${location.href}?_data=routes%2Fd%2Fmeter%2Fupload%2F%24projectId`, {
               method: 'post',
               body: formData
             })).json()
-          )
+          })
+        }),
+        tap((error) => {
+          if(error.message) {
+            uploadError.push(error);
+          }
         }),
         scan(sum => sum + 1, 0),
         map(sum => ~~(sum/uploadMeterList.length * 100)),
@@ -133,6 +154,7 @@ const UploadPage = () => {
         if(percent < 100) return setPercent(percent);
         data = [];
         setIsUpLoading(false);
+        if(uploadError.length) return setPercent(percent);
         location.reload();
       });
   }
@@ -148,6 +170,7 @@ const UploadPage = () => {
 
   return (
     <div className="Page MeterUploadPage">
+      {error && <Toast error>錯誤: {error}</Toast>}
       <div className="block">
         <div className="header">
           <h2 className="title">上傳水錶頁</h2>
@@ -185,6 +208,21 @@ const UploadPage = () => {
             <div style={{ marginLeft: `${percent}%`}}>{percent}%</div>
           </div>
           }
+
+          {Boolean(uploadError.length) && (
+            <div className="err-list">
+              <h3>未上傳水錶</h3>
+              {uploadError.map(err =>
+                <div key={err.waterId} className="err">
+                  <input type="checkbox" className="dn" id={`waterId-${err.waterId}`} />
+                  <label htmlFor={`waterId-${err.waterId}`}>
+                    水號：{err.waterId} - 錶號：{err.meterId}
+                  </label>
+                  <pre className="dn">{err.message}</pre>
+                </div>
+              )}
+            </div>
+          )}
 
           {!!fetcher.data && !!fetcher.data.length && (
             <div className="skip-upload">

@@ -82,3 +82,18 @@
   margin: 2px;
   font-size: 15px;
 }
+
+.MeterUploadPage .err-list .err > input + label:after {
+  cursor: pointer;
+  content: ' [查看原因]';
+  color: var(--color-error);
+}
+
+.MeterUploadPage .err-list .err > input:checked + label:after {
+  content: ' [關閉原因]';
+  color: var(--color-blue-bayoux);
+}
+
+.MeterUploadPage .err-list .err > input:checked ~ pre {
+  display: block;
+}
