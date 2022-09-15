@@ -1,3 +1,4 @@
+import { Project } from "@prisma/client";
 import { from, concatMap, scan, distinctUntilChanged, map, tap } from "rxjs";
 import { useState } from "react";
 import { read, utils } from "xlsx";
@@ -6,7 +7,8 @@ import { Toast } from "~/component/Toast";
 import { LinksFunction, LoaderFunction } from "@remix-run/node";
 import { isAdmin } from "~/api/user";
 import { db } from "~/utils/db.server";
-import { Project } from "@prisma/client";
+import { cache as areaCache } from "~/api/cache/area.cache";
+import { cache as projCache } from "~/api/cache/project.cache";
 export { action } from "./action";
 
 import stylesUrl from "~/styles/meter-upload.css";
@@ -34,8 +36,24 @@ export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader: LoaderFunction = async ({params: { projectId = 0 }, request }) => {
   await isAdmin(request);
+  await projCache(+projectId!);
+
+  // 更新小區抄錶成功/失敗數字
+  const areaListItems = await db.meter.groupBy({
+    by: ['area'],
+    _count: {
+      area: true,
+    },
+    where: { projectId: +projectId! },
+  });
+
+  for (let i = 0; i < areaListItems.length; i++) {
+    const area = areaListItems[i];
+    await areaCache(area.area as string, area._count.area);
+  }
+
   const projectListItems = await db.project.findMany({
     orderBy: { createdAt: "desc" },
   });

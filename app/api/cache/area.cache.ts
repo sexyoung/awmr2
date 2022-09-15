@@ -49,6 +49,7 @@ export async function cache(area: string, total: number, isCount0: boolean = fal
   // showCostTime('找水錶id'); // <--- 花時間
 
   const areaSummary = {
+    projectId: p.id,
     projectName: p.name,
     area: m.area || "",
     total,
@@ -60,4 +61,18 @@ export async function cache(area: string, total: number, isCount0: boolean = fal
   await redis.hSet(`${REDIS_PREFIX}:record`, area as string, JSON.stringify(areaSummary), expireTime);
   await redis.disconnect();
   return areaSummary;
+}
+
+export async function deleteCache(projectId: number = 0) {
+  const allRecord = await cacheAll();
+  const redis = new Redis(process.env.REDIS_URL);
+  await redis.connect();
+
+  for (let i = 0; i < Object.keys(allRecord).length; i++) {
+    const area = Object.keys(allRecord)[i];
+    if(allRecord[area].projectId === projectId) {
+      await redis.hDel(`${REDIS_PREFIX}:record`, area);
+    }
+  }
+  await redis.disconnect();
 }

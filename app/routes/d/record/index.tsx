@@ -164,7 +164,7 @@ const RecordPage = () => {
               success: successCount,
               notRecord: notRecordCount,
               total: meterCountSummary,
-              z: 1,
+              z: 0,
             }} />
             <ul className="sum-num df m0 p0 lsn mt5">
               <li className="f14">登錄: {successCount}</li>

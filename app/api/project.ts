@@ -1,7 +1,8 @@
 import { Project } from "@prisma/client";
 import type { NewProjectForm } from "~/type/project";
 import { db } from "~/utils/db.server";
-import { cache, cacheAll } from "./cache/project.cache";
+import { cache, cacheAll, deleteCache } from "./cache/project.cache";
+import { deleteCache as deleteAreaCache } from "./cache/area.cache";
 
 import { RecordCount } from "./record";
 
@@ -29,7 +30,10 @@ export async function remove({id}: {id: number}) {
   await db.project.delete({
     where: { id },
   });
-  await cache(id);
+  // 刪除該標案快取
+  await deleteCache(id);
+  // 也要刪除旗下小區快取
+  await deleteAreaCache(id);
 }
 
 export type ProjectData = Array<Project & {

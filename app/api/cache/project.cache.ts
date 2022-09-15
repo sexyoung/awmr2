@@ -82,3 +82,15 @@ export async function cache(projectId: number = 0) {
 
   return data;
 }
+
+export async function deleteCache(projectId: number = 0) {
+  const allRecord: any[] = await cacheAll();
+  const redis = new Redis(process.env.REDIS_URL);
+  await redis.connect();
+  const pIndex = allRecord.findIndex(x => x.id === projectId);
+  await redis.set(`${REDIS_PREFIX}:record`, JSON.stringify([
+    ...allRecord.slice(0, pIndex),
+    ...allRecord.slice(pIndex + 1),
+  ]));
+  await redis.disconnect();
+}
