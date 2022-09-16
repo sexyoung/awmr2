@@ -120,24 +120,32 @@ const projectExportPage = () => {
   const handleDownload = async () => {
     const search = getQuery(selection);
     const recordList: RecordQuery[] = await (await (await fetch(`/d/project/export/query/record?${search}`)).json());
-    const sheetData = recordList.map(record => ({
-      標案: record.meter.project.name,
-      小區: record.meter.area,
-      水號: record.meter.waterId,
-      錶號: record.meter.meterId,
-      地址: record.meter.address,
-      供水: Suppy[record.meter.suppy as keyof typeof Suppy],
-      口徑: Caliber[record.meter.meterId[0] as keyof typeof Caliber],
-      錶種: Type[record.meter.type as keyof typeof Type],
-      錶位: record.meter.location,
-      備註: record.meter.note,
-      狀態: Status[record.status],
-      內容: record.content,
-      工程師: record.user.fullname,
-      日期: new Date(record.createdAt).toLocaleString().split(' ')[0],
-      時間: new Date(record.createdAt).toLocaleString().split(' ')[1],
-    }))
+    let colMaxWidth = [
+      12, 16, 13, 13, 40, 6, 4, 9, 0, 0, 6, 9, 10, 11, 14, 
+    ];
+    const sheetData = recordList.map(record => {
+      const data: {[key: string]: any} = ({
+        標案: record.meter.project.name,
+        小區: record.meter.area,
+        水號: record.meter.waterId,
+        錶號: record.meter.meterId,
+        地址: record.meter.address,
+        供水: Suppy[record.meter.suppy as keyof typeof Suppy],
+        口徑: Caliber[record.meter.meterId.replace(/[0-9]/g, '') as keyof typeof Caliber],
+        錶種: Type[record.meter.type as keyof typeof Type],
+        錶位: record.meter.location,
+        備註: record.meter.note,
+        狀態: Status[record.status],
+        內容: record.content,
+        工程師: record.user.fullname,
+        日期: new Date(record.createdAt).toLocaleString().split(' ')[0],
+        時間: new Date(record.createdAt).toLocaleString().split(' ')[1],
+      });
+      return data;
+    });
     const worksheet = XLSX.utils.json_to_sheet(sheetData);
+    
+    worksheet["!cols"] = colMaxWidth.map(width => ({width}));
     
     // const count = await (await (await fetch(`/d/project/export/query/count?${search}`)).json());
     // const worksheet = XLSX.utils.json_to_sheet([
@@ -152,25 +160,39 @@ const projectExportPage = () => {
   }
 
   return (
-    <div>
-      <h2>標案匯出頁</h2>
-      <select name="projectId" onChange={handleChangeProject} defaultValue={params.projectId}>
-        {projectListItems.map(project =>
-          <option key={project.id} value={project.id}>{project.name}</option>
-        )}
-      </select><br />
-      <select name="area" ref={selectDOM}>
-        {areaListItems.map(({ area, _count }) =>
-          <option key={area} value={area}>{area}({_count.area})</option>
-        )}
-      </select>
-      <br />
-      <DateRangePicker
-        locale={zhTW}
-        ranges={[selection]}
-        onChange={handleSelect}
-      />
-      <button disabled={!canDownLoad} onClick={handleDownload}>download</button>
+    <div className="Page ProjectExportPage">
+      <div className="block">
+        <div className="header">
+          <h2 className="title">標案匯出頁</h2>
+        </div>
+        <div className="wrap">
+          <div className="df gap10">
+            <select className="input fx1 f1r" name="projectId" onChange={handleChangeProject} defaultValue={params.projectId}>
+              {projectListItems.map(project =>
+                <option key={project.id} value={project.id}>{project.name}</option>
+              )}
+            </select>
+            <select className="input fx1 f1r" name="area" ref={selectDOM}>
+              {areaListItems.map(({ area, _count }) =>
+                <option key={area} value={area}>{area}({_count.area})</option>
+              )}
+            </select>
+          </div>
+          <div className="mt10 mb10">
+            <DateRangePicker
+              className="dateRanger input wp100"
+              locale={zhTW}
+              ranges={[selection]}
+              onChange={handleSelect}
+            />
+          </div>
+          <div className="tac">
+            <button className="btn primary wp100 f1.5r"disabled={!canDownLoad} onClick={handleDownload}>
+              下載報告 (Excel)
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

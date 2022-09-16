@@ -157,6 +157,10 @@ select {
   margin-top: 10px;
 }
 
+.mb10 {
+  margin-bottom: 10px;
+}
+
 .db {
   display: block;
 }
@@ -582,6 +586,14 @@ label.avatar .img {
   border: none;
   color: #fff;
   background-color: var(--color-blue-bayoux);
+}
+
+.dateRanger {
+  box-sizing: border-box;
+}
+
+.dateRanger > div:first-child {
+  flex: 1;
 }
 
 @media screen and (max-width: 768px) {
