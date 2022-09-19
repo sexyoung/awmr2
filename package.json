@@ -10,6 +10,7 @@
   "scripts": {
     "build": "remix build",
     "dev": "remix dev",
+    "cache:update": "ts-node script/schedule",
     "start": "PORT=3030 remix-serve build"
   },
   "dependencies": {

@@ -177,10 +177,6 @@ const RecordPage = () => {
             </ul>
           </div>
         </div>
-        todo:
-        <ul>
-          <li>登記順便把水錶內容改掉</li>
-        </ul>
         <div className="df fww item-list">
           {meterListItem.length ?
             meterListItem.map(meter =>

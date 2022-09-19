@@ -1,4 +1,4 @@
-import { Meter, Prisma, Project } from "@prisma/client";
+import { Meter, Project } from "@prisma/client";
 import { db } from "~/utils/db.server";
 // import { showCostTime, startTime } from "~/utils/helper";
 import { Redis } from "~/utils/redis.server";
@@ -7,7 +7,6 @@ import { sum } from "../record";
 
 const REDIS_PREFIX = 'area';
 
-/** @todo: 屆時可能會有很多沒用到的小區，需要定期刪除 */
 export async function cacheAll() {
   const redis = new Redis(process.env.REDIS_URL);
   await redis.connect();
