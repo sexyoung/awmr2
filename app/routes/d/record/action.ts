@@ -90,7 +90,12 @@ const verb = {
     const projectIdList = (form.get('projectIdList') || "") as string;
     const redis = new Redis(process.env.REDIS_URL);
     await redis.connect();
-    const keys = await redis.keys(`${REDIS_PREFIX}:*${projectIdList}*:search:`);
+
+    const projectIdListArr = projectIdList.split(',').map(p => +p);
+    projectIdListArr.sort((a, b) => a - b);
+
+    const keys = await redis.keys(`${REDIS_PREFIX}:*${projectIdListArr.join(',')}*:search:`);
+    
     // const keys = [...new Set([
     //   `${REDIS_PREFIX}:*${projectIdList}*:search:${search}`,
     //   `${REDIS_PREFIX}:*${projectIdList}*:search:`,
