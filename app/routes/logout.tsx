@@ -2,7 +2,6 @@ import type {
   ActionFunction,
   LoaderFunction,
 } from "@remix-run/node";
-import { redirect } from "@remix-run/node";
 
 import { logout } from "~/api/user";
 
@@ -13,7 +12,6 @@ export const action: ActionFunction = async ({
   return logout(request);
 };
 
-// 或是，你直接網址打這個，會執行這個（導頁但不登出）
-export const loader: LoaderFunction = async () => {
-  return redirect("/");
+export const loader: LoaderFunction = async ({ request }) => {
+  return logout(request);
 };

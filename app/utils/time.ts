@@ -1,4 +1,4 @@
-export const formatYmd = (date: Date): string => {
+export const formatYmd = (date: Date = new Date()): string => {
   return date.toLocaleDateString().slice(0, 10);
 };
 

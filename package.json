@@ -13,6 +13,7 @@
     "start": "PORT=3030 remix-serve build"
   },
   "dependencies": {
+    "@line/bot-sdk": "^7.5.2",
     "@prisma/client": "^3.14.0",
     "@remix-run/node": "^1.5.1",
     "@remix-run/react": "^1.5.1",
@@ -21,6 +22,7 @@
     "browser-image-compression": "^2.0.0",
     "date-fns": "^2.28.0",
     "dotenv": "^16.0.1",
+    "js-md5": "^0.7.3",
     "react": "^17.0.2",
     "react-date-range": "^1.4.0",
     "react-dom": "^17.0.2",
@@ -34,6 +36,7 @@
     "@remix-run/dev": "^1.5.1",
     "@remix-run/eslint-config": "^1.5.1",
     "@types/bcryptjs": "^2.4.2",
+    "@types/js-md5": "^0.4.3",
     "@types/react": "^17.0.45",
     "@types/react-date-range": "^1.4.3",
     "@types/react-dom": "^17.0.17",
