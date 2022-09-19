@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { useState, Fragment, MouseEventHandler, FormEvent } from "react";
 import { LinksFunction, LoaderFunction } from "@remix-run/node";
 import { Meter, Project, Record, User } from "@prisma/client";
-import { Form, useFetcher, useLoaderData } from "@remix-run/react";
+import { Form, useFetcher, useLoaderData, useTransition } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 import { Suppy, Type } from "~/consts/meter";
@@ -99,6 +99,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 const RecordPage = () => {
   const fetcher = useFetcher();
+  const transition = useTransition();
   const [showModal, setShowModal] = useState(false);
   const [status, setStatus] = useState<Status>(Status.success);
   const { meterCountSummary, successCount, notRecordCount, search, href, pageTotal, meterListItem, projectListItems, showRecord, userTitle } = useLoaderData<LoadData>();
@@ -319,6 +320,7 @@ const RecordPage = () => {
             </div>
           }
           {(fetcher.state === 'submitting') && <Modal>登錄中</Modal>}
+          {([fetcher.state, transition.state].includes('loading') ) && <Modal>讀取中</Modal>}
         </div>
       </div>
     </div>
