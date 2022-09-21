@@ -164,7 +164,7 @@ const RecordPage = () => {
       });
       return setPreview('');
     }
-    blob = await imageCompression(file, {maxSizeMB: 0.5, maxWidthOrHeight: 900});
+    blob = await imageCompression(file, {maxSizeMB: 0.1, maxWidthOrHeight: 1000});
     setPreview(URL.createObjectURL(blob));
 
     // 還是把設定檔名的部分在上傳時就指定好吧
