@@ -1,27 +1,12 @@
 import {
   ActionFunction,
-  json,
-  unstable_composeUploadHandlers,
-  unstable_createFileUploadHandler,
-  unstable_createMemoryUploadHandler,
   unstable_parseMultipartFormData,
 } from "@remix-run/node";
 import { update } from "~/api/user";
-import { db } from "~/utils/db.server";
+import { uploadHandlerFun } from "~/utils/upload";
 
-// 或是，你直接網址打這個，會執行這個（導頁但不登出）
 export const action: ActionFunction = async ({ request }) => {
-  const uploadHandler = unstable_composeUploadHandlers(
-    unstable_createFileUploadHandler({
-      maxPartSize: 5_000_000,
-      directory: './public/avatar',
-      file: (f) =>
-        `${Math.random().toString().slice(2)+Math.random().toString().slice(2)}.${f.contentType.split('/').pop()}`
-      ,
-    }),
-    // parse everything else into memory
-    unstable_createMemoryUploadHandler()
-  );
+  const uploadHandler = uploadHandlerFun('./public/avatar', `${Math.random().toString().slice(2)+Math.random().toString().slice(2)}`);
   const formData = await unstable_parseMultipartFormData(
     request,
     uploadHandler

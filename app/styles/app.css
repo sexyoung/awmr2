@@ -22,6 +22,10 @@ select {
   background-color: #fff;
 }
 
+.b {
+  font-weight: bold;
+}
+
 .pr {
   position: relative;
 }
@@ -117,6 +121,14 @@ select {
   background-color: var(--color-zombie);
 }
 
+.bgrn {
+  background-repeat: no-repeat;
+}
+
+.bgpc {
+  background-position: center;
+}
+
 .nowrap {
   white-space: nowrap;
 }
@@ -209,6 +221,10 @@ select {
   justify-content: end;
 }
 
+.jcse {
+  justify-content: space-evenly;
+}
+
 .aic {
   align-items: center;
 }
@@ -293,6 +309,18 @@ select {
 
 .wp100 {
   width: 100%;
+}
+
+.w20 {
+  width: 20px;
+}
+
+.h20 {
+  height: 20px;
+}
+
+.pl5 {
+  padding-left: 5px;
 }
 
 .bsbb {

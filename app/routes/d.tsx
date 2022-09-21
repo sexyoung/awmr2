@@ -46,7 +46,7 @@ export default function DashBoard() {
           <div className="system-name">
             小區
             <u>抄表系統</u>
-            <small><small><small>v1.5</small></small></small>
+            <small><small><small>v2.0</small></small></small>
           </div>
           <label htmlFor="hamburger" id="hamburger-menu" />
           <div className="info bg-blue-bayoux xs:pf xs:r0 xs:t0 xs:h100vh">

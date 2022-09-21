@@ -111,7 +111,7 @@ export const sum: SumFunc = async (meterIdList, isAllDate = false) => {
   };
 }
 
-export async function create(data: {userId: number; meterId: number; status: Status ; content: string}) {
+export async function create(data: {userId: number; meterId: number; status: Status ; content: string, picture?: string}) {
   await db.record.create({ data });
 }
 

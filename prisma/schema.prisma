@@ -95,6 +95,7 @@ model Record {
   meterId   Int       @db.UnsignedInt
   status    Status
   content   String    @db.VarChar(50)
+  picture   String?   @db.VarChar(150)
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
 }

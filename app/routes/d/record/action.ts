@@ -12,6 +12,7 @@ import { cache, REDIS_PREFIX } from "./cache";
 import { cache as areaCache } from "~/api/cache/area.cache";
 import { cache as projCache } from "~/api/cache/project.cache";
 import { showCostTime, startTime } from "~/utils/helper";
+import { formatYmd } from "~/utils/time";
 
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData();
@@ -76,13 +77,16 @@ const verb = {
     return json(true);
   },
   record: async (form: FormData, userId: number, status: Status) => {
-    const meterId = +form.get('meterId')!
+    const meterId = +form.get('meterId')!;
+
+    const [Y, M, D] = formatYmd().split('/');
 
     await api.create({
       userId,
       status,
       meterId,
       content: form.get('content') as string,
+      ...(form.get('picture') ? {picture: `/${Y}-${M}/${D}/${form.get('picture')}`}: {}),
     });
 
     const search = (form.get('search') || "") as string;

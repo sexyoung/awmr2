@@ -1,7 +1,8 @@
 import { format } from "date-fns";
-import { useState, Fragment, MouseEventHandler, FormEvent } from "react";
-import { LinksFunction, LoaderFunction } from "@remix-run/node";
+import imageCompression from 'browser-image-compression';
 import { Meter, Project, Record, User } from "@prisma/client";
+import { LinksFunction, LoaderFunction } from "@remix-run/node";
+import { useState, Fragment, MouseEventHandler, FormEvent } from "react";
 import { Form, useFetcher, useLoaderData, useTransition } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
@@ -18,7 +19,9 @@ import Modal from "~/component/Modal";
 
 export { action } from "./action";
 
+const IMAGE = "/image.svg";
 const PAGE_SIZE = 30;
+let blob: File | null;
 
 type MeterWithPR = Meter & {
   project: Project;
@@ -100,6 +103,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 const RecordPage = () => {
   const fetcher = useFetcher();
   const transition = useTransition();
+  const [preview, setPreview] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [status, setStatus] = useState<Status>(Status.success);
   const { meterCountSummary, successCount, notRecordCount, search, href, pageTotal, meterListItem, projectListItems, showRecord, userTitle } = useLoaderData<LoadData>();
@@ -110,7 +114,7 @@ const RecordPage = () => {
     otherDOM.checked = false;
   }
 
-  const handleSubmit = (meter: MeterWithPR, event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (meter: MeterWithPR, event: FormEvent<HTMLFormElement>) => {
     const formData = new FormData(event.currentTarget);
     if(formData.get('_method') === Status.success) {
       const inputContent = formData.has('content') ? +(formData.get('content') as string): 0;
@@ -120,6 +124,17 @@ const RecordPage = () => {
       if(degree >= 100 || degree <= -2) {
         alert("登錄度數超過100度 或 -2度");
       }
+    }
+
+    if(preview && blob) {
+      const formDataImage = new FormData();
+      formDataImage.append('picture', blob);
+      const picture = await(await fetch(`/d/record/upload?waterId=${meter.waterId}&meterId=${meter.meterId}`, {
+        method: 'post',
+        body: formDataImage,
+      })).json();
+      blob = null;
+      setPreview('');
     }
     
     (document.getElementById(`success-${meter.id}`) as HTMLInputElement).checked = false;
@@ -139,6 +154,23 @@ const RecordPage = () => {
       paramsObj.showRecord = "1";
     }
     location.href = `/d/record?${(Object.keys(paramsObj).map(key => `${key}=${paramsObj[key]}`).join('&'))}`;
+  }
+
+  const handleCompression = async (meter: MeterWithPR, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files![0];
+    if(!file) {
+      document.querySelectorAll<HTMLInputElement>(`[class=picture-${meter.id}]`).forEach(input => {
+        input.value = '';
+      });
+      return setPreview('');
+    }
+    blob = await imageCompression(file, {maxSizeMB: 0.5, maxWidthOrHeight: 900});
+    setPreview(URL.createObjectURL(blob));
+
+    // 還是把設定檔名的部分在上傳時就指定好吧
+    document.querySelectorAll<HTMLInputElement>(`[class=picture-${meter.id}]`).forEach(input => {
+      input.value = `${meter.waterId}-${meter.meterId}.${blob!.name.split('.').pop()}`;
+    });
   }
 
   return (
@@ -216,11 +248,12 @@ const RecordPage = () => {
                           </div>
                           {meter.Record.map(record =>
                             <div key={record.id} className="record df jcsb">
-                              <div className={`tac content bg-${record.status}`}>
+                              <div className={`tac content bg-${record.status} df aic jcse`}>
+                                {record.picture && <div className="bgrn bgpc w20 h20 pl5" style={{backgroundImage: `url(${IMAGE})`}} />}
                                 {record.status === Status.success? record.content: NotRecordReasonMap[record.content as keyof typeof NotRecordReasonMap]}
                               </div>
                               <div className="name">{record.user.fullname}</div>
-                              <div className="time f12 mono-font">{format(new Date(record.createdAt), 'MM-dd HH:mm')}</div>
+                              <div className="time f12 mono-font df aic">{format(new Date(record.createdAt), 'MM-dd HH:mm')}</div>
                             </div>
                           )}
                         </div>
@@ -230,28 +263,40 @@ const RecordPage = () => {
                       <label className="fx1 tac p4 color-mantis cp cf border-mantis xs:p10" htmlFor={`success-${meter.id}`}>正常</label>
                       <label className="fx1 tac p4 color-zombie cp cf border-zombie xs:p10" htmlFor={`notRecord-${meter.id}`}>異常</label>
                     </div>
-                    <fetcher.Form onSubmit={handleSubmit.bind(null, meter)} method="post" className="success-form pa fill p10p50 ttxp-100 tt150ms df fdc jcc xs:p10 gap10">
+                    <fetcher.Form encType="multipart/form-data" onSubmit={handleSubmit.bind(null, meter)} method="post" className="success-form pa fill p10p50 ttxp-100 tt150ms df fdc jcc xs:p10 gap10">
                       <input type="hidden" name="_method" value={Status.success} />
                       <input type="hidden" name="meterId" defaultValue={meter.id} />
                       <input type="hidden" name="search" defaultValue={search} />
                       <input type="hidden" name="showRecord" defaultValue={showRecord ? "1": ""} />
                       <input type="hidden" name="projectIdList" defaultValue={userTitle === Role.ENG ? projectListItems.map(({ id }) => id).join(','): ""} />
-                      <input className="input f1r xs:f3r" type="tel" name="content" placeholder="度數" required />
+                      <div className="df">
+                        <input className="input fx2 f1r xs:f3r wp100" type="tel" name="content" placeholder="度數" required />
+                        <label className="fx1 db bgpc bgrn" style={{backgroundImage: `url(${preview || IMAGE})`, backgroundSize: '70%'}}>
+                          <input type="file" className="dn" onChange={handleCompression.bind(null, meter)} accept="image/*" />
+                        </label>
+                        <input type="hidden" name="picture" className={`picture-${meter.id}`} />
+                      </div>
                       <button className="btn primary f1r xs:f2r">登錄</button>
                     </fetcher.Form>
-                    <fetcher.Form onSubmit={handleSubmit.bind(null, meter)} method="post" className="notRecord-form pa fill p10p50 ttxp100 tt150ms df fdc jcc xs:p10 gap10">
+                    <fetcher.Form encType="multipart/form-data" onSubmit={handleSubmit.bind(null, meter)} method="post" className="notRecord-form pa fill p10p50 ttxp100 tt150ms df fdc jcc xs:p10 gap10">
                       <input type="hidden" name="_method" value={Status.notRecord} />
                       <input type="hidden" name="meterId" defaultValue={meter.id} />
                       <input type="hidden" name="search" defaultValue={search} />
                       <input type="hidden" name="showRecord" defaultValue={showRecord ? "1": ""} />
                       <input type="hidden" name="projectIdList" defaultValue={userTitle === Role.ENG ? projectListItems.map(({ id }) => id).join(','): ""} />
-                      <select className="input f1r xs:f3r" name="content" required>
-                        {Object.keys(NotRecordReasonMap).map(key =>
-                          <option key={key} value={key}>
-                            {NotRecordReasonMap[key as keyof typeof NotRecordReasonMap]}
-                          </option>
-                        )}
-                      </select>
+                      <div className="df">
+                        <select className="input fx2 f1r xs:f3r wp100" name="content" required>
+                          {Object.keys(NotRecordReasonMap).map(key =>
+                            <option key={key} value={key}>
+                              {NotRecordReasonMap[key as keyof typeof NotRecordReasonMap]}
+                            </option>
+                          )}
+                        </select>
+                        <label className="fx1 db bgpc bgrn" style={{backgroundImage: `url(${preview || IMAGE})`, backgroundSize: '70%'}}>
+                          <input type="file" className="dn" onChange={handleCompression.bind(null, meter)} accept="image/*" />
+                        </label>
+                        <input type="hidden" name="picture" className={`picture-${meter.id}`} />
+                      </div>
                       <button className="btn primary f1r xs:f2r">登錄</button>
                     </fetcher.Form>
                   </div>

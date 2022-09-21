@@ -3,3 +3,4 @@ build
 .env
 .cache
 public/avatar/*
+public/record/*
