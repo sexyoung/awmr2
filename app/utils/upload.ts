@@ -5,9 +5,7 @@ export const uploadHandlerFun = (directory: string, fileName: string, maxPartSiz
     avoidFileConflicts: false,
     maxPartSize,
     directory,
-    file: (f) =>
-      `${fileName}.${f.contentType.split('/').pop()}`
-    ,
+    file: (f) => fileName,
   }),
   // parse everything else into memory
   unstable_createMemoryUploadHandler()

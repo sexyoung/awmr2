@@ -3,7 +3,7 @@ import imageCompression from 'browser-image-compression';
 import { Meter, Project, Record, User } from "@prisma/client";
 import { LinksFunction, LoaderFunction } from "@remix-run/node";
 import { useState, Fragment, MouseEventHandler, FormEvent } from "react";
-import { Form, useFetcher, useLoaderData, useTransition } from "@remix-run/react";
+import { Form, Link, useFetcher, useLoaderData, useTransition } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 import { Suppy, Type } from "~/consts/meter";
@@ -129,7 +129,7 @@ const RecordPage = () => {
     if(preview && blob) {
       const formDataImage = new FormData();
       formDataImage.append('picture', blob);
-      const picture = await(await fetch(`/d/record/upload?waterId=${meter.waterId}&meterId=${meter.meterId}`, {
+      const picture = await(await fetch(`/d/record/upload?name=${document.querySelector<HTMLInputElement>(`[class=picture-${meter.id}]`)!.value}`, {
         method: 'post',
         body: formDataImage,
       })).json();
@@ -249,7 +249,7 @@ const RecordPage = () => {
                           {meter.Record.map(record =>
                             <div key={record.id} className="record df jcsb">
                               <div className={`tac content bg-${record.status} df aic jcse`}>
-                                {record.picture && <div className="bgrn bgpc w20 h20 pl5" style={{backgroundImage: `url(${IMAGE})`}} />}
+                                {record.picture && <Link target="_blank" to={`/p/${record.id}`}><div className="bgrn bgpc w20 h20 pl5" style={{backgroundImage: `url(${IMAGE})`}} /></Link>}
                                 {record.status === Status.success? record.content: NotRecordReasonMap[record.content as keyof typeof NotRecordReasonMap]}
                               </div>
                               <div className="name">{record.user.fullname}</div>

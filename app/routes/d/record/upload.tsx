@@ -4,10 +4,7 @@ import { uploadHandlerFun } from "~/utils/upload";
 
 export const action: ActionFunction = async ({ request }) => {
   const url = new URL(request.url)
-  const waterId = url.searchParams.get('waterId')!;
-  const meterId = url.searchParams.get('meterId')!;
-
-  const fileName = `${waterId}-${meterId}`;
+  const fileName = url.searchParams.get('name')!;
   const [Y, M, D] = formatYmd().split('/');
   const uploadHandler = uploadHandlerFun(
     `./public/record/${Y}-${M}/${D}`,
