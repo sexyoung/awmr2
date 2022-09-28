@@ -8,7 +8,8 @@ on:
 jobs:
   build-dev:
     runs-on: ubuntu-latest
-
+    environment:
+      name: dev
     steps:
 
     - name: 使用 node 16.15.0
@@ -34,13 +35,13 @@ jobs:
     - name: 給予環境變數
       run: |
         touch .env
-        echo {{secrets.DATABASE_URL}} >> .env
-        echo {{secrets.MAP8_KEY}} >> .env
-        echo {{secrets.SESSION_SECRET}} >> .env
-        echo {{secrets.REDIS_URL}} >> .env
-        echo {{secrets.LINE_ACCESS_TOKEN}} >> .env
-        echo {{secrets.LINE_CHANNEL_SECRET}} >> .env
-        echo {{secrets.DOMAIN}} >> .env
+        echo "DATABASE_URL=${{secrets.DATABASE_URL}}" >> .env
+        echo "MAP8_KEY=${{secrets.MAP8_KEY}}" >> .env
+        echo "SESSION_SECRET=${{secrets.SESSION_SECRET}}" >> .env
+        echo "REDIS_URL=${{secrets.REDIS_URL}}" >> .env
+        echo "LINE_ACCESS_TOKEN=${{secrets.LINE_ACCESS_TOKEN}}" >> .env
+        echo "LINE_CHANNEL_SECRET=${{secrets.LINE_CHANNEL_SECRET}}" >> .env
+        echo "DOMAIN=${{secrets.DOMAIN}}" >> .env
         cat .env
 
     # - name: 跑個測試唄
@@ -59,7 +60,7 @@ jobs:
     - name: 壓縮 build 資料夾
       uses: TonyBogdanov/zip@1.0
       with:
-        args: zip -qq -r ./build.zip ./build ./public
+        args: zip -qq -r ./build.zip ./build ./public .env
 
     - name: 上傳 build 🆙
       uses: actions/upload-artifact@v3
