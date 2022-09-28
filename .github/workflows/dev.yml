@@ -36,6 +36,11 @@ jobs:
         touch .env
         echo {{secrets.DATABASE_URL}} >> .env
         echo {{secrets.MAP8_KEY}} >> .env
+        echo {{secrets.SESSION_SECRET}} >> .env
+        echo {{secrets.REDIS_URL}} >> .env
+        echo {{secrets.LINE_ACCESS_TOKEN}} >> .env
+        echo {{secrets.LINE_CHANNEL_SECRET}} >> .env
+        echo {{secrets.DOMAIN}} >> .env
         cat .env
 
     # - name: 跑個測試唄
