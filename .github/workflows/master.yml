@@ -59,7 +59,7 @@ jobs:
     - name: 壓縮 build 資料夾
       uses: TonyBogdanov/zip@1.0
       with:
-        args: zip -qq -r ./build.zip ./build ./public
+        args: zip -qq -r ./build.zip ./build ./public .env ./prisma
 
     - name: 上傳 build 🆙
       uses: actions/upload-artifact@v3
