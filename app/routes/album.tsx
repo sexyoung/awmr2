@@ -37,11 +37,13 @@ export const loader: LoaderFunction = async ({ request }) => {
       recordList: await db.record.findMany({
         where: {
           picture: {in: pictureList.map(pic => `${p}/${pic}`)},
-          meter: {
-            project: {
-              id: {in: user.projects.map(p => p.projectId)},
+          ...(user.projects.length ? {
+            meter: {
+              project: {
+                id: {in: user.projects.map(p => p.projectId)},
+              }
             }
-          }
+          }: {}),
         },
         include: {
           user: true,
