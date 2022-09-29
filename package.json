@@ -10,7 +10,6 @@
   "scripts": {
     "build": "remix build",
     "dev": "remix dev",
-    "cache:update": "ts-node script/schedule",
     "start": "remix-serve build"
   },
   "dependencies": {

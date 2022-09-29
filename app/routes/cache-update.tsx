@@ -1,13 +1,15 @@
-import {config} from 'dotenv';
-import {resolve} from 'path'
+import { json, LoaderFunction, redirect } from "@remix-run/node";
 import { cache } from '~/routes/d/record/cache';
 import { db } from '~/utils/db.server';
 import { Redis } from "~/utils/redis.server";
 import { cache as areaCache } from "~/api/cache/area.cache";
 
-config({path: resolve(__dirname, "../.env")});
-
-(async () => {
+export const loader: LoaderFunction = async ({ request }) => {
+  const url = new URL(request.url);
+  const key = url.searchParams.get("key") || '';
+  if(key !== process.env.CACHE_KEY) {
+    throw redirect('https://www.google.com');
+  }
   await cache({ isForce: true });
 
   const redis = new Redis(process.env.REDIS_URL);
@@ -24,4 +26,5 @@ config({path: resolve(__dirname, "../.env")});
   }
 
   await redis.disconnect();
-})();
+  return json('OK');
+}

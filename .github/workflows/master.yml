@@ -39,13 +39,14 @@ jobs:
     - name: 給予環境變數
       run: |
         touch .env
-        echo {{secrets.DATABASE_URL}} >> .env
-        echo {{secrets.MAP8_KEY}} >> .env
-        echo {{secrets.SESSION_SECRET}} >> .env
-        echo {{secrets.REDIS_URL}} >> .env
-        echo {{secrets.LINE_ACCESS_TOKEN}} >> .env
-        echo {{secrets.LINE_CHANNEL_SECRET}} >> .env
-        echo {{secrets.DOMAIN}} >> .env
+        echo "DATABASE_URL=${{secrets.DATABASE_URL}}" >> .env
+        echo "MAP8_KEY=${{secrets.MAP8_KEY}}" >> .env
+        echo "SESSION_SECRET=${{secrets.SESSION_SECRET}}" >> .env
+        echo "REDIS_URL=${{secrets.REDIS_URL}}" >> .env
+        echo "LINE_ACCESS_TOKEN=${{secrets.LINE_ACCESS_TOKEN}}" >> .env
+        echo "LINE_CHANNEL_SECRET=${{secrets.LINE_CHANNEL_SECRET}}" >> .env
+        echo "DOMAIN=${{secrets.DOMAIN}}" >> .env
+        echo "CACHE_KEY=${{secrets.CACHE_KEY}}" >> .env
         cat .env
 
     # - name: 跑個測試唄
@@ -93,6 +94,14 @@ jobs:
           source: "./,!.git,!build.zip"
           target: "~/web/awmr-2"
 
+      - name: 重啟 awmr-2
+        uses: appleboy/ssh-action@master
+        with:
+          HOST: ${{secrets.HOST}}
+          USERNAME: ${{secrets.USER}}
+          PORT: 22
+          KEY: ${{ secrets.KEY }}
+          script: pm2 restart awmr-2
       # - name: 改一下位置唄
       #   uses: garygrossgarten/github-action-ssh@release
       #   with:
