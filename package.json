@@ -11,7 +11,7 @@
     "build": "remix build",
     "dev": "remix dev",
     "cache:update": "ts-node script/schedule",
-    "start": "PORT=3030 remix-serve build"
+    "start": "remix-serve build"
   },
   "dependencies": {
     "@line/bot-sdk": "^7.5.2",
