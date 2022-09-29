@@ -94,6 +94,15 @@ jobs:
           source: "./,!.git,!build.zip"
           target: "~/web/awmr-2-dev"
 
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@master
+        with:
+          HOST: ${{secrets.HOST}}
+          USERNAME: ${{secrets.USER}}
+          PORT: 22
+          KEY: ${{ secrets.KEY }}
+          script: pm2 restart awmr-2-dev
+
       # - name: 改一下位置唄
       #   uses: garygrossgarten/github-action-ssh@release
       #   with:
