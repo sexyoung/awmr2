@@ -47,6 +47,7 @@ jobs:
         echo "LINE_CHANNEL_SECRET=${{secrets.LINE_CHANNEL_SECRET}}" >> .env
         echo "DOMAIN=${{secrets.DOMAIN}}" >> .env
         echo "CACHE_KEY=${{secrets.CACHE_KEY}}" >> .env
+        echo "ENV=PRD" >> .env
         cat .env
 
     # - name: 跑個測試唄

@@ -21,8 +21,8 @@
   background-color: #67747c;
 }
 
-.frame.development:before,
-.frame.development .app .menu {
+.frame.DEV:before,
+.frame.DEV .app .menu {
   background-color: #7c8b67;
 }
 
@@ -97,7 +97,7 @@
   list-style: none;
 }
 
-.frame.development .app .menu .info {
+.frame.DEV .app .menu .info {
   background-color: #7c8b67;
 }
 

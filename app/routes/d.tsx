@@ -13,18 +13,20 @@ export const links: LinksFunction = () => {
 
 type LoaderData = {
   user: Awaited<ReturnType<typeof getUser>>;
+  ENV: string;
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
   await requireUserId(request);
   const data: LoaderData = {
     user: await getUser(request),
+    ENV: process.env.ENV || 'PRD',
   };
   return json(data);
 };
 
 export default function DashBoard() {
-  const { user } = useLoaderData<LoaderData>();
+  const { user, ENV } = useLoaderData<LoaderData>();
 
   const handleLogout: React.FormEventHandler<HTMLFormElement> = (e) => {
     !confirm('確定登出?') && e.preventDefault();
@@ -39,7 +41,7 @@ export default function DashBoard() {
   }
 
   return (
-    <div className={`frame ${process.env.NODE_ENV}`}>
+    <div className={`frame ${ENV}`}>
       <div className="app">
         <input type="checkbox" id="hamburger" />
         <div id="menu" className="menu xs:pf xs:df xs:jcsb" onClick={handleClose}>
@@ -47,7 +49,7 @@ export default function DashBoard() {
             小區
             <u>抄表系統</u>
             <small><small><small>
-              {process.env.NODE_ENV === 'development' ? '測試版': 'v2.0'}
+              {ENV === 'DEV' ? '測試版': 'v2.0'}
             </small></small></small>
           </div>
           <label htmlFor="hamburger" id="hamburger-menu" />

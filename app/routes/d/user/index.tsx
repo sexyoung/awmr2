@@ -34,7 +34,6 @@ export const meta: MetaFunction = () => ({
   title: TITLE,
 });
 
-
 export const loader: LoaderFunction = async ({ request }) => {
   await isAdmin(request);
   const url = new URL(request.url);
