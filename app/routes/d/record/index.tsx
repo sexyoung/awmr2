@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import imageCompression from 'browser-image-compression';
 import { Meter, Project, Record, User } from "@prisma/client";
-import { LinksFunction, LoaderFunction } from "@remix-run/node";
+import { LinksFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
 import { useState, Fragment, MouseEventHandler, FormEvent } from "react";
 import { Form, Link, useFetcher, useLoaderData, useTransition } from "@remix-run/react";
 
@@ -19,6 +19,7 @@ import Modal from "~/component/Modal";
 
 export { action } from "./action";
 
+const TITLE = '水錶登錄';
 const IMAGE = "/image.svg";
 const PAGE_SIZE = 30;
 let blob: File | null;
@@ -47,6 +48,10 @@ type LoadData = {
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
 };
+
+export const meta: MetaFunction = () => ({
+  title: TITLE,
+});
 
 export const loader: LoaderFunction = async ({ request }) => {
   const user = await getUser(request);
@@ -177,7 +182,7 @@ const RecordPage = () => {
     <div className="Page RecordPage">
       <div className="block">
         <div className="header">
-          <h2 className="title">水錶登錄頁</h2>
+          <h2 className="title">{TITLE}</h2>
           {pageTotal > 1 && <Pagination {...{pageTotal, href}} />}
         </div>
         <div className="search-form">

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { read, utils } from "xlsx";
 import { useParams, useFetcher, useLoaderData } from "@remix-run/react"
 import { Toast } from "~/component/Toast";
-import { LinksFunction, LoaderFunction } from "@remix-run/node";
+import { LinksFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
 import { isAdmin } from "~/api/user";
 import { db } from "~/utils/db.server";
 import { cache as areaCache } from "~/api/cache/area.cache";
@@ -31,10 +31,15 @@ let data: UploadMeter[];
 let fileName: string = '';
 let uploadError: {waterId: string; meterId: string; message: string;}[] = [];
 const sheetHeader = ["waterID", "area", "meterID", "address", "status", "type", "location"];
+const TITLE = '上傳水錶';
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
 };
+
+export const meta: MetaFunction = () => ({
+  title: TITLE,
+});
 
 export const loader: LoaderFunction = async ({params: { projectId = 0 }, request }) => {
   await isAdmin(request);
@@ -191,7 +196,7 @@ const UploadPage = () => {
       {error && <Toast error>錯誤: {error}</Toast>}
       <div className="block">
         <div className="header">
-          <h2 className="title">上傳水錶頁</h2>
+          <h2 className="title">上傳水錶</h2>
         </div>
         <div className="wrap">
           {fetcher.state === 'idle' &&

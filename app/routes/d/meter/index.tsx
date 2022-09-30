@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { useRef, useState } from "react";
 import { Meter, Project, Record } from "@prisma/client";
-import { LinksFunction, LoaderFunction } from "@remix-run/node";
+import { LinksFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 import { db } from "~/utils/db.server";
 import { Suppy, Type } from "~/consts/meter";
@@ -14,6 +14,7 @@ export { action } from "./action";
 import stylesUrl from "~/styles/meter-page.css";
 
 const PAGE_SIZE = 30;
+const TITLE = '水錶查詢';
 
 type LoadData = {
   href: string;
@@ -31,6 +32,10 @@ type LoadData = {
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
 };
+
+export const meta: MetaFunction = () => ({
+  title: TITLE,
+});
 
 export const loader: LoaderFunction = async ({ request }) => {
   await isAdmin(request);
@@ -138,7 +143,7 @@ const MeterPage = () => {
     <div className="Page MeterPage">
       <div className="block">
         <div className="header">
-          <h2 className="title">水錶查詢頁</h2>
+          <h2 className="title">{TITLE}</h2>
           {pageTotal > 1 && <Pagination {...{pageTotal, href}} />}
         </div>
         <div className="search-form">

@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { json, LoaderFunction } from "@remix-run/node";
+import { json, LoaderFunction, MetaFunction } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
 import { query, AreaData } from "~/api/area";
 import { isAdmin } from "~/api/user";
@@ -7,6 +7,11 @@ import { Pagination } from "~/component/Pagination";
 import RecordBar from "~/component/RecordBar";
 
 const PAGE_SIZE = 30;
+const TITLE = '小區查詢';
+
+export const meta: MetaFunction = () => ({
+  title: TITLE,
+});
 
 export const loader: LoaderFunction = async ({ request }) => {
   await isAdmin(request);
@@ -49,7 +54,7 @@ const AreaPage = () => {
     <div className="Page AreaPage">
       <div className="block">
         <div className="header">
-          <h2 className="title">小區查詢</h2>
+          <h2 className="title">{TITLE}</h2>
           {pageTotal > 1 && <Pagination {...{pageTotal, href}} />}
         </div>
         <div className="search-form">

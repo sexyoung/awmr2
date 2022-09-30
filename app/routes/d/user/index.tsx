@@ -1,5 +1,5 @@
 import { Record, Role, User } from "@prisma/client";
-import { LinksFunction, LoaderFunction, redirect } from "@remix-run/node";
+import { LinksFunction, LoaderFunction, MetaFunction, redirect } from "@remix-run/node";
 import { Form, Link, useFetcher, useLoaderData } from "@remix-run/react";
 import { isAdmin } from "~/api/user";
 import { db } from "~/utils/db.server";
@@ -9,6 +9,7 @@ import stylesUrl from "~/styles/user-page.css";
 import { RoleMap } from "~/consts/role";
 export { action } from "./action";
 
+const TITLE = '人事查詢';
 const PAGE_SIZE = 20;
 const RoleArr = Object.keys(Role);
 
@@ -28,6 +29,11 @@ type LoadData = {
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
 };
+
+export const meta: MetaFunction = () => ({
+  title: TITLE,
+});
+
 
 export const loader: LoaderFunction = async ({ request }) => {
   await isAdmin(request);
@@ -116,7 +122,7 @@ export default () => {
       <div className="block">
         <div className="header">
           <h2 className="title">
-            人事查詢
+            {TITLE}
             <Link className="btn primary f1r ml5 tdn" to="/d/user/new">新增使用者</Link>
           </h2>
           {pageTotal > 1 && <Pagination {...{pageTotal, href}} />}

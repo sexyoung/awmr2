@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { Meter, Record, Role, User } from "@prisma/client";
-import { LoaderFunction } from "@remix-run/node";
+import { LoaderFunction, MetaFunction } from "@remix-run/node";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
@@ -11,6 +11,7 @@ import { getUser } from "~/api/user";
 export { action } from "../meter/action";
 
 const PAGE_SIZE = 30;
+const TITLE = '登錄記錄';
 
 type ItemType = Record & {
   user: User;
@@ -24,6 +25,10 @@ type LoadData = {
   recordListItems: ItemType[];
   search: string;
 } & PaginationProps
+
+export const meta: MetaFunction = () => ({
+  title: TITLE,
+});
 
 export const loader: LoaderFunction = async ({ request }) => {
   const user = await getUser(request);
@@ -94,7 +99,7 @@ const HistoryPage = () => {
     <div className="Page HistoryPage">
       <div className="block">
         <div className="header">
-          <h2 className="title">登錄記錄頁</h2>
+          <h2 className="title">{TITLE}</h2>
           {pageTotal > 1 && <Pagination {...{pageTotal, href}} />}
         </div>
         <div className="search-form">

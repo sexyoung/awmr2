@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Record, User, Project, Meter } from "@prisma/client";
-import { LinksFunction, LoaderFunction } from "@remix-run/node";
+import { LinksFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
 import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 import { db } from "~/utils/db.server";
 import { Avator } from "./avatar";
@@ -21,6 +21,12 @@ type ActionData = {
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
+};
+
+export const meta: MetaFunction = ({data}) => {
+  return {
+    title: `編輯 ${data.user ? (data.user.fullname || data.user.name): ''}`,
+  }
 };
 
 type LoaderData = { user: User & {

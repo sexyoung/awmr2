@@ -1,4 +1,4 @@
-import { LoaderFunction, redirect } from "@remix-run/node";
+import { LoaderFunction, MetaFunction, redirect } from "@remix-run/node";
 import type { ActionFunction } from "@remix-run/node";
 import { Form, Link, useActionData, useSearchParams } from "@remix-run/react";
 
@@ -13,6 +13,8 @@ type ActionData = ActionDataGen<{
   name: string;
   password: string;
 }>
+
+const TITLE = '新增人事';
 
 function validateName(name: unknown) {
   if (typeof name !== "string" || name.length < 3) {
@@ -30,6 +32,10 @@ export const loader: LoaderFunction = async ({ request }) => {
   await isAdmin(request);
   return null;
 }
+
+export const meta: MetaFunction = () => ({
+  title: TITLE,
+});
 
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData();
@@ -96,7 +102,7 @@ const NewUserPage = () => {
       <div className="block">
         <div className="header">
           <h2 className="title">
-            <Link to="/d/user">人事查詢</Link> &gt; 新增人事
+            <Link to="/d/user">人事查詢</Link> &gt; {TITLE}
           </h2>
         </div>
         <div className="ph20">

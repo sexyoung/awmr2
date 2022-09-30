@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { Record, Role, User } from "@prisma/client";
-import { json, LinksFunction, LoaderFunction } from "@remix-run/node";
+import { json, LinksFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
 import { Link, useFetcher, useLoaderData } from "@remix-run/react";
 import { query as areaQuery, AreaData } from "~/api/area";
 import { query as projectQuery, ProjectData } from "~/api/project";
@@ -13,10 +13,15 @@ import RecordBar from "~/component/RecordBar";
 import { RoleMap } from '~/consts/role';
 
 const TAKE = 5;
+const TITLE = '首頁總覽';
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
 };
+
+export const meta: MetaFunction = () => ({
+  title: TITLE,
+});
 
 type LoaderData = {
   projectListItems: ProjectData;

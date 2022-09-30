@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { LoaderFunction } from "@remix-run/node";
+import { LoaderFunction, MetaFunction } from "@remix-run/node";
 import { db } from "~/utils/db.server";
 
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
@@ -10,6 +10,7 @@ import { isAdmin } from "~/api/user";
 export { action } from "./action";
 
 const PAGE_SIZE = 30;
+const TITLE = '區外要求';
 
 type ItemType = Record & {
   user: User;
@@ -24,6 +25,9 @@ type LoadData = {
   search: string;
 } & PaginationProps
 
+export const meta: MetaFunction = () => ({
+  title: TITLE,
+});
 
 export const loader: LoaderFunction = async ({ request }) => {
   await isAdmin(request);
@@ -76,7 +80,7 @@ const OutPage = () => {
     <div className="Page OutPage">
       <div className="block">
         <div className="header">
-          <h2 className="title">區外要求</h2>
+          <h2 className="title">{TITLE}</h2>
           {pageTotal > 1 && <Pagination {...{pageTotal, href}} />}
         </div>
         <table style={{tableLayout: 'fixed'}}>

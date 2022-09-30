@@ -1,4 +1,4 @@
-import { json, LinksFunction, LoaderFunction } from "@remix-run/node";
+import { json, LinksFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
 import { Form, Link, useActionData, useLoaderData, useFetcher } from "@remix-run/react";
 
 import type { ActionDataGen } from "~/type/action.data";
@@ -9,14 +9,19 @@ import RecordBar from "~/component/RecordBar";
 import Modal from "~/component/Modal";
 import { useState } from "react";
 export { action } from "./action";
-
 import stylesUrl from "~/styles/project-page.css";
+
+const TITLE = '標案管理';
 
 type ActionData = ActionDataGen<NewProjectForm>
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
 };
+
+export const meta: MetaFunction = () => ({
+  title: TITLE,
+});
 
 export const loader: LoaderFunction = async ({ request }) => {
   await isAdmin(request);
@@ -47,7 +52,7 @@ export default () => {
     <div className="Page ProjectPage">
       <div className="block">
         <div className="header">
-          <h2 className="title">標案管理頁</h2>
+          <h2 className="title">{TITLE}</h2>
           <div><button className="btn primary f1r" onClick={setShowModal.bind(null, true)}>+ 新增標案</button></div>
         </div>
         {showModal &&
