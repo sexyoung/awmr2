@@ -21,6 +21,11 @@
   background-color: #67747c;
 }
 
+.frame.development:before,
+.frame.development .app .menu {
+  background-color: #7c8b67;
+}
+
 .frame .app .menu {
   z-index: 1;
   min-width: 200px;
@@ -92,8 +97,8 @@
   list-style: none;
 }
 
-.frame .app .menu ul li {
-
+.frame.development .app .menu .info {
+  background-color: #7c8b67;
 }
 
 .frame .app .menu ul li a {
@@ -151,6 +156,8 @@
   .frame .app .menu .info {
     transform: translateX(100%);
     transition: transform .25s;
+    z-index: 1;
+    padding-top: 30px;
   }
 
   .frame .app .menu #hamburger-menu {
@@ -163,11 +170,6 @@
 
   .frame .app #hamburger:checked ~ .menu:after {
     display: block;
-  }
-
-  .frame .app .menu .info {
-    z-index: 1;
-    padding-top: 30px;
   }
 
   .frame .app .menu ul li {

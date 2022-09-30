@@ -37,16 +37,18 @@ export default function DashBoard() {
       hamburger.checked = false;
     }
   }
-  
+
   return (
-    <div className="frame">
+    <div className={`frame ${process.env.NODE_ENV}`}>
       <div className="app">
         <input type="checkbox" id="hamburger" />
         <div id="menu" className="menu xs:pf xs:df xs:jcsb" onClick={handleClose}>
           <div className="system-name">
             小區
             <u>抄表系統</u>
-            <small><small><small>v2.0</small></small></small>
+            <small><small><small>
+              {process.env.NODE_ENV === 'development' ? '測試版': 'v2.0'}
+            </small></small></small>
           </div>
           <label htmlFor="hamburger" id="hamburger-menu" />
           <div className="info bg-blue-bayoux xs:pf xs:r0 xs:t0 xs:h100vh">
