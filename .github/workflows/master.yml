@@ -4,7 +4,7 @@ name: deploy to prd server
 on:
   pull_request:
     branches:
-      - master
+      - develop
     types: [ closed ]
 
 jobs:
