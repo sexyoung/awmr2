@@ -1,0 +1,117 @@
+.UserPage .filter {
+  list-style: none;
+  margin: 0 17px 10px;
+  /* border: 1px solid #ddd; */
+}
+
+.UserPage input[type=radio][name=title] {
+  display: none;
+}
+
+.UserPage .filter.ENG li:nth-child(1) {
+  border-bottom: 3px solid #eee;
+}
+.UserPage .filter.ENG li:nth-child(1) > a {
+  color: #666;
+}
+.UserPage .filter.ENM li:nth-child(2) {
+  border-bottom: 3px solid #cce1ef;
+}
+.UserPage .filter.ENM li:nth-child(2) > a {
+  color: #86a2b5;
+}
+.UserPage .filter.OFW li:nth-child(3) {
+  border-bottom: 3px solid #e2efcc;
+}
+.UserPage .filter.OFW li:nth-child(3) > a {
+  color: #86b59a;
+}
+.UserPage .filter.ADM li:nth-child(4) {
+  border-bottom: 3px solid #e59ecf;
+}
+.UserPage .filter.ADM li:nth-child(4) > a {
+  color: #b58686;
+}
+
+.UserPage .filter li {
+  border-bottom: 3px solid #f9f9f9;
+}
+
+.UserPage .filter li a {
+  color: #bbb;
+  display: block;
+  text-decoration: none;
+}
+
+.UserPage .user-box {
+  box-sizing: border-box;
+  width: calc(25% - 8px);
+  border: 1px solid #ddd;
+  padding-top: 20px;
+  font-size: 14px;
+  padding-bottom: 0;
+}
+
+.UserPage .user-box .avatar {
+  margin: 0 auto;
+  width: 100px;
+  height: 100px;
+  border-radius: 100%;
+}
+
+.UserPage .user-box .avatar:before {
+  display: none;
+  cursor: pointer;
+}
+
+.UserPage .user-box .avatar:hover:before {
+  position: absolute;
+  display: flex;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  color: #fff;
+  font-size: 1.2rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.UserPage .user-box .avatar.enabled:before {
+  background-color: rgb(29 119 11 / 70%);
+  content: '啟用';
+}
+
+.UserPage .user-box .avatar.disabled:before {
+  background-color: rgb(174 54 54 / 70%);
+  content: '停用';
+}
+
+.UserPage .user-box.disabled {
+  opacity: .3;
+}
+
+.UserPage .user-box .title {
+  top: 0;
+  right: 0;
+  font-size: 11px;
+  padding: 2px 6px;
+}
+
+.UserPage .user-box .edit {
+  padding: 4px 0;
+  background-color: #eee;
+  color: #333;
+  text-decoration: none;
+}
+
+.UserPage .user-box .edit:hover {
+  background-color: #ccc;
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.UserPage .user-box .title.ENG { background-color: #eee; }
+.UserPage .user-box .title.ENM { background-color: #cce1ef; }
+.UserPage .user-box .title.OFW { background-color: #e2efcc; }
+.UserPage .user-box .title.ADM { background-color: #e59ecf; }

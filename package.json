@@ -4,24 +4,45 @@
   "description": "",
   "license": "",
   "sideEffects": false,
+  "prisma": {
+    "seed": "node --require esbuild-register prisma/seed.ts"
+  },
   "scripts": {
     "build": "remix build",
     "dev": "remix dev",
     "start": "remix-serve build"
   },
   "dependencies": {
+    "@line/bot-sdk": "^7.5.2",
     "@remix-run/node": "^1.5.1",
     "@remix-run/react": "^1.5.1",
     "@remix-run/serve": "^1.5.1",
+    "bcryptjs": "^2.4.3",
+    "browser-image-compression": "^2.0.0",
+    "date-fns": "^2.28.0",
+    "dotenv": "^16.0.1",
+    "js-md5": "^0.7.3",
     "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react-date-range": "^1.4.0",
+    "react-dom": "^17.0.2",
+    "redis": "^4.2.0",
+    "rxjs": "^7.5.5",
+    "ts-node": "^10.9.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@prisma/client": "^4.3.1",
     "@remix-run/dev": "^1.5.1",
     "@remix-run/eslint-config": "^1.5.1",
+    "@types/bcryptjs": "^2.4.2",
+    "@types/js-md5": "^0.4.3",
     "@types/react": "^17.0.45",
+    "@types/react-date-range": "^1.4.3",
     "@types/react-dom": "^17.0.17",
+    "esbuild-register": "^3.3.2",
     "eslint": "^8.15.0",
+    "prisma": "^4.3.1",
+    "tsconfig-paths": "^4.1.0",
     "typescript": "^4.6.4"
   },
   "engines": {

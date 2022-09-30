@@ -1,0 +1,7 @@
+.UserDetailPage .project-list li {
+  width: 25%;
+  margin-bottom: 10px;
+}
+.UserDetailPage .project-list li, .UserDetailPage .project-list form {
+  display: inline-block;
+}

@@ -1,0 +1,5 @@
+.ProjectPage .NewForm {
+  display: flex;
+  gap: 7px;
+  flex-direction: column;
+}

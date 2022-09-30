@@ -1,0 +1,52 @@
+.LoginPage {
+  height: 100%;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.LoginPage form {
+  gap: 5px;
+  display: flex;
+  padding: 20px;
+  margin: 0 auto;
+  flex-direction: column;
+  width: min-content;
+  height: fit-content;
+  text-align: center;
+  background-color: #fff;
+}
+
+.LoginPage form .title {
+  font-weight: 700;
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.LoginPage form input {
+  padding: 5px 10px;
+  outline: none;
+  font-size: 1rem;
+  border-radius: 3px;
+  border: 1px solid #aaa;
+}
+
+.LoginPage form .error {
+  color: #f00;
+}
+
+.LoginPage form button {
+  color: #fff;
+  border: none;
+  outline: none;
+  padding: 7px 0;
+  font-size: 1rem;
+  border-radius: 3px;
+  background-color: #5693af;
+}
+
+@media screen and (max-width: 768px) {
+  
+}
