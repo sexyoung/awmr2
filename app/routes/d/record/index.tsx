@@ -56,12 +56,11 @@ export const meta: MetaFunction = () => ({
 export const loader: LoaderFunction = async ({ request }) => {
   const user = await getUser(request);
   if(!user) return;
-  let projectIdList = user.title !== Role.ADM ?
-    (await db.projectsOnUsers.findMany({where: {userId: user.id}})).map(({ projectId }) => projectId): [];
+  let projectIdList = (await db.projectsOnUsers.findMany({where: {userId: user.id}})).map(({ projectId }) => projectId);
 
   const url = new URL(request.url);
   const projectListItems = await db.project.findMany({
-    ...(user.title !== Role.ADM ? {where: { id: {in: projectIdList}}}: {}),
+    where: { id: {in: projectIdList}},
     orderBy: { createdAt: "desc" },
   });
   const page = +url.searchParams.get("page")! || 1;

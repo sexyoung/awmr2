@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import type { Record, User, Project, Meter } from "@prisma/client";
+import { Role } from "@prisma/client";
 import { LinksFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
 import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 import { db } from "~/utils/db.server";
 import { Avator } from "./avatar";
-import { isAdmin } from "~/api/user";
+import { getUser, isAdmin } from "~/api/user";
 import { Toast } from "~/component/Toast";
 import stylesUrl from "~/styles/user-detail-page.css";
 import { format } from "date-fns";
@@ -29,13 +30,15 @@ export const meta: MetaFunction = ({data}) => {
   }
 };
 
-type LoaderData = { user: User & {
+type LoaderData = { userTitle: Role; user: User & {
   Record: (Record & { meter: Meter })[];
   projects: number[];
 }, projectListItems: Project[] };
 
 export const loader: LoaderFunction = async ({ params: { userId = 0 }, request }) => {
   await isAdmin(request);
+  const currUser = await getUser(request);
+  if(!currUser) return;
   const projectListItems = await db.project.findMany({
     orderBy: { createdAt: "desc" },
   });
@@ -54,6 +57,7 @@ export const loader: LoaderFunction = async ({ params: { userId = 0 }, request }
   });
   if (!user) throw new Error("user not found");
   return {
+    userTitle: currUser.title,
     user: {
       ...user,
       projects: user.projects.map(({ project }) => project.id)
@@ -66,7 +70,8 @@ const UserRoute = () => {
   const [error, setError] = useState('');
   const [showUpdated, setShowUpdated] = useState(false);
   const {type, ts, code, target} = (useActionData<ActionData>() || {}) as ActionData;
-  const { user, projectListItems } = useLoaderData<LoaderData>();
+  const { user, projectListItems, userTitle } = useLoaderData<LoaderData>();
+  const isDisabled = userTitle !== Role.ADM;
 
   useEffect(() => {
     if(type === 'UPDATED') {
@@ -77,7 +82,7 @@ const UserRoute = () => {
       setTimeout(setError.bind(null, ''), 3000);
     }
   }, [type, ts]);
-  
+
   return (
     <div className="Page UserDetailPage">
       {showUpdated && (
@@ -94,22 +99,22 @@ const UserRoute = () => {
         </div>
         <div className="ph20">
           <Form method="put">
-            <input name="_method" type="hidden" value="update" />
-            <input name="id" type="hidden" value={user.id} />
+            <input name="_method" type="hidden" value="update" disabled={isDisabled} />
+            <input name="id" type="hidden" value={user.id} disabled={isDisabled} />
             <div className="tac">帳號 {user.name}</div>
-            <Avator id={user.id} picture={user.avatar} afterChange={() => location.reload()} />
-            <UserForm {...{user}} />
+            <Avator id={user.id} picture={user.avatar} isDisabled={isDisabled} afterChange={() => location.reload()} />
+            <UserForm {...{user, isDisabled}} />
           </Form>
           <h2 className="tac">所屬標案</h2>
           <ul className="project-list p0 m0">
             {projectListItems.map(project =>
               <li key={project.id}>
                 <Form method="patch" id={`form${project.id}`}>
-                <input type="hidden" name="_method" value="attach" />
-                <input type="hidden" name="userId" defaultValue={user.id} />
-                <input type="hidden" name="projectId" defaultValue={project.id} />
+                <input type="hidden" name="_method" value="attach" disabled={isDisabled} />
+                <input type="hidden" name="userId" defaultValue={user.id} disabled={isDisabled} />
+                <input type="hidden" name="projectId" defaultValue={project.id} disabled={isDisabled} />
                   <label className={project.isActive ? '': 'color-gray'}>
-                    <input type="checkbox" defaultChecked={user.projects.includes(project.id)} onChange={() => document.getElementById(`submit-${project.id}`)?.click()} />
+                    <input type="checkbox" defaultChecked={user.projects.includes(project.id)} onChange={() => document.getElementById(`submit-${project.id}`)?.click()} disabled={isDisabled} />
                     {project.name}
                     <button className="dn" id={`submit-${project.id}`}>update</button>
                   </label>

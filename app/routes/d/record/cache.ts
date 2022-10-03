@@ -34,9 +34,7 @@ export async function cache({
     }),
     AND: [
       {isActive: true},
-      (projectIdList.length ? {
-        projectId: { in: projectIdList }
-      } : {}),
+      {projectId: { in: projectIdList }},
       {project: {isActive: true}}
     ],
     OR: [
