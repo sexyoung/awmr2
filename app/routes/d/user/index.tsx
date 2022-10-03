@@ -19,6 +19,7 @@ type ItemType = User & {
 
 type LoadData = {
   userTitle: Role;
+  canEdit: boolean;
   href: string;
   title: string;
   pathname: string;
@@ -40,8 +41,9 @@ export const loader: LoaderFunction = async ({ request }) => {
   const user = await getUser(request);
   if(!user) return;
   const url = new URL(request.url);
-  const index = RoleArr.indexOf(url.searchParams.get("title") as string);
-  if(index === -1) return redirect("/d/user?title=ENG");
+  const tabIndex = RoleArr.indexOf(url.searchParams.get("title") as string);
+  const roleIndex = RoleArr.indexOf(user.title);
+  if(tabIndex === -1) return redirect("/d/user?title=ENG");
   const showResign = Boolean(url.searchParams.get("showResign")! || '');
   const page = +url.searchParams.get("page")! || 1;
   const title = url.searchParams.get("title") as Role;
@@ -69,6 +71,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   return {
     userTitle: user.title,
+    canEdit: roleIndex > tabIndex,
     title,
     search,
     pageTotal,
@@ -88,7 +91,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export default () => {
   const fetcher = useFetcher();
-  const { userListItems, pageTotal, href, search, title, showResign, userTitle } = useLoaderData<LoadData>();
+  const { userListItems, pageTotal, href, search, title, showResign, userTitle, canEdit } = useLoaderData<LoadData>();
 
   const handleActive: React.ChangeEventHandler<HTMLInputElement> = ({currentTarget}) => {
     const result: {[key:string]: string} = {}
@@ -125,7 +128,7 @@ export default () => {
         <div className="header">
           <h2 className="title">
             {TITLE}
-            <Link className="btn primary f1r ml5 tdn" to="/d/user/new">新增使用者</Link>
+            <Link className="btn primary f1r ml5 tdn" to="/d/user/new">新增人事</Link>
           </h2>
           {pageTotal > 1 && <Pagination {...{pageTotal, href}} />}
         </div>
@@ -168,7 +171,7 @@ export default () => {
               <div>{user.name} - {user.fullname}</div>
               <div>{user.phone || '　'}</div>
               <Link className="edit" to={`/d/user/${user.id}`}>
-                {userTitle === Role.ADM ? '編輯': '觀看'}資料
+                {canEdit ? '編輯': '觀看'}
               </Link>
               <div className={`title pa ${user.title}`}>{RoleMap[user.title]}</div>
             </div>

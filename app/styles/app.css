@@ -299,6 +299,10 @@ select {
   background-size: cover;
 }
 
+.bgsct {
+  background-size: contain;
+}
+
 .bgpc {
   background-position: center;
 }

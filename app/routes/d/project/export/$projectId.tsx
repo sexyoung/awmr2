@@ -14,6 +14,7 @@ import { Caliber } from "~/consts/meter";
 import { isAdmin } from "~/api/user";
 
 type LoaderData = {
+  DOMAIN: string;
   areaListItems: {
     area: string;
     _count: { area: number },
@@ -69,6 +70,7 @@ export const loader: LoaderFunction = async ({ params: { projectId = 0 }, reques
   });
 
   return {
+    DOMAIN: process.env.DOMAIN,
     areaListItems,
     projectListItems,
   }
@@ -83,7 +85,7 @@ const projectExportPage = () => {
     startDate: startOfDay(new Date()),
     key: 'selection',
   });
-  const { projectListItems, areaListItems } = useLoaderData<LoaderData>();
+  const { projectListItems, areaListItems, DOMAIN } = useLoaderData<LoaderData>();
 
   const getQuery = (selection: Range) => {
     const endDate = format(selection.endDate as Date, 'yyyy-MM-dd');
@@ -121,7 +123,7 @@ const projectExportPage = () => {
     const search = getQuery(selection);
     const recordList: RecordQuery[] = await (await (await fetch(`/d/project/export/query/record?${search}`)).json());
     let colMaxWidth = [
-      12, 16, 13, 13, 40, 6, 4, 9, 0, 0, 6, 9, 10, 11, 14, 
+      12, 16, 13, 13, 40, 6, 4, 9, 0, 0, 6, 9, 10, 11, 14, 80
     ];
     const sheetData = recordList.map(record => {
       const data: {[key: string]: any} = ({
@@ -140,6 +142,7 @@ const projectExportPage = () => {
         工程師: record.user.fullname,
         日期: new Date(record.createdAt).toLocaleString().split(' ')[0],
         時間: new Date(record.createdAt).toLocaleString().split(' ')[1],
+        照片: `${DOMAIN}/record${record.picture}`
       });
       return data;
     });

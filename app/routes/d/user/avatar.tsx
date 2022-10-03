@@ -16,7 +16,6 @@ const toBase64 = (file: File) => new Promise((resolve, reject) => {
 
 interface IAvatar {
   id: number;
-  isDisabled: boolean;
   picture: string | null;
   afterChange?: () => void;
 }
@@ -45,9 +44,7 @@ export const Avator: FC<IAvatar> = (props) => {
       {props.picture &&
         <div className="img m0a" style={{backgroundImage: `url(/avatar/${props.picture})`}} />
       }
-      {!props.isDisabled &&
-        <div className="btn primary dib">{preview ? '上傳中...': '上傳照片'}</div>
-      }
+      <div className="btn primary dib">{preview ? '上傳中...': '上傳照片'}</div>
       {!preview && <input className="dn" type="file" onChange={handleUpload} accept="image/*" />}
     </label>
   );

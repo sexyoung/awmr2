@@ -22,7 +22,7 @@ type RegisterForm = LoginForm & {
 export async function register({ name, password, title, fullname, email, phone, note }: RegisterForm) {
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await db.user.create({
-    data: { name, password: passwordHash, title, fullname, email, phone, note },
+    data: { name, password: passwordHash, title, fullname, email, phone, note, isActive: false },
   });
   return { id: user.id, name, title, fullname, email, phone, note };
 }

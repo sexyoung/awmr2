@@ -275,7 +275,7 @@ const RecordPage = () => {
                       <input type="hidden" name="projectIdList" defaultValue={userTitle !== Role.ADM ? projectListItems.map(({ id }) => id).join(','): ""} />
                       <div className="df">
                         <input className="input fx2 f1r xs:f3r wp100" type="tel" name="content" placeholder="度數" required />
-                        <label className="fx1 db bgpc bgrn bgsc" style={{backgroundImage: `url(${preview || IMAGE})`}}>
+                        <label className="fx1 db bgpc bgrn bgsct" style={{backgroundImage: `url(${preview || IMAGE})`}}>
                           <input type="file" className="dn" onChange={handleCompression.bind(null, meter)} accept="image/*" />
                         </label>
                         <input type="hidden" name="picture" className={`picture-${meter.id}`} />
