@@ -1,9 +1,9 @@
 import { LoaderFunction, MetaFunction, redirect } from "@remix-run/node";
 import type { ActionFunction } from "@remix-run/node";
-import { Form, Link, useActionData, useSearchParams } from "@remix-run/react";
+import { Form, Link, useActionData, useLoaderData, useSearchParams } from "@remix-run/react";
 
 import { Role } from "~/consts/role";
-import { isAdmin, register } from "~/api/user";
+import { getUser, isAdmin, register } from "~/api/user";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request";
 import type { ActionDataGen } from "~/type/action.data";
@@ -30,7 +30,10 @@ function validatePassword(password: unknown) {
 
 export const loader: LoaderFunction = async ({ request }) => {
   await isAdmin(request);
-  return null;
+  const user = await getUser(request);
+  if(!user) return;
+  const RoleList = Object.keys(Role);
+  return {titleList: RoleList.slice(0, RoleList.indexOf(user.title))};
 }
 
 export const meta: MetaFunction = () => ({
@@ -81,7 +84,7 @@ export const action: ActionFunction = async ({ request }) => {
   if (userExists) {
     return badRequest<ActionData>({
       fields,
-      formError: `帳號 ${name} 已存在，請用別的`,
+      formError: `帳號 ${newUserData.name} 已存在，請用別的`,
     });
   }
   const user = await register(newUserData);
@@ -97,6 +100,8 @@ export const action: ActionFunction = async ({ request }) => {
 const NewUserPage = () => {
   const [searchParams] = useSearchParams();
   const actionData = useActionData<ActionData>();
+  const { titleList } = useLoaderData();
+  
   return (
     <div className="Page UserNewPage">
       <div className="block">
@@ -113,11 +118,10 @@ const NewUserPage = () => {
           </p>
           <Form method="post">
             <input type="hidden" name="redirectTo" value={searchParams.get("redirectTo") ?? undefined} />
-
             <div className="df gap10" style={{maxWidth: 650, margin: '10px auto'}}>
               <div className="df aic fx1 gap10">帳號 <input className="input fx1" type="text" name="name" required /></div>
             </div>
-            <UserForm />
+            <UserForm {...{titleList}} />
           </Form>
         </div>
       </div>

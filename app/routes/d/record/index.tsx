@@ -56,12 +56,11 @@ export const meta: MetaFunction = () => ({
 export const loader: LoaderFunction = async ({ request }) => {
   const user = await getUser(request);
   if(!user) return;
-  let projectIdList = user.title !== Role.ADM ?
-    (await db.projectsOnUsers.findMany({where: {userId: user.id}})).map(({ projectId }) => projectId): [];
+  let projectIdList = (await db.projectsOnUsers.findMany({where: {userId: user.id}})).map(({ projectId }) => projectId);
 
   const url = new URL(request.url);
   const projectListItems = await db.project.findMany({
-    ...(user.title !== Role.ADM ? {where: { id: {in: projectIdList}}}: {}),
+    where: { id: {in: projectIdList}},
     orderBy: { createdAt: "desc" },
   });
   const page = +url.searchParams.get("page")! || 1;
@@ -276,7 +275,7 @@ const RecordPage = () => {
                       <input type="hidden" name="projectIdList" defaultValue={userTitle !== Role.ADM ? projectListItems.map(({ id }) => id).join(','): ""} />
                       <div className="df">
                         <input className="input fx2 f1r xs:f3r wp100" type="tel" name="content" placeholder="度數" required />
-                        <label className="fx1 db bgpc bgrn bgsc" style={{backgroundImage: `url(${preview || IMAGE})`}}>
+                        <label className="fx1 db bgpc bgrn bgsct" style={{backgroundImage: `url(${preview || IMAGE})`}}>
                           <input type="file" className="dn" onChange={handleCompression.bind(null, meter)} accept="image/*" />
                         </label>
                         <input type="hidden" name="picture" className={`picture-${meter.id}`} />

@@ -1,7 +1,7 @@
 import { Record, Role, User } from "@prisma/client";
 import { LinksFunction, LoaderFunction, MetaFunction, redirect } from "@remix-run/node";
 import { Form, Link, useFetcher, useLoaderData } from "@remix-run/react";
-import { isAdmin } from "~/api/user";
+import { getUser, isAdmin } from "~/api/user";
 import { db } from "~/utils/db.server";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
 
@@ -18,6 +18,8 @@ type ItemType = User & {
 }
 
 type LoadData = {
+  userTitle: Role;
+  canEdit: boolean;
   href: string;
   title: string;
   pathname: string;
@@ -36,9 +38,12 @@ export const meta: MetaFunction = () => ({
 
 export const loader: LoaderFunction = async ({ request }) => {
   await isAdmin(request);
+  const user = await getUser(request);
+  if(!user) return;
   const url = new URL(request.url);
-  const index = RoleArr.indexOf(url.searchParams.get("title") as string);
-  if(index === -1) return redirect("/d/user?title=ENG");
+  const tabIndex = RoleArr.indexOf(url.searchParams.get("title") as string);
+  const roleIndex = RoleArr.indexOf(user.title);
+  if(tabIndex === -1) return redirect("/d/user?title=ENG");
   const showResign = Boolean(url.searchParams.get("showResign")! || '');
   const page = +url.searchParams.get("page")! || 1;
   const title = url.searchParams.get("title") as Role;
@@ -65,6 +70,8 @@ export const loader: LoaderFunction = async ({ request }) => {
   const pageTotal = ~~(userCount / PAGE_SIZE) + 1;
 
   return {
+    userTitle: user.title,
+    canEdit: roleIndex > tabIndex,
     title,
     search,
     pageTotal,
@@ -84,10 +91,9 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export default () => {
   const fetcher = useFetcher();
-  const { userListItems, pageTotal, href, search, title, showResign } = useLoaderData<LoadData>();
+  const { userListItems, pageTotal, href, search, title, showResign, userTitle, canEdit } = useLoaderData<LoadData>();
 
   const handleActive: React.ChangeEventHandler<HTMLInputElement> = ({currentTarget}) => {
-    console.log(currentTarget.checked);
     const result: {[key:string]: string} = {}
     const url = new URL(location.href);
     for (const [key, value] of url.searchParams.entries()) {
@@ -122,7 +128,7 @@ export default () => {
         <div className="header">
           <h2 className="title">
             {TITLE}
-            <Link className="btn primary f1r ml5 tdn" to="/d/user/new">新增使用者</Link>
+            <Link className="btn primary f1r ml5 tdn" to="/d/user/new">新增人事</Link>
           </h2>
           {pageTotal > 1 && <Pagination {...{pageTotal, href}} />}
         </div>
@@ -142,9 +148,11 @@ export default () => {
           <li className="fx1 tac OFW">
             <Link className="p10" to={`/d/user?title=OFW&search=${search}&showResign=${showResign ? 1: ''}`}>{RoleMap.OFW}</Link>
           </li>
-          <li className="fx1 tac ADM">
-            <Link className="p10" to={`/d/user?title=ADM&search=${search}&showResign=${showResign ? 1: ''}`}>{RoleMap.ADM}</Link>
-          </li>
+          {userTitle === Role.ADM &&
+            <li className="fx1 tac ADM">
+              <Link className="p10" to={`/d/user?title=ADM&search=${search}&showResign=${showResign ? 1: ''}`}>{RoleMap.ADM}</Link>
+            </li>
+          }
           <li className="fx1 tac df jcc aic">
             <label>
               <input type="checkbox" name="isActive" value="1" onChange={handleActive} defaultChecked={showResign} />
@@ -162,7 +170,9 @@ export default () => {
               } />
               <div>{user.name} - {user.fullname}</div>
               <div>{user.phone || '　'}</div>
-              <Link className="edit" to={`/d/user/${user.id}`}>編輯資料</Link>
+              <Link className="edit" to={`/d/user/${user.id}`}>
+                {canEdit ? '編輯': '觀看'}
+              </Link>
               <div className={`title pa ${user.title}`}>{RoleMap[user.title]}</div>
             </div>
           )}
