@@ -69,7 +69,7 @@ export const loader: LoaderFunction = async ({ params: { userId = 0 }, request }
       projects: user.projects.map(({ project }) => project.id)
     },
     projectListItems,
-    canEdit: RoleList.indexOf(currUser.title) > RoleList.indexOf(user.title),
+    canEdit: RoleList.indexOf(currUser.title) > RoleList.indexOf(user.title) || currUser.title === Role.ADM,
   };
 };
 

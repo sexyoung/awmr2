@@ -71,7 +71,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   return {
     userTitle: user.title,
-    canEdit: roleIndex > tabIndex,
+    canEdit: roleIndex > tabIndex || user.title === Role.ADM,
     title,
     search,
     pageTotal,
