@@ -65,11 +65,11 @@ const AreaPage = () => {
         <table>
           <thead>
             <tr>
-              <th style={{width: 130, boxSizing: 'border-box'}}>標案</th>
-              <th style={{width: 150, boxSizing: 'border-box'}}>小區</th>
+              <th style={{width: 170, boxSizing: 'border-box'}}>標案</th>
+              <th style={{width: 180, boxSizing: 'border-box'}}>小區</th>
               <th>登錄</th>
               <th style={{width: 80, boxSizing: 'border-box'}}>抄見率</th>
-              <th style={{width: 150, boxSizing: 'border-box'}}>進度</th>
+              <th style={{width: 110, boxSizing: 'border-box'}}>進度</th>
               <th>錶數</th>
               <th style={{width: 130, boxSizing: 'border-box'}}>登錄時間</th>
             </tr>
