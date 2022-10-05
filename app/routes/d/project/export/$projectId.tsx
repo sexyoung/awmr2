@@ -46,6 +46,8 @@ const Status = {
   notRecord: '異常',
 }
 
+let count = 0;
+
 export const links: LinksFunction = () => {
   return [
     { rel: "stylesheet", href: rdrStyle },
@@ -111,7 +113,7 @@ const projectExportPage = () => {
     // };
     const search = getQuery(selection);
 
-    const count = await (await (await fetch(`/d/project/export/query/count?${search}`)).json());
+    count = await (await (await fetch(`/d/project/export/query/count?${search}`)).json());
     setCanDownLoad(count > 0);
   }
 
@@ -190,8 +192,8 @@ const projectExportPage = () => {
             />
           </div>
           <div className="tac">
-            <button className="btn primary wp100 f1.5r"disabled={!canDownLoad} onClick={handleDownload}>
-              下載報告 (Excel)
+            <button className="btn primary wp100 f1.5r" disabled={!canDownLoad} onClick={handleDownload}>
+              下載報告 (Excel) {Boolean(count) && `(${count})`}
             </button>
           </div>
         </div>
