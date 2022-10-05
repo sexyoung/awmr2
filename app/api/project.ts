@@ -45,5 +45,8 @@ export type ProjectData = Array<Project & {
 export async function query(take?: number) {
   // 先取得快照裡的全部標案資料
   const cacheProject = await cacheAll();
+  console.log(cacheProject);
+  
+  cacheProject.sort((a: any, b: any) => a.code > b.code ? 1: -1);
   return take ? cacheProject.slice(0, take): cacheProject;
 }
