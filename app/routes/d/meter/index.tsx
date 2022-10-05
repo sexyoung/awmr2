@@ -8,7 +8,7 @@ import { Suppy, Type } from "~/consts/meter";
 import { NotRecordReasonMap, Status } from "~/consts/reocrd";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
 import Modal from "~/component/Modal";
-import { isAdmin } from "~/api/user";
+import { getUser, isAdmin } from "~/api/user";
 export { action } from "./action";
 
 import stylesUrl from "~/styles/meter-page.css";
@@ -39,6 +39,9 @@ export const meta: MetaFunction = () => ({
 
 export const loader: LoaderFunction = async ({ request }) => {
   await isAdmin(request);
+  const user = await getUser(request);
+  if(!user) return;
+  const userProjects = user.projects.map(({ project }) => project.id);
   const url = new URL(request.url);
   const projectListItems = await db.project.findMany({
     orderBy: { createdAt: "desc" },
@@ -54,8 +57,11 @@ export const loader: LoaderFunction = async ({ request }) => {
       {waterId: { contains: search }},
       {location: { contains: search }},
       {note: { contains: search }},
+    ],
+    AND: [
+      {projectId: {in: userProjects}}
     ]
-  }: {}
+  }: {projectId: {in: userProjects}}
 
   let meterCount = await db.meter.count({ where });
   meterCount = meterCount && (meterCount - 1);
