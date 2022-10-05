@@ -11,7 +11,7 @@ import rdrTheme from 'react-date-range/dist/theme/default.css'; // theme css fil
 import { db } from "~/utils/db.server";
 import { Meter, Project, Record, User } from "@prisma/client";
 import { Caliber } from "~/consts/meter";
-import { isAdmin } from "~/api/user";
+import { getUser, isAdmin } from "~/api/user";
 
 type LoaderData = {
   DOMAIN: string;
@@ -57,9 +57,10 @@ export const links: LinksFunction = () => {
 
 export const loader: LoaderFunction = async ({ params: { projectId = 0 }, request }) => {
   await isAdmin(request);
-  const projectListItems = await db.project.findMany({
-    orderBy: { createdAt: "desc" },
-  });
+  const user = await getUser(request);
+  if(!user) return;
+
+  const projectListItems = user.projects.map(({ project }) => ({id: project.id, name: project.name}));
 
   const areaListItems = await db.meter.groupBy({
     by: ['area'],

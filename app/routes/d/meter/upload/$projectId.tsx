@@ -5,7 +5,7 @@ import { read, utils } from "xlsx";
 import { useParams, useFetcher, useLoaderData } from "@remix-run/react"
 import { Toast } from "~/component/Toast";
 import { LinksFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
-import { isAdmin } from "~/api/user";
+import { getUser, isAdmin } from "~/api/user";
 import { db } from "~/utils/db.server";
 export { action } from "./action";
 
@@ -41,9 +41,9 @@ export const meta: MetaFunction = () => ({
 
 export const loader: LoaderFunction = async ({params: { projectId = 0 }, request }) => {
   await isAdmin(request);
-  const projectListItems = await db.project.findMany({
-    orderBy: { createdAt: "desc" },
-  });
+  const user = await getUser(request);
+  if(!user) return;
+  const projectListItems = user.projects.map(({ project }) => ({id: project.id, name: project.name}));
   return {
     projectListItems,
   };

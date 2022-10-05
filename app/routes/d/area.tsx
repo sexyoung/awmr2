@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { json, LoaderFunction, MetaFunction } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
 import { query, AreaData } from "~/api/area";
-import { isAdmin } from "~/api/user";
+import { getUser, isAdmin } from "~/api/user";
 import { Pagination } from "~/component/Pagination";
 import RecordBar from "~/component/RecordBar";
 
@@ -18,12 +18,16 @@ export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
   const page = +url.searchParams.get("page")! || 1;
   const search = url.searchParams.get("search") || '';
+  const user = await getUser(request);
+  if(!user) return;
+  const userProjects = user.projects.map(({ project }) => project.id);
 
   const where = search ? {
-    OR: [
+    AND: [
+      {projectId: {in: userProjects}},
       {area: { contains: search }},
     ]
-  }: {}
+  }: {projectId: {in: userProjects}}
 
   const {
     count,
