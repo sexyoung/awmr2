@@ -5,10 +5,8 @@ import { read, utils } from "xlsx";
 import { useParams, useFetcher, useLoaderData } from "@remix-run/react"
 import { Toast } from "~/component/Toast";
 import { LinksFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
-import { isAdmin } from "~/api/user";
+import { getUser, isAdmin } from "~/api/user";
 import { db } from "~/utils/db.server";
-import { cache as areaCache } from "~/api/cache/area.cache";
-import { cache as projCache } from "~/api/cache/project.cache";
 export { action } from "./action";
 
 import stylesUrl from "~/styles/meter-upload.css";
@@ -43,25 +41,9 @@ export const meta: MetaFunction = () => ({
 
 export const loader: LoaderFunction = async ({params: { projectId = 0 }, request }) => {
   await isAdmin(request);
-  await projCache(+projectId!);
-
-  // 更新小區抄錶成功/失敗數字
-  const areaListItems = await db.meter.groupBy({
-    by: ['area'],
-    _count: {
-      area: true,
-    },
-    where: { projectId: +projectId! },
-  });
-
-  for (let i = 0; i < areaListItems.length; i++) {
-    const area = areaListItems[i];
-    await areaCache(area.area as string, area._count.area);
-  }
-
-  const projectListItems = await db.project.findMany({
-    orderBy: { createdAt: "desc" },
-  });
+  const user = await getUser(request);
+  if(!user) return;
+  const projectListItems = user.projects.map(({ project }) => ({id: project.id, name: project.name}));
   return {
     projectListItems,
   };
@@ -173,11 +155,12 @@ const UploadPage = () => {
         distinctUntilChanged()
       );
       
-      uploadMeterList$.subscribe(percent => {
+      uploadMeterList$.subscribe(async percent => {
         if(percent < 100) return setPercent(percent);
         data = [];
         setIsUpLoading(false);
         if(uploadError.length) return setPercent(percent);
+        await fetch(`/d/meter/upload/update/${+params.projectId!}`);
         location.reload();
       });
   }

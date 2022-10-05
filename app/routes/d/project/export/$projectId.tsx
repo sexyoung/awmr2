@@ -11,7 +11,7 @@ import rdrTheme from 'react-date-range/dist/theme/default.css'; // theme css fil
 import { db } from "~/utils/db.server";
 import { Meter, Project, Record, User } from "@prisma/client";
 import { Caliber } from "~/consts/meter";
-import { isAdmin } from "~/api/user";
+import { getUser, isAdmin } from "~/api/user";
 
 type LoaderData = {
   DOMAIN: string;
@@ -46,6 +46,8 @@ const Status = {
   notRecord: '異常',
 }
 
+let count = 0;
+
 export const links: LinksFunction = () => {
   return [
     { rel: "stylesheet", href: rdrStyle },
@@ -55,9 +57,10 @@ export const links: LinksFunction = () => {
 
 export const loader: LoaderFunction = async ({ params: { projectId = 0 }, request }) => {
   await isAdmin(request);
-  const projectListItems = await db.project.findMany({
-    orderBy: { createdAt: "desc" },
-  });
+  const user = await getUser(request);
+  if(!user) return;
+
+  const projectListItems = user.projects.map(({ project }) => ({id: project.id, name: project.name}));
 
   const areaListItems = await db.meter.groupBy({
     by: ['area'],
@@ -111,7 +114,7 @@ const projectExportPage = () => {
     // };
     const search = getQuery(selection);
 
-    const count = await (await (await fetch(`/d/project/export/query/count?${search}`)).json());
+    count = await (await (await fetch(`/d/project/export/query/count?${search}`)).json());
     setCanDownLoad(count > 0);
   }
 
@@ -190,8 +193,8 @@ const projectExportPage = () => {
             />
           </div>
           <div className="tac">
-            <button className="btn primary wp100 f1.5r"disabled={!canDownLoad} onClick={handleDownload}>
-              下載報告 (Excel)
+            <button className="btn primary wp100 f1.5r" disabled={!canDownLoad} onClick={handleDownload}>
+              下載報告 (Excel) {Boolean(count) && `(${count})`}
             </button>
           </div>
         </div>

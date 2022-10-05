@@ -620,6 +620,10 @@ label.avatar .img {
   background-color: var(--color-blue-bayoux);
 }
 
+.btn:disabled {
+  opacity: 0.5;
+}
+
 .dateRanger {
   box-sizing: border-box;
 }

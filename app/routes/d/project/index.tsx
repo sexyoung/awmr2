@@ -3,13 +3,14 @@ import { Form, Link, useActionData, useLoaderData, useFetcher } from "@remix-run
 
 import type { ActionDataGen } from "~/type/action.data";
 import type { NewProjectForm } from "~/type/project";
-import { isAdmin } from "~/api/user";
+import { getUser, isAdmin } from "~/api/user";
 import { query as projectQuery, ProjectData } from "~/api/project";
 import RecordBar from "~/component/RecordBar";
 import Modal from "~/component/Modal";
 import { useState } from "react";
 export { action } from "./action";
 import stylesUrl from "~/styles/project-page.css";
+import { Project } from "@prisma/client";
 
 const TITLE = '標案管理';
 
@@ -25,7 +26,13 @@ export const meta: MetaFunction = () => ({
 
 export const loader: LoaderFunction = async ({ request }) => {
   await isAdmin(request);
-  return json(await projectQuery());
+
+  const user = await getUser(request);
+  if(!user) return;
+  const userProjects = user.projects.map(({ project }) => project.id);
+
+  // console.log(await projectQuery());
+  return json((await projectQuery()).filter((project: Project) => userProjects.includes(project.id)));
 };
 
 export default () => {

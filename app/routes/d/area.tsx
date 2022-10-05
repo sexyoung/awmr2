@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { json, LoaderFunction, MetaFunction } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
 import { query, AreaData } from "~/api/area";
-import { isAdmin } from "~/api/user";
+import { getUser, isAdmin } from "~/api/user";
 import { Pagination } from "~/component/Pagination";
 import RecordBar from "~/component/RecordBar";
 
@@ -18,12 +18,16 @@ export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
   const page = +url.searchParams.get("page")! || 1;
   const search = url.searchParams.get("search") || '';
+  const user = await getUser(request);
+  if(!user) return;
+  const userProjects = user.projects.map(({ project }) => project.id);
 
   const where = search ? {
-    OR: [
+    AND: [
+      {projectId: {in: userProjects}},
       {area: { contains: search }},
     ]
-  }: {}
+  }: {projectId: {in: userProjects}}
 
   const {
     count,
@@ -65,11 +69,11 @@ const AreaPage = () => {
         <table>
           <thead>
             <tr>
-              <th style={{width: 130, boxSizing: 'border-box'}}>標案</th>
-              <th style={{width: 150, boxSizing: 'border-box'}}>小區</th>
+              <th style={{width: 170, boxSizing: 'border-box'}}>標案</th>
+              <th style={{width: 180, boxSizing: 'border-box'}}>小區</th>
               <th>登錄</th>
               <th style={{width: 80, boxSizing: 'border-box'}}>抄見率</th>
-              <th style={{width: 150, boxSizing: 'border-box'}}>進度</th>
+              <th style={{width: 110, boxSizing: 'border-box'}}>進度</th>
               <th>錶數</th>
               <th style={{width: 130, boxSizing: 'border-box'}}>登錄時間</th>
             </tr>

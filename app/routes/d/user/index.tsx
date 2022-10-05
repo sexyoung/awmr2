@@ -93,7 +93,7 @@ export default () => {
   const fetcher = useFetcher();
   const { userListItems, pageTotal, href, search, title, showResign, userTitle, canEdit } = useLoaderData<LoadData>();
 
-  const handleActive: React.ChangeEventHandler<HTMLInputElement> = ({currentTarget}) => {
+  const handleActive: React.MouseEventHandler<HTMLInputElement> = ({currentTarget}) => {
     const result: {[key:string]: string} = {}
     const url = new URL(location.href);
     for (const [key, value] of url.searchParams.entries()) {
@@ -158,7 +158,7 @@ export default () => {
           }
           <li className="fx1 tac df jcc aic">
             <label>
-              <input type="checkbox" name="isActive" value="1" onChange={handleActive} defaultChecked={showResign} />
+              <input type="checkbox" name="isActive" value="1" onClick={handleActive} defaultChecked={showResign} />
               顯示停用
             </label>
           </li>

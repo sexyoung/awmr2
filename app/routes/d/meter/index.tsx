@@ -8,7 +8,7 @@ import { Suppy, Type } from "~/consts/meter";
 import { NotRecordReasonMap, Status } from "~/consts/reocrd";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
 import Modal from "~/component/Modal";
-import { isAdmin } from "~/api/user";
+import { getUser, isAdmin } from "~/api/user";
 export { action } from "./action";
 
 import stylesUrl from "~/styles/meter-page.css";
@@ -39,6 +39,9 @@ export const meta: MetaFunction = () => ({
 
 export const loader: LoaderFunction = async ({ request }) => {
   await isAdmin(request);
+  const user = await getUser(request);
+  if(!user) return;
+  const userProjects = user.projects.map(({ project }) => project.id);
   const url = new URL(request.url);
   const projectListItems = await db.project.findMany({
     orderBy: { createdAt: "desc" },
@@ -54,8 +57,11 @@ export const loader: LoaderFunction = async ({ request }) => {
       {waterId: { contains: search }},
       {location: { contains: search }},
       {note: { contains: search }},
+    ],
+    AND: [
+      {projectId: {in: userProjects}}
     ]
-  }: {}
+  }: {projectId: {in: userProjects}}
 
   let meterCount = await db.meter.count({ where });
   meterCount = meterCount && (meterCount - 1);
@@ -181,14 +187,14 @@ const MeterPage = () => {
               <input className="input wp100 bsbb fx1" placeholder="地址" ref={address} type="text" name="address" />
             </div>
             <div className="df aic gap10 w300">供水
-              <select className="input wp100 bsbb fx1" ref={type} name="type" required>
+              <select className="input wp100 bsbb fx1" ref={type} name="type">
                 <option value={Suppy.NOM}>正常</option>
                 <option value={Suppy.END}>中止</option>
                 <option value={Suppy.PAU}>停水</option>
               </select>
             </div>
             <div className="df aic gap10 w300">表種
-              <select className="input wp100 bsbb fx1" ref={suppy} name="suppy" required>
+              <select className="input wp100 bsbb fx1" ref={suppy} name="suppy">
                 <option value={Type.DRT}>直接錶</option>
                 <option value={Type.TTL}>總錶</option>
                 <option value={Type.BCH}>分錶</option>
