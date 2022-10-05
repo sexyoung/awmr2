@@ -113,6 +113,9 @@ export default () => {
   }
 
   const toggleActive = (id: number, isActive: boolean) => {
+    if(userTitle !== Role.ADM) {
+      return alert('請洽管理員停用/啟用');
+    }
     fetcher.submit({
       _method: 'toggle',
       isActive: isActive ? '1': '',
