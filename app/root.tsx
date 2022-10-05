@@ -7,7 +7,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
-
+import * as gtag from "~/utils/gtags";
 import stylesUrl from "~/styles/app.css";
 
 export const links: LinksFunction = () => {
@@ -32,6 +32,24 @@ export default function App() {
       <head>
         <Meta />
         <Links />
+        <script
+          async
+          src={`https://www.googletagmanager.com/gtag/js?id=${gtag.GA_TRACKING_ID}`}
+        />
+        <script
+          async
+          id="gtag-init"
+          dangerouslySetInnerHTML={{
+            __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${gtag.GA_TRACKING_ID}', {
+              page_path: window.location.pathname,
+            });
+          `
+          }}
+        />
       </head>
       <body>
         <Outlet />
