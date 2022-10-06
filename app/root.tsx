@@ -1,3 +1,4 @@
+import LogRocket from 'logrocket';
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import {
   Links,
@@ -9,6 +10,8 @@ import {
 } from "@remix-run/react";
 import * as gtag from "~/utils/gtags";
 import stylesUrl from "~/styles/app.css";
+
+LogRocket.init('minteai/awmr2');
 
 export const links: LinksFunction = () => {
   return [
