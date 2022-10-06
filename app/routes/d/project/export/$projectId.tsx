@@ -145,7 +145,7 @@ const projectExportPage = () => {
         工程師: record.user.fullname,
         日期: new Date(record.createdAt).toLocaleString().split(' ')[0],
         時間: new Date(record.createdAt).toLocaleString().split(' ')[1],
-        照片: `${DOMAIN}/record${record.picture}`
+        照片: record.picture ? `${DOMAIN}/record${record.picture}`: ''
       });
       return data;
     });
