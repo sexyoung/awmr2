@@ -369,7 +369,7 @@ const RecordPage = () => {
             </div>
           }
           {(fetcher.state === 'submitting') && <Modal>登錄中</Modal>}
-          {([fetcher.state, transition.state].includes('loading') ) && <Modal>讀取中</Modal>}
+          {([fetcher.state, transition.state].includes('loading') || transition.state === 'submitting') && <Modal>讀取中</Modal>}
         </div>
       </div>
     </div>
