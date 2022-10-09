@@ -125,7 +125,7 @@ const RecordPage = () => {
       const lastRecord = meter.Record.shift();
       const lastContent = lastRecord ? +lastRecord.content: 0;
       const degree = inputContent - lastContent;
-      if(degree >= 100 || degree <= -2) {
+      if(lastContent && (degree >= 100 || degree <= -2)) {
         alert("登錄度數超過100度 或 -2度");
       }
     }
