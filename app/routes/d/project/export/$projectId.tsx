@@ -143,8 +143,8 @@ const projectExportPage = () => {
         狀態: Status[record.status],
         內容: record.content,
         工程師: record.user.fullname,
-        日期: new Date(record.createdAt).toLocaleString().split(' ')[0],
-        時間: new Date(record.createdAt).toLocaleString().split(' ')[1],
+        日期: format(+ new Date(record.createdAt), 'yyyy/MM/dd'),
+        時間: format(+ new Date(record.createdAt), 'HH:mm:ss'),
         照片: record.picture ? `${DOMAIN}/record${record.picture}`: ''
       });
       return data;
