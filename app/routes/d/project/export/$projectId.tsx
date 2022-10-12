@@ -12,6 +12,7 @@ import { db } from "~/utils/db.server";
 import { Meter, Project, Record, User } from "@prisma/client";
 import { Caliber } from "~/consts/meter";
 import { getUser, isAdmin } from "~/api/user";
+import { cacheAll } from "~/api/cache/area.cache";
 
 type LoaderData = {
   DOMAIN: string;
@@ -70,6 +71,15 @@ export const loader: LoaderFunction = async ({ params: { projectId = 0 }, reques
     where: {
       projectId: +projectId,
     }
+  });
+
+  const cacheArea = await cacheAll();
+  /** @ts-ignore */
+  areaListItems.sort((a, b) => {
+    return (
+      +new Date(cacheArea[b.area as string].lastRecordTime || 0) -
+      +new Date(cacheArea[a.area as string].lastRecordTime || 0)
+    );
   });
 
   return {
