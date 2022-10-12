@@ -93,6 +93,14 @@
   color: var(--color-blue-bayoux);
 }
 
+.RecordPage .item-list .item .value input[type=checkbox]:checked ~ span {
+  display: none;
+}
+
+.RecordPage .item-list .item .value input[type=checkbox]:checked ~ input {
+  display: inline-block;
+}
+
 .RecordPage .item-list .item > input {
   display: none;
 }

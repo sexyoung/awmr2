@@ -121,6 +121,10 @@ select {
   background-color: var(--color-zombie);
 }
 
+.color-spanish-green {
+  color: var(--color-spanish-green);
+}
+
 .bgrn {
   background-repeat: no-repeat;
 }

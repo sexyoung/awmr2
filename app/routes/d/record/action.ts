@@ -78,6 +78,29 @@ const verb = {
   },
   record: async (form: FormData, userId: number, status: Status) => {
     const meterId = +form.get('meterId')!;
+    let updateMeter: {[key: string]: any} = {};
+    [
+      'updateMeter[waterId]',
+      'updateMeter[meterId]',
+      'updateMeter[address]',
+      'updateMeter[location]',
+      'updateMeter[note]',
+    ].forEach(key => {
+      if(form.get(key)) {
+        updateMeter[key.slice(12, -1)] = form.get(key) as string;
+      }
+    });
+
+    // 如果有更新地址的話要順便更新經緯度
+    if(updateMeter.address) {
+      updateMeter = {
+        ...updateMeter,
+        ...(await MeterUploadAction.coordinate(toSBC(updateMeter.address)))
+      };
+    }
+
+    // 更新水表，如果有修改的話
+    meterApi.update({ id: meterId, data: updateMeter});
 
     const [Y, M, D] = formatYmd().split('/');
 

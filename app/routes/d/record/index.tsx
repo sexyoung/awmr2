@@ -108,6 +108,7 @@ const RecordPage = () => {
   const fetcher = useFetcher();
   const transition = useTransition();
   const [preview, setPreview] = useState('');
+  const [modifyDOM, setModifyDOM] = useState<{[key: string]: string}>({});
   const [showModal, setShowModal] = useState(false);
   const [status, setStatus] = useState<Status>(Status.success);
   const { meterCountSummary, successCount, notRecordCount, search, href, pageTotal, meterListItem, projectListItems, showRecord, userTitle } = useLoaderData<LoadData>();
@@ -143,6 +144,7 @@ const RecordPage = () => {
     
     (document.getElementById(`success-${meter.id}`) as HTMLInputElement).checked = false;
     (document.getElementById(`notRecord-${meter.id}`) as HTMLInputElement).checked = false;
+    setModifyDOM({});
   }
 
   const toggleShowRecord = () => {
@@ -175,6 +177,31 @@ const RecordPage = () => {
     document.querySelectorAll<HTMLInputElement>(`[class=picture-${meter.id}]`).forEach(input => {
       input.value = `${meter.waterId}-${meter.meterId}.${blob!.name.split('.').pop()}`;
     });
+  }
+
+  const handleToggle: MouseEventHandler<HTMLInputElement> = ({ currentTarget }) => {
+    const InputDOM = document.querySelector(`[data-id=${currentTarget.getAttribute('id')!.slice(9)}]`) as HTMLInputElement;
+    InputDOM.focus();
+    InputDOM.selectionStart = InputDOM.selectionEnd = InputDOM.value.length;
+  }
+
+  const handleKeyUp: React.KeyboardEventHandler<HTMLInputElement> = ({ currentTarget, key }) => {
+    if(!['Enter', 'Escape'].includes(key)) return;
+    const CheckBoxDOM = document.getElementById("checkbox-" + currentTarget.getAttribute('data-id') as string) as HTMLInputElement;
+    if(key === 'Enter') {
+      if(currentTarget.value !== currentTarget.dataset.value) {
+        setModifyDOM(modifyDOM => ({
+          ...modifyDOM,
+          [currentTarget.getAttribute('data-id')!]: currentTarget.value,
+        }))
+      } else {
+        setModifyDOM(modifyDOM => {
+          delete modifyDOM[currentTarget.getAttribute('data-id')!];
+          return {...modifyDOM};
+        });
+      }
+    }
+    CheckBoxDOM.click();
   }
 
   return (
@@ -224,19 +251,59 @@ const RecordPage = () => {
                     <input onClick={handleChecked} data-other={`notRecord-${meter.id}`} type="checkbox" id={`success-${meter.id}`} className="toggle-success" />
                     <input onClick={handleChecked} data-other={`success-${meter.id}`} type="checkbox" id={`notRecord-${meter.id}`} className="toggle-notRecord" />
                     <div className="df aic gap10">
-                      <span className="wsn">水號</span> <span className="value">{meter.waterId}</span>
+                      <span className="wsn">水號</span>
+                      <label className="value fx1 df">
+                        <input type="checkbox" className="dn" id={`checkbox-waterId-${meter.id}`} onClick={handleToggle} />
+                        {modifyDOM[`waterId-${meter.id}`] ?
+                          <span className="bg-zombie">{modifyDOM[`waterId-${meter.id}`]}</span>:
+                          <span className="cp">{meter.waterId}</span>
+                        }
+                        <input required type="text" className="input dn fx1" name="waterId" data-id={`waterId-${meter.id}`} data-value={meter.waterId} onKeyUp={handleKeyUp} defaultValue={meter.waterId} />
+                      </label>
                     </div>
                     <div className="df aic gap10">
-                      <span className="wsn">錶號</span> <span className="value">{meter.meterId}</span>
+                      <span className="wsn">錶號</span>
+                      <label className="value fx1 df">
+                        <input type="checkbox" className="dn" id={`checkbox-meterId-${meter.id}`} onClick={handleToggle} />
+                        {modifyDOM[`meterId-${meter.id}`] ?
+                          <span className="bg-zombie">{modifyDOM[`meterId-${meter.id}`]}</span>:
+                          <span className="cp">{meter.meterId}</span>
+                        }
+                        <input required type="text" className="input dn fx1" name="meterId" data-id={`meterId-${meter.id}`} data-value={meter.meterId} onKeyUp={handleKeyUp} defaultValue={meter.meterId} />
+                      </label>
                     </div>
                     <div className="df aic gap10">
-                      <span className="wsn">地址</span> <span className="value">{meter.address}</span>
+                      <span className="wsn">地址</span>
+                      <label className="value fx1 df">
+                        <input type="checkbox" className="dn" id={`checkbox-address-${meter.id}`} onClick={handleToggle} />
+                        {modifyDOM[`address-${meter.id}`] ?
+                          <span className="bg-zombie">{modifyDOM[`address-${meter.id}`]}</span>:
+                          <span className="cp">{meter.address}</span>
+                        }
+                        <input required type="text" className="input dn fx1" name="address" data-id={`address-${meter.id}`} data-value={meter.address} onKeyUp={handleKeyUp} defaultValue={meter.address || ''} />
+                      </label>
                     </div>
                     <div className="df aic gap10">
-                      <span className="wsn">錶位</span> <span className="value">{meter.location}</span>
+                      <span className="wsn">錶位</span>
+                      <label className="value fx1 df">
+                        <input type="checkbox" className="dn" id={`checkbox-location-${meter.id}`} onClick={handleToggle} />
+                        {modifyDOM[`location-${meter.id}`] ?
+                          <span className="bg-zombie">{modifyDOM[`location-${meter.id}`]}</span>:
+                          <span className="cp">{meter.location || "新增錶位"}</span>
+                        }
+                        <input type="text" className="input dn fx1" name="location" data-id={`location-${meter.id}`} data-value={meter.location} onKeyUp={handleKeyUp} defaultValue={meter.location || ''} />
+                      </label>
                     </div>
                     <div className="df aic gap10">
-                      <span className="wsn">備註</span> <span className="value">{meter.note}</span>
+                      <span className="wsn">備註</span>
+                      <label className="value fx1 df">
+                        <input type="checkbox" className="dn" id={`checkbox-note-${meter.id}`} onClick={handleToggle} />
+                        {modifyDOM[`note-${meter.id}`] ?
+                          <span className="bg-zombie">{modifyDOM[`note-${meter.id}`]}</span>:
+                          <span className="cp">{meter.note || "新增備註"}</span>
+                        }
+                        <input type="text" className="input dn fx1" name="note" data-id={`note-${meter.id}`} data-value={meter.note} onKeyUp={handleKeyUp} defaultValue={meter.note || ''} />
+                      </label>
                     </div>
                     {!!meter.Record.length &&
                       <>
@@ -247,7 +314,7 @@ const RecordPage = () => {
                           <div className="tar">
                             <label className="close cp" htmlFor={`toggle-record-${meter.id}`}>
                               <span>×</span>
-                            關閉
+                              關閉
                             </label>
                           </div>
                           {meter.Record.map(record =>
@@ -273,6 +340,11 @@ const RecordPage = () => {
                       <input type="hidden" name="search" defaultValue={search} />
                       <input type="hidden" name="showRecord" defaultValue={showRecord ? "1": ""} />
                       <input type="hidden" name="projectIdList" defaultValue={userTitle !== Role.ADM ? projectListItems.map(({ id }) => id).join(','): ""} />
+                      {modifyDOM[`waterId-${meter.id}`] && <input name="updateMeter[waterId]" type="hidden" value={modifyDOM[`waterId-${meter.id}`]} />}
+                      {modifyDOM[`meterId-${meter.id}`] && <input name="updateMeter[meterId]" type="hidden" value={modifyDOM[`meterId-${meter.id}`]} />}
+                      {modifyDOM[`address-${meter.id}`] && <input name="updateMeter[address]" type="hidden" value={modifyDOM[`address-${meter.id}`]} />}
+                      {modifyDOM[`location-${meter.id}`] && <input name="updateMeter[location]" type="hidden" value={modifyDOM[`location-${meter.id}`]} />}
+                      {modifyDOM[`note-${meter.id}`] && <input name="updateMeter[note]" type="hidden" value={modifyDOM[`note-${meter.id}`]} />}
                       <div className="df">
                         <input className="input fx2 f1r xs:f3r wp100" type="tel" name="content" placeholder="度數" required />
                         <label className="fx1 db bgpc bgrn bgsct" style={{backgroundImage: `url(${preview || IMAGE})`}}>
@@ -288,6 +360,11 @@ const RecordPage = () => {
                       <input type="hidden" name="search" defaultValue={search} />
                       <input type="hidden" name="showRecord" defaultValue={showRecord ? "1": ""} />
                       <input type="hidden" name="projectIdList" defaultValue={userTitle !== Role.ADM ? projectListItems.map(({ id }) => id).join(','): ""} />
+                      {modifyDOM[`waterId-${meter.id}`] && <input name="updateMeter[waterId]" type="hidden" value={modifyDOM[`waterId-${meter.id}`]} />}
+                      {modifyDOM[`meterId-${meter.id}`] && <input name="updateMeter[meterId]" type="hidden" value={modifyDOM[`meterId-${meter.id}`]} />}
+                      {modifyDOM[`address-${meter.id}`] && <input name="updateMeter[address]" type="hidden" value={modifyDOM[`address-${meter.id}`]} />}
+                      {modifyDOM[`location-${meter.id}`] && <input name="updateMeter[location]" type="hidden" value={modifyDOM[`location-${meter.id}`]} />}
+                      {modifyDOM[`note-${meter.id}`] && <input name="updateMeter[note]" type="hidden" value={modifyDOM[`note-${meter.id}`]} />}
                       <div className="df">
                         <select className="input fx2 f1r xs:f3r wp100" name="content" required>
                           {Object.keys(NotRecordReasonMap).map(key =>
