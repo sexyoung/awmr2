@@ -78,6 +78,29 @@ const verb = {
   },
   record: async (form: FormData, userId: number, status: Status) => {
     const meterId = +form.get('meterId')!;
+    let updateMeter: {[key: string]: any} = {};
+    [
+      'updateMeter[waterId]',
+      'updateMeter[meterId]',
+      'updateMeter[address]',
+      'updateMeter[location]',
+      'updateMeter[note]',
+    ].forEach(key => {
+      if(form.get(key)) {
+        updateMeter[key.slice(12, -1)] = form.get(key) as string;
+      }
+    });
+
+    // 如果有更新地址的話要順便更新經緯度
+    if(updateMeter.address) {
+      updateMeter = {
+        ...updateMeter,
+        ...(await MeterUploadAction.coordinate(toSBC(updateMeter.address)))
+      };
+    }
+
+    // 更新水表，如果有修改的話
+    meterApi.update({ id: meterId, data: updateMeter});
 
     const [Y, M, D] = formatYmd().split('/');
 
@@ -99,6 +122,7 @@ const verb = {
     projectIdListArr.sort((a, b) => a - b);
 
     const keys = await redis.keys(`${REDIS_PREFIX}:*${projectIdListArr.join(',')}*:search:`);
+    await redis.disconnect();
     
     // const keys = [...new Set([
     //   `${REDIS_PREFIX}:*${projectIdList}*:search:${search}`,
@@ -134,16 +158,16 @@ const verb = {
         },
         where: { area: meter!.area! },
       });
-      await areaCache(meter!.area!, areaListItems[0]._count.area);
+      areaCache(meter!.area!, areaListItems[0]._count.area);
     });
 
-    const summary = await redis.hGetAll(`${REDIS_PREFIX}:${projectIdList}:search:${search}`);
-    await redis.disconnect();
+    // const summary = await redis.hGetAll(`${REDIS_PREFIX}:${projectIdList}:search:${search}`);
+    // await redis.disconnect();
     return {
-      meterCount: +summary.meterCount,
-      meterCountSummary: +summary.meterCountSummary,
-      successCount: +summary.successCount,
-      notRecordCount: +summary.notRecordCount,
+      // meterCount: +summary.meterCount,
+      // meterCountSummary: +summary.meterCountSummary,
+      // successCount: +summary.successCount,
+      // notRecordCount: +summary.notRecordCount,
     };
   }
 }

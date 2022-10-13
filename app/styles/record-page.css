@@ -22,6 +22,19 @@
   
 }
 
+.RecordPage .search-form .key {
+  padding: 5px 10px;
+  border-radius: 3px;
+  height: 20px;
+  margin-bottom: 5px;
+  margin-right: 5px;
+}
+
+.RecordPage .search-form .key:hover {
+  text-decoration: line-through;
+  background-color: var(--color-gray);
+}
+
 .RecordPage .toggle-block input:checked + label {
   color: #fff;
   background-color: var(--color-blue-bayoux);
@@ -91,6 +104,14 @@
 
 .RecordPage .item-list .item .value {
   color: var(--color-blue-bayoux);
+}
+
+.RecordPage .item-list .item .value input[type=checkbox]:checked ~ span {
+  display: none;
+}
+
+.RecordPage .item-list .item .value input[type=checkbox]:checked ~ input {
+  display: inline-block;
 }
 
 .RecordPage .item-list .item > input {

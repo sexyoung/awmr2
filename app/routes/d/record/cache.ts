@@ -13,7 +13,7 @@ type Cache = {
 }
 
 export async function cache({
-  search = '',
+  search = '', // 'key1,key2,key3,...'
   isForce = false,
   showRecord = false,
   projectIdList = [],
@@ -35,16 +35,19 @@ export async function cache({
     AND: [
       {isActive: true},
       {projectId: { in: projectIdList }},
-      {project: {isActive: true}}
+      {project: {isActive: true}},
+      ...search.split(',').map(contains => ({
+        OR: [
+          {area: { contains }},
+          {address: { contains }},
+          {meterId: { contains }},
+          {waterId: { contains }},
+          {location: { contains }},
+          {note: { contains }},
+        ]
+      }))
+
     ],
-    OR: [
-      {area: { contains: search }},
-      {address: { contains: search }},
-      {meterId: { contains: search }},
-      {waterId: { contains: search }},
-      {location: { contains: search }},
-      {note: { contains: search }},
-    ]
   }
 
   const redis = new Redis(process.env.REDIS_URL);

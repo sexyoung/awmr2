@@ -12,6 +12,7 @@ import { db } from "~/utils/db.server";
 import { Meter, Project, Record, User } from "@prisma/client";
 import { Caliber } from "~/consts/meter";
 import { getUser, isAdmin } from "~/api/user";
+import { cacheAll } from "~/api/cache/area.cache";
 
 type LoaderData = {
   DOMAIN: string;
@@ -70,6 +71,15 @@ export const loader: LoaderFunction = async ({ params: { projectId = 0 }, reques
     where: {
       projectId: +projectId,
     }
+  });
+
+  const cacheArea = await cacheAll();
+  /** @ts-ignore */
+  areaListItems.sort((a, b) => {
+    return (
+      +new Date(cacheArea[b.area as string].lastRecordTime || 0) -
+      +new Date(cacheArea[a.area as string].lastRecordTime || 0)
+    );
   });
 
   return {
@@ -143,9 +153,9 @@ const projectExportPage = () => {
         狀態: Status[record.status],
         內容: record.content,
         工程師: record.user.fullname,
-        日期: new Date(record.createdAt).toLocaleString().split(' ')[0],
-        時間: new Date(record.createdAt).toLocaleString().split(' ')[1],
-        照片: `${DOMAIN}/record${record.picture}`
+        日期: format(+ new Date(record.createdAt), 'yyyy/MM/dd'),
+        時間: format(+ new Date(record.createdAt), 'HH:mm:ss'),
+        照片: record.picture ? `${DOMAIN}/record${record.picture}`: ''
       });
       return data;
     });

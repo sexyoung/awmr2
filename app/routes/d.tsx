@@ -1,6 +1,7 @@
+import LogRocket from 'logrocket';
 import { LoaderFunction, json, LinksFunction } from "@remix-run/node";
 import { Outlet, Link, useLoaderData, Form } from "@remix-run/react";
-import { MouseEventHandler } from "react";
+import { MouseEventHandler, useEffect } from "react";
 
 import { getUser, requireUserId } from "~/api/user";
 import { Role } from "~/consts/role";
@@ -26,7 +27,15 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export default function DashBoard() {
+
   const { user, ENV } = useLoaderData<LoaderData>();
+
+  useEffect(() => {
+    LogRocket.identify((user!.id).toString(), {
+      name: user!.fullname || user!.name,
+      email: user!.email as string,
+    });
+  }, []);
 
   const handleLogout: React.FormEventHandler<HTMLFormElement> = (e) => {
     !confirm('確定登出?') && e.preventDefault();
