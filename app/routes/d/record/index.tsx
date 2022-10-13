@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import imageCompression from 'browser-image-compression';
 import { Meter, Project, Record, User } from "@prisma/client";
 import { LinksFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
-import { useState, Fragment, MouseEventHandler, FormEvent } from "react";
+import { useState, Fragment, MouseEventHandler, FormEvent, useEffect } from "react";
 import { Form, Link, useFetcher, useLoaderData, useTransition } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
@@ -113,6 +113,10 @@ const RecordPage = () => {
   const [status, setStatus] = useState<Status>(Status.success);
   const { meterCountSummary, successCount, notRecordCount, search, href, pageTotal, meterListItem, projectListItems, showRecord, userTitle } = useLoaderData<LoadData>();
 
+  useEffect(() => {
+    (document.getElementById('search') as HTMLInputElement).value = '';
+  });
+
   const handleChecked: MouseEventHandler = ({ target }) => {
     const DOM = (target as HTMLInputElement);
     const otherDOM = (document.getElementById(DOM.dataset.other as string) as HTMLInputElement);
@@ -204,6 +208,11 @@ const RecordPage = () => {
     CheckBoxDOM.click();
   }
 
+  const handleQuery = async (event: FormEvent<HTMLFormElement>) => {
+    const DOM = (document.getElementById('search') as HTMLInputElement);
+    DOM.value = search ? search.split(',').concat(DOM.value).join(','): DOM.value;
+  }
+
   return (
     <div className="Page RecordPage">
       <div className="block">
@@ -212,8 +221,15 @@ const RecordPage = () => {
           {pageTotal > 1 && <Pagination {...{pageTotal, href}} />}
         </div>
         <div className="search-form">
-          <Form method="get">
-            <input type="text" className="xs:f1.2r" name="search" defaultValue={search} placeholder="搜尋小區、地址、錶號、水號、位置..." />
+          <Form method="get" onSubmit={handleQuery}>
+            {search &&
+              <div>
+                {search.split(',').map((key, i) =>
+                  <Link to={`/d/record?search=${[...search.split(',').slice(0, i), ...search.split(',').slice(i +1)].join(',')}`} className="key tdn dif bg-mantis cf aic" key={i}>{key}</Link>
+                )}
+              </div>
+            }
+            <input type="text" className="xs:f1.2r" name="search" id="search" placeholder="搜尋小區、地址、錶號、水號、位置..." />
           </Form>
         </div>
         <div className="df gap10 ph20 xs:fdc">

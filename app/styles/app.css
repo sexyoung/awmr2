@@ -173,6 +173,10 @@ select {
   margin-top: 10px;
 }
 
+.mb5 {
+  margin-bottom: 5px;
+}
+
 .mb10 {
   margin-bottom: 10px;
 }
@@ -215,6 +219,10 @@ select {
 
 .dib {
   display: inline-block;
+}
+
+.dif {
+  display: inline-flex;
 }
 
 .jcsa {
