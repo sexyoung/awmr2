@@ -122,7 +122,6 @@ const verb = {
     projectIdListArr.sort((a, b) => a - b);
 
     const keys = await redis.keys(`${REDIS_PREFIX}:*${projectIdListArr.join(',')}*:search:`);
-    await redis.disconnect();
     
     // const keys = [...new Set([
     //   `${REDIS_PREFIX}:*${projectIdList}*:search:${search}`,
@@ -158,16 +157,16 @@ const verb = {
         },
         where: { area: meter!.area! },
       });
-      areaCache(meter!.area!, areaListItems[0]._count.area);
+      await areaCache(meter!.area!, areaListItems[0]._count.area);
     });
 
-    // const summary = await redis.hGetAll(`${REDIS_PREFIX}:${projectIdList}:search:${search}`);
-    // await redis.disconnect();
+    const summary = await redis.hGetAll(`${REDIS_PREFIX}:${projectIdList}:search:${search}`);
+    await redis.disconnect();
     return {
-      // meterCount: +summary.meterCount,
-      // meterCountSummary: +summary.meterCountSummary,
-      // successCount: +summary.successCount,
-      // notRecordCount: +summary.notRecordCount,
+      meterCount: +summary.meterCount,
+      meterCountSummary: +summary.meterCountSummary,
+      successCount: +summary.successCount,
+      notRecordCount: +summary.notRecordCount,
     };
   }
 }
