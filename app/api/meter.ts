@@ -8,7 +8,7 @@ export async function toggle({id, isActive}: {id: number, isActive: boolean}) {
 }
 
 export async function update({id, data}: {id: number, data: any}) {
-  await db.meter.update({
+  return await db.meter.update({
     where: { id },
     data,
   });
