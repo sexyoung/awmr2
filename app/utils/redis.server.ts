@@ -17,6 +17,12 @@ export class Redis {
   async set(key: string, value: any) {
     return await this.client.set(key, value);
   }
+  async sAdd(key: string, value: any) {
+    return await this.client.sAdd(key, value);
+  }
+  async sMembers(key: string) {
+    return await this.client.sMembers(key);
+  }
   async hGetAll(key: string) {
     return await this.client.hGetAll(key);
   }
@@ -26,6 +32,9 @@ export class Redis {
     }
     await this.client.hSet(key, field, value);
     await this.client.expire(key, expire);
+  }
+  async del(key: string) {
+    await this.client.del(key);
   }
   async hDel(key: string, field: string) {
     await this.client.hDel(key, field);

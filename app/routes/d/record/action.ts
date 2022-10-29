@@ -8,10 +8,6 @@ import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request";
 import { toSBC, verb as MeterUploadAction } from "~/routes/d/meter/upload/action";
 import * as meterApi from "~/api/meter";
-import { cache, REDIS_PREFIX } from "./cache";
-import { cache as areaCache } from "~/api/cache/area.cache";
-import { cache as projCache } from "~/api/cache/project.cache";
-import { showCostTime, startTime } from "~/utils/helper";
 import { formatYmd } from "~/utils/time";
 
 export const action: ActionFunction = async ({ request }) => {
@@ -100,7 +96,7 @@ const verb = {
     }
 
     // 更新水表，如果有修改的話
-    meterApi.update({ id: meterId, data: updateMeter});
+    const {projectId, area} = await meterApi.update({ id: meterId, data: updateMeter});
 
     const [Y, M, D] = formatYmd().split('/');
 
@@ -113,61 +109,13 @@ const verb = {
     });
 
     const search = (form.get('search') || "") as string;
-    const showRecord = !!form.get('showRecord');
+    const showRecord = !!form.get('showRecord') ? '1': '';
     const projectIdList = (form.get('projectIdList') || "") as string;
+
     const redis = new Redis(process.env.REDIS_URL);
     await redis.connect();
-
-    const projectIdListArr = projectIdList.split(',').map(p => +p);
-    projectIdListArr.sort((a, b) => a - b);
-
-    const keys = await redis.keys(`${REDIS_PREFIX}:*${projectIdListArr.join(',')}*:search:`);
+    await redis.sAdd('job', `${projectId}:${area}:${projectIdList}:${search}:${showRecord}`);
     await redis.disconnect();
-    
-    // const keys = [...new Set([
-    //   `${REDIS_PREFIX}:*${projectIdList}*:search:${search}`,
-    //   `${REDIS_PREFIX}:*${projectIdList}*:search:`,
-    //   // `${REDIS_PREFIX}::search:`, // ← 加了這個會花8秒 (但非工程師會用到，需找時間批次處理)
-    // ])];
-    // 先把特定搜尋與全域的 summary 先更新
-    // 然後要在排程中把 record:summary:{包括18的}:search:* 全部更新 (每個約 0.5s)
-
-    // startTime();
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      const projectIdListStr = key.split(':')[2];
-      const search = key.split(':')[4];
-      await cache({
-        search,
-        showRecord,
-        isForce: true,
-        projectIdList: projectIdListStr ? projectIdListStr.split(',').map(Number): [],
-      });
-      // showCostTime(`${key} 總耗時: `);
-    }
-
-    db.meter.findUnique({where: {id: meterId}}).then(async meter => {
-      // 更新 project
-      projCache(meter!.projectId);
-
-      // 更新小區抄錶成功/失敗數字
-      const areaListItems = await db.meter.groupBy({
-        by: ['area'],
-        _count: {
-          area: true,
-        },
-        where: { area: meter!.area! },
-      });
-      areaCache(meter!.area!, areaListItems[0]._count.area);
-    });
-
-    // const summary = await redis.hGetAll(`${REDIS_PREFIX}:${projectIdList}:search:${search}`);
-    // await redis.disconnect();
-    return {
-      // meterCount: +summary.meterCount,
-      // meterCountSummary: +summary.meterCountSummary,
-      // successCount: +summary.successCount,
-      // notRecordCount: +summary.notRecordCount,
-    };
+    return json('OK');
   }
 }
