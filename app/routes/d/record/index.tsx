@@ -221,7 +221,7 @@ const RecordPage = () => {
           {pageTotal > 1 && <Pagination {...{pageTotal, href}} />}
         </div>
         <div className="search-form">
-          <Form method="get" onSubmit={handleQuery}>
+          <Form method="get" onSubmit={handleQuery} action="/d/record">
             {search &&
               <div>
                 {search.split(',').map((key, i) =>
