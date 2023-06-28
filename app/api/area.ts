@@ -4,6 +4,7 @@ import { cacheAll, cache } from "./cache/area.cache";
 import { RecordCount } from "./record";
 
 export type AreaData = ({
+  projectId: number;
   projectName: string;
   area: string;
   total: number;

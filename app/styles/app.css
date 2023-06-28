@@ -271,8 +271,10 @@ select {
 .Page > .block > .search-form input {
   padding: 10px;
   outline: none;
-  border: 1px solid #ddd;
   width: -webkit-fill-available;
+}
+.Page > .block > .search-form input:disabled {
+  opacity: .4;
 }
 
 .Page > .block > .wrap {
@@ -305,6 +307,10 @@ select {
 
 .w300 {
   width: 300px;
+}
+
+.h300 {
+  height: 300px;
 }
 
 .bgsc {

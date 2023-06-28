@@ -2,17 +2,19 @@ import { format } from "date-fns";
 import imageCompression from 'browser-image-compression';
 import { Meter, Project, Record, User } from "@prisma/client";
 import { LinksFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
-import { useState, Fragment, MouseEventHandler, FormEvent, useEffect } from "react";
+import { useRef, useState, Fragment, MouseEventHandler, FormEvent, useEffect } from "react";
 import { Form, Link, useFetcher, useLoaderData, useTransition } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 import { Suppy, Type } from "~/consts/meter";
 import { NotRecordReasonMap, Status } from "~/consts/reocrd";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
+import { showCostTime, startTime } from "~/utils/helper";
 
 import RecordBar from "~/component/RecordBar";
 import { cache } from "./cache";
 import stylesUrl from "~/styles/record-page.css";
+import { query } from "~/api/area";
 import { getUser } from "~/api/user";
 import { Role } from "~/consts/role";
 import Modal from "~/component/Modal";
@@ -35,14 +37,17 @@ type LoadData = {
   userTitle: Role;
   href: string;
   meterCount: number;
-  meterCountSummary: number;
-  successCount: number;
-  notRecordCount: number;
+  meterCountSummary?: number;
+  successCount?: number;
+  notRecordCount?: number;
   searchString: string;
   showRecord: boolean;
   projectListItems: Project[];
-  meterListItem: MeterWithPR[];
-  search: string;
+  areaListItems: {[key: number]: string[]};
+  meterListItem?: MeterWithPR[];
+  search?: string;
+  projectId: number;
+  area: string;
 } & PaginationProps
 
 export const links: LinksFunction = () => {
@@ -63,20 +68,49 @@ export const loader: LoaderFunction = async ({ request }) => {
     where: { id: {in: projectIdList}},
     orderBy: { createdAt: "desc" },
   });
+
+  const { data } = await query({});
+
+  const areaListItems: {[key: number]: string[]} = {}
+
+  for (let i = 0; i < data.length; i++) {
+    const element = data[i];
+    if(areaListItems[element.projectId]) {
+      areaListItems[element.projectId].push(element.area);
+    } else {
+      areaListItems[element.projectId] = [];
+    }
+  }
+  
   const page = +url.searchParams.get("page")! || 1;
   const search = url.searchParams.get("search") || '';
+  const projectId = +(url.searchParams.get("projectId") || 0);
+  const area = url.searchParams.get("area") || '';
   const showRecord = Boolean(url.searchParams.get("showRecord")! || 0);
+  
+  if(!projectId || !area) {
+    return {
+      userTitle: user.title,
+      projectId,
+      area,
+      projectListItems,
+      areaListItems,
+      href: url.href,
+    };
+  }
 
+  startTime();
   const {
     where,
     meterCount,
     meterCountSummary,
     successCount,
     notRecordCount,
-  } = await cache({ search, showRecord, projectIdList });
+  } = await cache({ search, showRecord, projectId, area });
+  showCostTime("快取");
 
   const pageTotal = ~~((meterCount && (meterCount - 1)) / PAGE_SIZE) + 1;
-  const meterListItem = await db.meter.findMany({
+  const meterListItem = search ? await db.meter.findMany({
     where,
     skip: (page - 1) * PAGE_SIZE,
     take: PAGE_SIZE,
@@ -89,10 +123,14 @@ export const loader: LoaderFunction = async ({ request }) => {
         }
       },
     }
-  });
+  }): [];
+  
+  showCostTime("查詢");
   return {
     userTitle: user.title,
     search,
+    projectId,
+    area,
     pageTotal,
     showRecord,
     meterCountSummary,
@@ -100,18 +138,38 @@ export const loader: LoaderFunction = async ({ request }) => {
     notRecordCount,
     meterListItem,
     projectListItems,
+    areaListItems,
     href: url.href,
   };
 }
 
 const RecordPage = () => {
+  const queryForm = useRef<HTMLFormElement>(null);
   const fetcher = useFetcher();
   const transition = useTransition();
   const [preview, setPreview] = useState('');
   const [modifyDOM, setModifyDOM] = useState<{[key: string]: string}>({});
   const [showModal, setShowModal] = useState(false);
   const [status, setStatus] = useState<Status>(Status.success);
-  const { meterCountSummary, successCount, notRecordCount, search, href, pageTotal, meterListItem, projectListItems, showRecord, userTitle } = useLoaderData<LoadData>();
+  const {
+    meterCountSummary,
+    successCount,
+    notRecordCount,
+    search,
+    projectId,
+    area,
+    href,
+    pageTotal = 0,
+    meterListItem,
+    projectListItems,
+    areaListItems,
+    showRecord,
+    userTitle
+  } = useLoaderData<LoadData>();
+  const isDisabled = !projectId || !area;
+  const canCalc = meterCountSummary !== undefined &&
+  successCount !== undefined &&
+  notRecordCount !== undefined;
 
   useEffect(() => {
     (document.getElementById('search') as HTMLInputElement).value = '';
@@ -208,9 +266,17 @@ const RecordPage = () => {
     CheckBoxDOM.click();
   }
 
-  const handleQuery = async (event: FormEvent<HTMLFormElement>) => {
+  const handleQuery = async (_event: FormEvent<HTMLFormElement>) => {
     const DOM = (document.getElementById('search') as HTMLInputElement);
     DOM.value = search ? search.split(',').concat(DOM.value).join(','): DOM.value;
+  }
+
+  const handleChnageProjectId = (_event: FormEvent<HTMLSelectElement>) => {
+    queryForm.current?.submit();
+  }
+
+  const handleChnageArea = (_event: FormEvent<HTMLSelectElement>) => {
+    queryForm.current?.submit();
   }
 
   return (
@@ -221,20 +287,38 @@ const RecordPage = () => {
           {pageTotal > 1 && <Pagination {...{pageTotal, href}} />}
         </div>
         <div className="search-form">
-          <Form method="get" onSubmit={handleQuery} action="/d/record">
+          <Form method="get" onSubmit={handleQuery} action="/d/record" ref={queryForm}>
+            <div className="pa-form df gap10">
+              <div className="fx1">
+                <select className="input wp100" value={projectId} name="projectId" onChange={handleChnageProjectId}>
+                  <option value="0">選擇標案</option>
+                  {projectListItems.map(project =>
+                    <option key={project.id} value={project.id}>{project.name}</option>
+                  )}
+                </select>
+              </div>
+              <div className="fx1">
+                <select className="input wp100" value={area} name="area" onChange={handleChnageArea}>
+                  <option value="">選擇小區</option>
+                  {areaListItems[projectId]?.map(area =>
+                    <option key={area} value={area}>{area}</option>
+                  )}
+                </select>
+              </div>
+            </div>
             {search &&
               <div>
                 {search.split(',').map((key, i) =>
-                  <Link to={`/d/record?search=${[...search.split(',').slice(0, i), ...search.split(',').slice(i +1)].join(',')}`} className="key tdn dif bg-mantis cf aic" key={i}>{key}</Link>
+                  <Link to={`/d/record?projectId=${projectId}&area=${area}&search=${[...search.split(',').slice(0, i), ...search.split(',').slice(i +1)].join(',')}`} className="key tdn dif bg-mantis cf aic" key={i}>{key}</Link>
                 )}
               </div>
             }
-            <input type="text" className="xs:f1.2r" name="search" id="search" placeholder="搜尋小區、地址、錶號、水號、位置..." />
+            <input type="text" className="input xs:f1.2r" name="search" id="search" placeholder="搜尋小區、地址、錶號、水號、位置..." disabled={isDisabled} />
           </Form>
         </div>
         <div className="df gap10 ph20 xs:fdc">
           <div className="toggle-block df">
-            <input id="hadRecord" type="checkbox" defaultChecked={showRecord} onChange={toggleShowRecord} />
+            <input id="hadRecord" type="checkbox" defaultChecked={showRecord} onChange={toggleShowRecord} disabled={isDisabled} />
             <label className="df bg-gallery jcc aic ph20 xs:fx1 xs:p10" htmlFor="hadRecord">已登記水錶</label>
             {/* <input id="GPS" type="checkbox" />
             <label htmlFor="GPS">GPS</label> */}
@@ -249,16 +333,16 @@ const RecordPage = () => {
             <ul className="sum-num df m0 p0 lsn mt5">
               <li className="f14">登錄: {successCount}</li>
               <li className="f14">異常: {notRecordCount}</li>
-              <li className="f14">剩餘: {meterCountSummary - successCount - notRecordCount}</li>
+              <li className="f14">剩餘: {canCalc && (meterCountSummary - successCount - notRecordCount)}</li>
               <li className="f14">
                 抄見率:
-                {~~(10000 * successCount / (meterCountSummary - notRecordCount))/100}%
+                {canCalc && (~~(10000 * successCount / (meterCountSummary - notRecordCount))/100)}%
               </li>
             </ul>
           </div>
         </div>
         <div className="df fww item-list">
-          {meterListItem.length ?
+          {meterListItem?.length ?
             meterListItem.map(meter =>
               <Fragment key={meter.id}>
                 <div className="fg1 fbp50 mwp50 xs:fbp100 xs:mwp100">
@@ -355,7 +439,6 @@ const RecordPage = () => {
                       <input type="hidden" name="meterId" defaultValue={meter.id} />
                       <input type="hidden" name="search" defaultValue={search} />
                       <input type="hidden" name="showRecord" defaultValue={showRecord ? "1": ""} />
-                      <input type="hidden" name="projectIdList" defaultValue={userTitle !== Role.ADM ? projectListItems.map(({ id }) => id).join(','): ""} />
                       {modifyDOM[`waterId-${meter.id}`] && <input name="updateMeter[waterId]" type="hidden" value={modifyDOM[`waterId-${meter.id}`]} />}
                       {modifyDOM[`meterId-${meter.id}`] && <input name="updateMeter[meterId]" type="hidden" value={modifyDOM[`meterId-${meter.id}`]} />}
                       {modifyDOM[`address-${meter.id}`] && <input name="updateMeter[address]" type="hidden" value={modifyDOM[`address-${meter.id}`]} />}
@@ -401,6 +484,7 @@ const RecordPage = () => {
                 <div className="break" />
               </Fragment>
             ):
+            search ?
             <div className="m0a xs:wp100">
               <h3 className="tac">新增未存在水錶</h3>
               <fetcher.Form method="post" onSubmit={setShowModal.bind(null, true)}>
@@ -460,6 +544,8 @@ const RecordPage = () => {
               </fetcher.Form>
               {showModal && <Modal onClose={setShowModal.bind(null, false)}>新增水錶中</Modal>}
             </div>
+            :
+            <div className="h300 wp100 df jcc">請搜尋...</div>
           }
           {(fetcher.state === 'submitting') && <Modal>登錄中</Modal>}
           {([fetcher.state, transition.state].includes('loading') || transition.state === 'submitting') && <Modal>讀取中</Modal>}

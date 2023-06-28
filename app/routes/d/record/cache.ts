@@ -2,24 +2,24 @@ import { db } from "~/utils/db.server";
 import { Redis } from "~/utils/redis.server";
 import { formatYmd, getTomorrow, getUntilTomorrowSecond } from "~/utils/time";
 
-/** record:summary:{projIdList}:search:${keyword} */
+/** record:summary:{projId}:{area}:search:${keyword} */
 export const REDIS_PREFIX = 'record:summary';
 
 type Cache = {
   search?: string;
   isForce?: boolean;
   showRecord?: boolean;
-  projectIdList?: number[];
+  projectId?: number;
+  area?: string;
 }
 
 export async function cache({
   search = '', // 'key1,key2,key3,...'
   isForce = false,
   showRecord = false,
-  projectIdList = [],
+  projectId = 0,
+  area = '',
 }: Cache) {
-
-  const projStr = projectIdList.join(',');
 
   // 預設排除今日登記
   const where = {
@@ -34,11 +34,11 @@ export async function cache({
     }),
     AND: [
       {isActive: true},
-      {projectId: { in: projectIdList }},
+      {projectId},
+      {area},
       {project: {isActive: true}},
       ...search.split(',').map(contains => ({
         OR: [
-          {area: { contains }},
           {address: { contains }},
           {meterId: { contains }},
           {waterId: { contains }},
@@ -54,7 +54,7 @@ export async function cache({
   await redis.connect();
 
   if(!isForce) {
-    const summary = await redis.hGetAll(`${REDIS_PREFIX}:${projStr}:search:${search}`);
+    const summary = await redis.hGetAll(`${REDIS_PREFIX}:${projectId}:${area}:search:${search}`);
     if(Object.entries(summary).length) {
       await redis.disconnect();
       return {
@@ -99,10 +99,10 @@ export async function cache({
 
   if(!search) {
     /** 到了明天00:00 會自已清掉 */
-    await redis.hSet(`${REDIS_PREFIX}:${projStr}:search:${search}`, 'meterCount', meterCount, expireTime);
-    await redis.hSet(`${REDIS_PREFIX}:${projStr}:search:${search}`, 'meterCountSummary', meterCountSummary, expireTime);
-    await redis.hSet(`${REDIS_PREFIX}:${projStr}:search:${search}`, 'successCount', successCount, expireTime);
-    await redis.hSet(`${REDIS_PREFIX}:${projStr}:search:${search}`, 'notRecordCount', notRecordCount, expireTime);
+    await redis.hSet(`${REDIS_PREFIX}:${projectId}:${area}:search:${search}`, 'meterCount', meterCount, expireTime);
+    await redis.hSet(`${REDIS_PREFIX}:${projectId}:${area}:search:${search}`, 'meterCountSummary', meterCountSummary, expireTime);
+    await redis.hSet(`${REDIS_PREFIX}:${projectId}:${area}:search:${search}`, 'successCount', successCount, expireTime);
+    await redis.hSet(`${REDIS_PREFIX}:${projectId}:${area}:search:${search}`, 'notRecordCount', notRecordCount, expireTime);
   }
   
   await redis.disconnect();

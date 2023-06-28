@@ -110,11 +110,10 @@ const verb = {
 
     const search = (form.get('search') || "") as string;
     const showRecord = !!form.get('showRecord') ? '1': '';
-    const projectIdList = (form.get('projectIdList') || "") as string;
 
     const redis = new Redis(process.env.REDIS_URL);
     await redis.connect();
-    await redis.sAdd('job', `${projectId}:${area}:${projectIdList}:${search}:${showRecord}`);
+    await redis.sAdd('job', `${projectId}:${area}:${search}:${showRecord}`);
     await redis.disconnect();
     return json('OK');
   }
