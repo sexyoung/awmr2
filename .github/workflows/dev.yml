@@ -1,5 +1,5 @@
 # https://dev.to/dyarleniber/setting-up-a-ci-cd-workflow-on-github-actions-for-a-react-app-with-github-pages-and-codecov-4hnp
-
+# 隨便加個東西再跑一次試試
 name: deploy to dev server
 on:
   push:
@@ -87,12 +87,11 @@ jobs:
 
       - name: 上傳程式碼到server
         uses: appleboy/scp-action@master
-        env:
+        with:
           HOST: ${{secrets.HOST}}
           USERNAME: ${{secrets.USER}}
           PORT: 22
           KEY: ${{ secrets.KEY }}
-        with:
           source: "./,!.git,!build.zip"
           target: "~/web/awmr-2-dev"
 
