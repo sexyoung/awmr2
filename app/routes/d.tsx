@@ -54,18 +54,23 @@ export default function DashBoard() {
       <div className="app">
         <input type="checkbox" id="hamburger" />
         <div id="menu" className="menu xs:pf xs:df xs:jcsb" onClick={handleClose}>
-          <div className="system-name">
+          <Link to="/d" className="system-name">
             小區
             <u>抄表系統</u>
             <small><small><small>
               {ENV === 'DEV' ? '測試版': 'v2.0'}
             </small></small></small>
-          </div>
+          </Link>
           <label htmlFor="hamburger" id="hamburger-menu" />
           <div className="info bg-blue-bayoux xs:pf xs:r0 xs:t0 xs:h100vh">
             {user &&
               <div className="user-info">
-                <div className="avatar" style={{backgroundImage: `url(/avatar/${user.avatar})`}}/>
+                {(user.title === Role.ADM || user.title === Role.OFW) ?
+                  <Link to={`/d/user/${user.id}`}>
+                    <div className="avatar" style={{backgroundImage: `url(/avatar/${user.avatar})`}}/>
+                  </Link>:
+                  <div className="avatar" style={{backgroundImage: `url(/avatar/${user.avatar})`}}/>
+                }
                 <div className="name">{user.fullname || user.name}</div>
                 <Form action="/logout" method="post" onSubmit={handleLogout}>
                   <button type="submit" className="logout">

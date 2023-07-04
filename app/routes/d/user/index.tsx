@@ -166,16 +166,18 @@ export default () => {
         <div className="ph20 pb20 df fww gap10">
           {userListItems.map(user =>
             <div key={user.id} className={`user-box tac pr df fdc gap2 ${user.isActive ? 'enabled': 'disabled'}`}>
-              <div onClick={toggleActive.bind(null, user.id, user.isActive)} className={`bgsc bgpc pr ovh avatar ${user.isActive ? 'disabled': 'enabled'}`} style={
+              <Link to={`/d/user/${user.id}`} data-title={canEdit ? '編輯': '觀看'} className={`bgsc bgpc pr ovh avatar`} style={
                 user.avatar ?
                 {backgroundImage: `url(/avatar/${user.avatar})`}:
                 {backgroundColor: `#f6f6f6`}
               } />
               <div>{user.name} - {user.fullname}</div>
               <div>{user.phone || '　'}</div>
-              <Link className="edit" to={`/d/user/${user.id}`}>
-                {canEdit ? '編輯': '觀看'}
-              </Link>
+              {userTitle === Role.ADM && (
+                <div onClick={toggleActive.bind(null, user.id, user.isActive)} className={`edit ${user.isActive ? 'disabled': 'enabled'}`}>
+                  {user.isActive ? '停用': '啟用'}
+                </div>
+              )}
               <div className={`title pa ${user.title}`}>{RoleMap[user.title]}</div>
             </div>
           )}

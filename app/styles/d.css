@@ -36,6 +36,8 @@
 .frame .app .menu .system-name {
   font-size: 1.1rem;
   margin-bottom: 1rem;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .frame .app .menu #hamburger-menu {

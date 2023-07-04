@@ -62,6 +62,8 @@
 .UserPage .user-box .avatar:before {
   display: none;
   cursor: pointer;
+  background-color: rgba(144, 180, 137, 0.7);
+  content: attr(data-title);
 }
 
 .UserPage .user-box .avatar:hover:before {
@@ -75,16 +77,6 @@
   font-size: 1.2rem;
   justify-content: center;
   align-items: center;
-}
-
-.UserPage .user-box .avatar.enabled:before {
-  background-color: rgb(29 119 11 / 70%);
-  content: '啟用';
-}
-
-.UserPage .user-box .avatar.disabled:before {
-  background-color: rgb(174 54 54 / 70%);
-  content: '停用';
 }
 
 .UserPage .user-box.disabled {
@@ -103,7 +95,17 @@
   background-color: #eee;
   color: #333;
   text-decoration: none;
+  cursor: pointer;
 }
+
+.UserPage .user-box .edit.enabled {
+  color: rgb(29 119 11 / 70%);
+}
+
+.UserPage .user-box .edit.disabled {
+  color: rgb(174 54 54 / 70%);
+}
+
 
 .UserPage .user-box .edit:hover {
   background-color: #ccc;
