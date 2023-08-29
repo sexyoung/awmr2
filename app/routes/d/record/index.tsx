@@ -78,7 +78,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     if(areaListItems[element.projectId]) {
       areaListItems[element.projectId].push(element.area);
     } else {
-      areaListItems[element.projectId] = [];
+      areaListItems[element.projectId] = [element.area];
     }
   }
   
