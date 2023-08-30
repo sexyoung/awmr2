@@ -9,10 +9,11 @@ import { zhTW } from "date-fns/locale";
 import rdrStyle from 'react-date-range/dist/styles.css'; // main style file
 import rdrTheme from 'react-date-range/dist/theme/default.css'; // theme css file
 import { db } from "~/utils/db.server";
-import { Meter, Project, Record, User } from "@prisma/client";
+import { Meter, Project, Record, Status, User } from "@prisma/client";
 import { Caliber } from "~/consts/meter";
 import { getUser, isAdmin } from "~/api/user";
 import { cacheAll } from "~/api/cache/area.cache";
+import { NotRecordReasonMap } from "~/consts/reocrd";
 
 type LoaderData = {
   DOMAIN: string;
@@ -42,7 +43,7 @@ const Suppy = {
   5: '停水',
 }
 
-const Status = {
+const StatusMap = {
   success: '正常',
   notRecord: '異常',
 }
@@ -150,8 +151,8 @@ const projectExportPage = () => {
         錶種: Type[record.meter.type as keyof typeof Type],
         錶位: record.meter.location,
         備註: record.meter.note,
-        狀態: Status[record.status],
-        內容: record.content,
+        狀態: StatusMap[record.status],
+        內容: record.status === Status.success ? record.content: NotRecordReasonMap[record.content as keyof typeof NotRecordReasonMap],
         工程師: record.user.fullname,
         日期: format(+ new Date(record.createdAt), 'yyyy/MM/dd'),
         時間: format(+ new Date(record.createdAt), 'HH:mm:ss'),
