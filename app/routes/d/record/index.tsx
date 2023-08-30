@@ -87,8 +87,8 @@ export const loader: LoaderFunction = async ({ request }) => {
   const projectId = +(url.searchParams.get("projectId") || 0);
   const area = url.searchParams.get("area") || '';
   const showRecord = Boolean(url.searchParams.get("showRecord")! || 0);
-  
-  if(!projectId || !area) {
+
+  if(!projectId || (user.title !== Role.OFW ? !area: false)) {
     return {
       userTitle: user.title,
       projectId,
@@ -166,7 +166,7 @@ const RecordPage = () => {
     showRecord,
     userTitle
   } = useLoaderData<LoadData>();
-  const isDisabled = !projectId || !area;
+  const isDisabled = !projectId || (userTitle !== Role.OFW ? !area: false);
   const canCalc = meterCountSummary !== undefined &&
   successCount !== undefined &&
   notRecordCount !== undefined;

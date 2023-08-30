@@ -35,7 +35,7 @@ export async function cache({
     AND: [
       {isActive: true},
       {projectId},
-      {area},
+      area ? {area}: {},
       {project: {isActive: true}},
       ...search.split(',').map(contains => ({
         OR: [
