@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { useRef, useState } from "react";
 import { Meter, Project, Record } from "@prisma/client";
 import { LinksFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
-import { Form, useFetcher, useLoaderData } from "@remix-run/react";
+import { Form, useFetcher, useLoaderData, useLocation } from "@remix-run/react";
 import { db } from "~/utils/db.server";
 import { Suppy, Type } from "~/consts/meter";
 import { NotRecordReasonMap, Status } from "~/consts/reocrd";
@@ -99,6 +99,7 @@ const MeterPage = () => {
   const suppy = useRef<HTMLSelectElement>(null);
   const location = useRef<HTMLInputElement>(null);
   const note = useRef<HTMLInputElement>(null);
+  const locate = useLocation();
   const [index, setIndex] = useState(-1);
   const fetcher = useFetcher();
   const { search, href, pageTotal, meterListItem, projectListItems } = useLoaderData<LoadData>();
@@ -158,7 +159,7 @@ const MeterPage = () => {
           </Form>
         </div>
         <Modal onClose={handleHideEdit} className={index === -1 ? "dn": ''}>
-          <Form method="patch" className="EditForm">
+          <Form method="post" className="EditForm" action={`${locate.pathname}${locate.search}`}>
             <div className="title">修改水錶</div>
             <input type="hidden" name="_method" value="update" readOnly />
             <input ref={id} type="hidden" name="id" required />
