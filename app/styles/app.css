@@ -209,6 +209,10 @@ select {
   flex: 2;
 }
 
+.fx3 {
+  flex: 3;
+}
+
 .wsn {
   white-space: nowrap;
 }

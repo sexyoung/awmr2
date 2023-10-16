@@ -445,7 +445,7 @@ const RecordPage = () => {
                       {modifyDOM[`location-${meter.id}`] && <input name="updateMeter[location]" type="hidden" value={modifyDOM[`location-${meter.id}`]} />}
                       {modifyDOM[`note-${meter.id}`] && <input name="updateMeter[note]" type="hidden" value={modifyDOM[`note-${meter.id}`]} />}
                       <div className="df">
-                        <input className="input fx2 f1r xs:f3r wp100" type="tel" name="content" placeholder="度數" required />
+                        <input className="input fx3 f1r xs:f2r wp100" type="tel" name="content" placeholder="度數" required />
                         <label className="fx1 db bgpc bgrn bgsct" style={{backgroundImage: `url(${preview || IMAGE})`}}>
                           <input type="file" className="dn" onChange={handleCompression.bind(null, meter)} accept="image/*" />
                         </label>
@@ -465,14 +465,14 @@ const RecordPage = () => {
                       {modifyDOM[`location-${meter.id}`] && <input name="updateMeter[location]" type="hidden" value={modifyDOM[`location-${meter.id}`]} />}
                       {modifyDOM[`note-${meter.id}`] && <input name="updateMeter[note]" type="hidden" value={modifyDOM[`note-${meter.id}`]} />}
                       <div className="df">
-                        <select className="input fx2 f1r xs:f3r wp100" name="content" required>
+                        <select className="input fx3 f1r xs:f2r wp100" name="content" required>
                           {Object.keys(NotRecordReasonMap).map(key =>
                             <option key={key} value={key}>
                               {NotRecordReasonMap[key as keyof typeof NotRecordReasonMap]}
                             </option>
                           )}
                         </select>
-                        <label className="fx1 db bgpc bgrn bgsc" style={{backgroundImage: `url(${preview || IMAGE})`}}>
+                        <label className="fx1 db bgpc bgrn bgsct" style={{backgroundImage: `url(${preview || IMAGE})`}}>
                           <input type="file" className="dn" onChange={handleCompression.bind(null, meter)} accept="image/*" />
                         </label>
                         <input type="hidden" name="picture" className={`picture-${meter.id}`} />

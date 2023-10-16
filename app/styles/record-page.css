@@ -153,6 +153,7 @@
 
 .RecordPage .item-list .item .toggle-record:checked ~ .record-list {
   transform: translateY(0);
+  z-index: 1;
 }
 
 .RecordPage .item-list .item .toggle-success:checked ~ .success-form {
@@ -184,6 +185,7 @@
 
   .RecordPage .item-list .item > form {
     bottom: 78px;
+    top: 34px;
     background-color: #eee;
   }
 }
