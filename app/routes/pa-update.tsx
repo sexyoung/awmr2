@@ -29,6 +29,7 @@ export const loader: LoaderFunction = async ({ request }) => {
       showRecord: Boolean(showRecord),
       isForce: true,
       projectId: +projectId,
+      area,
     });
   
     // 更新 project
