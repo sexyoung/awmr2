@@ -237,7 +237,7 @@ const RecordPage = () => {
 
     // 還是把設定檔名的部分在上傳時就指定好吧
     document.querySelectorAll<HTMLInputElement>(`[class=picture-${meter.id}]`).forEach(input => {
-      input.value = `${meter.waterId}-${meter.meterId}.${blob!.name.split('.').pop()}`;
+      input.value = `${meter.area}-${meter.meterId}.${blob!.name.split('.').pop()}`;
     });
   }
 
