@@ -1,5 +1,4 @@
-import { PrismaClient, User, Project, Meter } from "@prisma/client";
-import { Role } from "~/consts/role";
+import { PrismaClient, User, Project, Meter, Role } from "@prisma/client";
 const db = new PrismaClient();
 
 async function seed() {
