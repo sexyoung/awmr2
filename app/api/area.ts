@@ -54,3 +54,16 @@ export async function query({ take = 0, where = {}, skip = 0 }: Params) {
     data: take ? data.slice(skip, skip+take): data,
   }
 }
+
+export async function changeArea(data: {
+  projectId: number;
+  fromArea: string;
+  toArea: string;
+  userId: number;
+}) {
+  await db.toChangeArea.create({ data });
+}
+
+export async function deleteChangeArea(id: number) {
+  await db.toChangeArea.delete({where: {id}})
+}

@@ -13,3 +13,12 @@ export async function update({id, data}: {id: number, data: any}) {
     data,
   });
 }
+
+export async function updateArea({fromArea, toArea}: {fromArea: string, toArea: string}) {
+  return await db.meter.updateMany({
+    where: { area: fromArea },
+    data: {
+      area: toArea
+    },
+  });
+}
