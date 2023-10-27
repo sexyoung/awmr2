@@ -642,12 +642,6 @@ label.avatar .img {
   background-color: var(--color-blue-bayoux);
 }
 
-.btn.error {
-  border: none;
-  color: #fff;
-  background-color: var(--color-error);
-}
-
 .btn:disabled {
   opacity: 0.5;
 }

@@ -94,7 +94,7 @@ export default function DashBoard() {
                 <li><Link to="/d/record/out">區外要求</Link></li>
                 <li><Link to="/d/user">人事查詢</Link></li>
               </>}
-              {[Role.ADM, Role.OFW].includes(user?.title) && <>
+              {(user?.title === Role.ADM || user?.title === Role.OFW) && <>
                 <li><Link to="/d/area/change">修改小區</Link></li>
               </>}
             </ul>
