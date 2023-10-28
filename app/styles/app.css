@@ -636,6 +636,12 @@ label.avatar .img {
   filter: brightness(0.85);
 }
 
+.btn.error {
+  border: none;
+  color: #fff;
+  background-color: var(--color-error);
+}
+
 .btn.primary {
   border: none;
   color: #fff;
