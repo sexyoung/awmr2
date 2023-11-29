@@ -447,7 +447,7 @@ const RecordPage = () => {
                       <div className="df">
                         <input className="input fx3 f1r xs:f2r wp100" type="tel" name="content" placeholder="度數" required />
                         <label className="fx1 db bgpc bgrn bgsct" style={{backgroundImage: `url(${preview || IMAGE})`}}>
-                          <input type="file" className="dn" onChange={handleCompression.bind(null, meter)} accept="image/*" capture="camera" />
+                          <input type="file" className="dn" onChange={handleCompression.bind(null, meter)} accept="image/*" />
                         </label>
                         <input type="hidden" name="picture" className={`picture-${meter.id}`} />
                       </div>
