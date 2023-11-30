@@ -410,7 +410,7 @@ const RecordPage = () => {
                         <label className={`last-record pa bg-${meter.Record[0].status}`} htmlFor={`toggle-record-${meter.id}`}>
                           {meter.Record[0].user.fullname}({meter.Record.length})
                         </label>
-                        <div className="record-list pa fill ova ttyp-100 tt150ms">
+                        <div className="record-list pa fill ova ttyp-100 tt150ms max-h-180">
                           <div className="tar">
                             <label className="close cp" htmlFor={`toggle-record-${meter.id}`}>
                               <span>×</span>
@@ -434,7 +434,7 @@ const RecordPage = () => {
                       <label className="fx1 tac p4 color-mantis cp cf border-mantis xs:p10" htmlFor={`success-${meter.id}`}>正常</label>
                       <label className="fx1 tac p4 color-zombie cp cf border-zombie xs:p10" htmlFor={`notRecord-${meter.id}`}>異常</label>
                     </div>
-                    <fetcher.Form encType="multipart/form-data" onSubmit={handleSubmit.bind(null, meter)} method="post" className="success-form pa fill p10p50 ttxp-100 tt150ms df fdc jcc xs:p10 gap10">
+                    <fetcher.Form encType="multipart/form-data" onSubmit={handleSubmit.bind(null, meter)} method="post" className="success-form p10p50 df fdc jcc xs:p10 gap10 dn">
                       <input type="hidden" name="_method" value={Status.success} />
                       <input type="hidden" name="meterId" defaultValue={meter.id} />
                       <input type="hidden" name="search" defaultValue={search} />
@@ -453,7 +453,7 @@ const RecordPage = () => {
                       </div>
                       <button className="btn primary f1r xs:f2r">登錄</button>
                     </fetcher.Form>
-                    <fetcher.Form encType="multipart/form-data" onSubmit={handleSubmit.bind(null, meter)} method="post" className="notRecord-form pa fill p10p50 ttxp100 tt150ms df fdc jcc xs:p10 gap10">
+                    <fetcher.Form encType="multipart/form-data" onSubmit={handleSubmit.bind(null, meter)} method="post" className="notRecord-form p10p50 df fdc jcc xs:p10 gap10 dn">
                       <input type="hidden" name="_method" value={Status.notRecord} />
                       <input type="hidden" name="meterId" defaultValue={meter.id} />
                       <input type="hidden" name="search" defaultValue={search} />

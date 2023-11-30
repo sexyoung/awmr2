@@ -14,6 +14,10 @@
   transition: transform .15s;
 }
 
+.max-h-180 {
+  max-height: 180px;
+}
+
 .RecordPage .toggle-block input {
   display: none;
 }
@@ -157,11 +161,11 @@
 }
 
 .RecordPage .item-list .item .toggle-success:checked ~ .success-form {
-  transform: translateX(0);
+  display: flex;
 }
 
 .RecordPage .item-list .item .toggle-notRecord:checked ~ .notRecord-form {
-  transform: translateX(0);
+  display: flex;
 }
 
 .RecordPage .item-list .item .toggle-success:checked ~ .btn-block > label:nth-of-type(1) {
