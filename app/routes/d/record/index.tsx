@@ -410,7 +410,7 @@ const RecordPage = () => {
                         <label className={`last-record pa bg-${meter.Record[0].status}`} htmlFor={`toggle-record-${meter.id}`}>
                           {meter.Record[0].user.fullname}({meter.Record.length})
                         </label>
-                        <div className="record-list pa fill ova ttyp-100 tt150ms max-h-180">
+                        <div className="record-list pa fill ova ttyp-100 tt150ms max-h-160">
                           <div className="tar">
                             <label className="close cp" htmlFor={`toggle-record-${meter.id}`}>
                               <span>×</span>
@@ -447,7 +447,7 @@ const RecordPage = () => {
                       <div className="df">
                         <input className="input fx3 f1r xs:f2r wp100" type="tel" name="content" placeholder="度數" required />
                         <label className="fx1 db bgpc bgrn bgsct" style={{backgroundImage: `url(${preview || IMAGE})`}}>
-                          <input type="file" className="dn" onChange={handleCompression.bind(null, meter)} accept="image/*" />
+                          <input type="file" className="dn" onChange={handleCompression.bind(null, meter)} accept="image/*" capture />
                         </label>
                         <input type="hidden" name="picture" className={`picture-${meter.id}`} />
                       </div>
@@ -473,7 +473,7 @@ const RecordPage = () => {
                           )}
                         </select>
                         <label className="fx1 db bgpc bgrn bgsct" style={{backgroundImage: `url(${preview || IMAGE})`}}>
-                          <input type="file" className="dn" onChange={handleCompression.bind(null, meter)} accept="image/*" capture="camera" />
+                          <input type="file" className="dn" onChange={handleCompression.bind(null, meter)} accept="image/*" capture />
                         </label>
                         <input type="hidden" name="picture" className={`picture-${meter.id}`} />
                       </div>

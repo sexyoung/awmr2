@@ -14,8 +14,8 @@
   transition: transform .15s;
 }
 
-.max-h-180 {
-  max-height: 180px;
+.max-h-160 {
+  max-height: 160px;
 }
 
 .RecordPage .toggle-block input {
