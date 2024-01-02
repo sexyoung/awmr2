@@ -52,10 +52,9 @@ export async function cache({
 
   const redis = new Redis(process.env.REDIS_URL);
   await redis.connect();
-
   if(!isForce) {
     const summary = await redis.hGetAll(`${REDIS_PREFIX}:${projectId}:${area}:search:${search}`);
-    if(Object.entries(summary).length) {
+    if(Object.entries(summary).length && 0) {
       await redis.disconnect();
       return {
         where,

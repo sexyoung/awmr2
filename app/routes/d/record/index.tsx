@@ -107,7 +107,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     successCount,
     notRecordCount,
   } = await cache({ search, showRecord, projectId, area });
-  showCostTime("快取");
+  // showCostTime("快取");
 
   const pageTotal = ~~((meterCount && (meterCount - 1)) / PAGE_SIZE) + 1;
   const meterListItem = await db.meter.findMany({
@@ -125,7 +125,7 @@ export const loader: LoaderFunction = async ({ request }) => {
     }
   });
   
-  showCostTime("查詢");
+  // showCostTime("查詢");
   return {
     userTitle: user.title,
     search,
