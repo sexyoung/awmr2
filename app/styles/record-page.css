@@ -156,7 +156,8 @@
 }
 
 .RecordPage .item-list .item .toggle-record:checked ~ .record-list {
-  transform: translateY(0);
+  transform: translateY(-100%);
+  display: block;
   z-index: 1;
 }
 

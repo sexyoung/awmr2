@@ -346,7 +346,7 @@ const RecordPage = () => {
             meterListItem.map(meter =>
               <Fragment key={meter.id}>
                 <div className="fg1 fbp50 mwp50 xs:fbp100 xs:mwp100">
-                  <div className="item m0a pr ovh">
+                  <div className="item m0a pr">
                     <input type="checkbox" id={`toggle-record-${meter.id}`} className="toggle-record" />
                     <input onClick={handleChecked} data-other={`notRecord-${meter.id}`} type="checkbox" id={`success-${meter.id}`} className="toggle-success" />
                     <input onClick={handleChecked} data-other={`success-${meter.id}`} type="checkbox" id={`notRecord-${meter.id}`} className="toggle-notRecord" />
@@ -410,7 +410,7 @@ const RecordPage = () => {
                         <label className={`last-record pa bg-${meter.Record[0].status}`} htmlFor={`toggle-record-${meter.id}`}>
                           {meter.Record[0].user.fullname}({meter.Record.length})
                         </label>
-                        <div className="record-list pa fill ova ttyp-100 tt150ms max-h-160">
+                        <div className="record-list pa fill ova dn tt150ms max-h-160">
                           <div className="tar">
                             <label className="close cp" htmlFor={`toggle-record-${meter.id}`}>
                               <span>×</span>
