@@ -1,0 +1,30 @@
+/* 手機版時，改變排列方式 */
+@media (max-width: 600px) {
+  .HistoryPage thead {
+    display: none;
+  }
+  .HistoryPage tr {
+    display: block;
+    margin: 0 20px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+  }
+
+  .HistoryPage.HistoryPage.HistoryPage.HistoryPage td {
+    padding: 0;
+    display: inline-block;
+  }
+
+  .HistoryPage.HistoryPage.HistoryPage.HistoryPage td:nth-child(1) {
+    width: 120px;
+  }
+  .HistoryPage.HistoryPage.HistoryPage.HistoryPage td:nth-child(2) {
+    width: calc(100% - 120px);
+  }
+
+  .HistoryPage.HistoryPage.HistoryPage.HistoryPage td:nth-child(4) {
+    margin: 0 10px;
+  }
+
+}
