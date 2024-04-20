@@ -14,12 +14,20 @@
   transition: transform .15s;
 }
 
+.max-h-160 {
+  max-height: 160px;
+}
+
 .RecordPage .toggle-block input {
   display: none;
 }
 
 .RecordPage .toggle-block label {
   
+}
+
+.RecordPage .pa-form {
+  margin-bottom: 10px;
 }
 
 .RecordPage .search-form .key {
@@ -148,15 +156,17 @@
 }
 
 .RecordPage .item-list .item .toggle-record:checked ~ .record-list {
-  transform: translateY(0);
+  transform: translateY(-100%);
+  display: block;
+  z-index: 1;
 }
 
 .RecordPage .item-list .item .toggle-success:checked ~ .success-form {
-  transform: translateX(0);
+  display: flex;
 }
 
 .RecordPage .item-list .item .toggle-notRecord:checked ~ .notRecord-form {
-  transform: translateX(0);
+  display: flex;
 }
 
 .RecordPage .item-list .item .toggle-success:checked ~ .btn-block > label:nth-of-type(1) {
@@ -180,6 +190,7 @@
 
   .RecordPage .item-list .item > form {
     bottom: 78px;
+    top: 34px;
     background-color: #eee;
   }
 }

@@ -5,7 +5,7 @@
 import { json, LoaderFunction, redirect } from "@remix-run/node";
 import { db } from '~/utils/db.server';
 import { Redis } from "~/utils/redis.server";
-import { cache, REDIS_PREFIX } from "~/routes/d/record/cache";
+import { cache } from "~/routes/d/record/cache";
 import { cache as areaCache } from "~/api/cache/area.cache";
 import { cache as projCache } from "~/api/cache/project.cache";
 
@@ -22,26 +22,15 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   for (let i = 0; i < jobList.length; i++) {
     const job = jobList[i];
-    const [projectId, area, projectIdList, search, showRecord] = job.split(':');
-    // console.log([projectId, area, projectIdList, search, showRecord]);
-    
-    const projectIdListArr = projectIdList.split(',').map(p => +p);
-    projectIdListArr.sort((a, b) => a - b);
+    const [projectId, area, search, showRecord] = job.split(':');
 
-    const keys = await redis.keys(`${REDIS_PREFIX}:*${projectIdListArr.join(',')}*:search:`);
-    // startTime();
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      const projectIdListStr = key.split(':')[2];
-      const search = key.split(':')[4];
-      await cache({
-        search,
-        showRecord: Boolean(showRecord),
-        isForce: true,
-        projectIdList: projectIdListStr ? projectIdListStr.split(',').map(Number): [],
-      });
-      // showCostTime(`${key} 總耗時: `);
-    }
+    await cache({
+      search,
+      showRecord: Boolean(showRecord),
+      isForce: true,
+      projectId: +projectId,
+      area,
+    });
   
     // 更新 project
     projCache(+projectId);

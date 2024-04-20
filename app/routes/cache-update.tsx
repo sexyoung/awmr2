@@ -1,5 +1,4 @@
 import { json, LoaderFunction, redirect } from "@remix-run/node";
-import { cache } from '~/routes/d/record/cache';
 import { db } from '~/utils/db.server';
 import { Redis } from "~/utils/redis.server";
 import { cache as areaCache } from "~/api/cache/area.cache";
@@ -10,7 +9,6 @@ export const loader: LoaderFunction = async ({ request }) => {
   if(key !== process.env.CACHE_KEY) {
     throw redirect('https://www.google.com');
   }
-  await cache({ isForce: true });
 
   const redis = new Redis(process.env.REDIS_URL);
   await redis.connect();

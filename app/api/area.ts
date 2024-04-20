@@ -4,6 +4,7 @@ import { cacheAll, cache } from "./cache/area.cache";
 import { RecordCount } from "./record";
 
 export type AreaData = ({
+  projectId: number;
   projectName: string;
   area: string;
   total: number;
@@ -52,4 +53,17 @@ export async function query({ take = 0, where = {}, skip = 0 }: Params) {
     count: areaListItems.length,
     data: take ? data.slice(skip, skip+take): data,
   }
+}
+
+export async function changeArea(data: {
+  projectId: number;
+  fromArea: string;
+  toArea: string;
+  userId: number;
+}) {
+  await db.toChangeArea.create({ data });
+}
+
+export async function deleteChangeArea(id: number) {
+  await db.toChangeArea.delete({where: {id}})
 }

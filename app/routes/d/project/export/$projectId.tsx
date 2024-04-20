@@ -1,4 +1,4 @@
-import * as XLSX from "xlsx";
+import * as XLSX from 'xlsx-js-style'
 import { useState, ChangeEventHandler, useRef } from "react";
 import { startOfDay, endOfDay, format } from 'date-fns';
 import { useLoaderData, useParams } from "@remix-run/react";
@@ -9,10 +9,11 @@ import { zhTW } from "date-fns/locale";
 import rdrStyle from 'react-date-range/dist/styles.css'; // main style file
 import rdrTheme from 'react-date-range/dist/theme/default.css'; // theme css file
 import { db } from "~/utils/db.server";
-import { Meter, Project, Record, User } from "@prisma/client";
+import { Meter, Project, Record, Status, User } from "@prisma/client";
 import { Caliber } from "~/consts/meter";
 import { getUser, isAdmin } from "~/api/user";
 import { cacheAll } from "~/api/cache/area.cache";
+import { NotRecordReasonMap } from "~/consts/reocrd";
 
 type LoaderData = {
   DOMAIN: string;
@@ -42,7 +43,7 @@ const Suppy = {
   5: '停水',
 }
 
-const Status = {
+const StatusMap = {
   success: '正常',
   notRecord: '異常',
 }
@@ -138,25 +139,28 @@ const projectExportPage = () => {
     let colMaxWidth = [
       12, 16, 13, 13, 40, 6, 4, 9, 0, 0, 6, 9, 10, 11, 14, 80
     ];
+    let lastWaterId = '';
     const sheetData = recordList.map(record => {
+      const s = lastWaterId === record.meter.waterId ? { font: { color: { rgb: "CCCCCC" } } }: {}
       const data: {[key: string]: any} = ({
-        標案: record.meter.project.name,
-        小區: record.meter.area,
-        水號: record.meter.waterId,
-        錶號: record.meter.meterId,
-        地址: record.meter.address,
-        供水: Suppy[record.meter.suppy as keyof typeof Suppy],
-        口徑: Caliber[record.meter.meterId.replace(/[0-9]/g, '') as keyof typeof Caliber],
-        錶種: Type[record.meter.type as keyof typeof Type],
-        錶位: record.meter.location,
-        備註: record.meter.note,
-        狀態: Status[record.status],
-        內容: record.content,
-        工程師: record.user.fullname,
-        日期: format(+ new Date(record.createdAt), 'yyyy/MM/dd'),
-        時間: format(+ new Date(record.createdAt), 'HH:mm:ss'),
-        照片: record.picture ? `${DOMAIN}/record${record.picture}`: ''
+        標案: {v: record.meter.project.name, s},
+        小區: {v: record.meter.area, s},
+        水號: {v: record.meter.waterId, s},
+        錶號: {v: record.meter.meterId, s},
+        地址: {v: record.meter.address, s},
+        供水: {v: Suppy[record.meter.suppy as keyof typeof Suppy], s},
+        口徑: {v: Caliber[record.meter.meterId.replace(/[0-9]/g, '') as keyof typeof Caliber], s},
+        錶種: {v: Type[record.meter.type as keyof typeof Type], s},
+        錶位: {v: record.meter.location, s},
+        備註: {v: record.meter.note, s},
+        狀態: {v: StatusMap[record.status], s},
+        內容: {v: record.status === Status.success ? record.content: NotRecordReasonMap[record.content as keyof typeof NotRecordReasonMap], s},
+        工程師: {v: record.user.fullname, s},
+        日期: {v: format(+ new Date(record.createdAt), 'yyyy/MM/dd'), s},
+        時間: {v: format(+ new Date(record.createdAt), 'HH:mm:ss'), s},
+        照片: {v: record.picture ? `${DOMAIN}/record${record.picture}`: '', s},
       });
+      lastWaterId = record.meter.waterId;
       return data;
     });
     const worksheet = XLSX.utils.json_to_sheet(sheetData);
@@ -169,10 +173,22 @@ const projectExportPage = () => {
     //   {a: 4, b: 5, c: 6},
     // ]);
     const workbook = XLSX.utils.book_new();
+
+// STEP 2: Create data rows and styles
+let row = [
+	{ v: "Courier: 24", t: "s", s: { font: { name: "Courier", sz: 24 } } },
+	{ v: "bold & color", t: "s", s: { font: { bold: true, color: { rgb: "FF0000" } } } },
+	{ v: "fill: color", t: "s", s: { fill: { fgColor: { rgb: "E9E9E9" } } } },
+	{ v: "line\nbreak", t: "s", s: { alignment: { wrapText: true } } },
+];
+
+// STEP 3: Create worksheet with rows; Add worksheet to workbook
+const ws = XLSX.utils.aoa_to_sheet([row]);
+
     XLSX.utils.book_append_sheet(workbook, worksheet, "record");
     // console.log(sheetData);
     
-    XLSX.writeFileXLSX(workbook, "records.xlsx");
+    XLSX.writeFile(workbook, "records.xlsx");
   }
 
   return (

@@ -57,9 +57,29 @@ export const verb = {
     const latlng = await verb.coordinate(address);
     // await delay(800);
     try {
-      await db.meter.create({
-        data: {...meter, ...latlng, address: toSBC(address)}
+      /** 2023/7/22
+       * 上傳水表時需要:
+       * 同水號異表號: 可覆蓋！
+       * 異水號同表號: 不可覆蓋！
+       * 所以只要同表號就不能蓋掉
+       */
+      
+      const meterListItem = await db.meter.findUnique({
+        where: {
+          waterId: meter.waterId
+        }
       });
+
+      if(!meterListItem) {
+        await db.meter.create({
+          data: {...meter, ...latlng, address: toSBC(address)}
+        });
+      } else {
+        await db.meter.update({
+          where: {waterId: meter.waterId},
+          data: {...meter, ...latlng, address: toSBC(address)}
+        });
+      }
       return json({...meter, ...latlng});
       // return json(true);
     } catch(e) {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Record, User, Project, Meter } from "@prisma/client";
 import { Role } from "@prisma/client";
-import { LinksFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
+import { redirect, LinksFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
 import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 import { db } from "~/utils/db.server";
 import { Avator } from "./avatar";
@@ -61,9 +61,10 @@ export const loader: LoaderFunction = async ({ params: { userId = 0 }, request }
     }
   });
   if (!user) throw new Error("user not found");
+  if (user.title === Role.ADM && currUser.title !== Role.ADM) return redirect('/d');
   const RoleList = Object.keys(Role);
   return {
-    titleList: RoleList.slice(0, RoleList.indexOf(currUser.title)),
+    titleList: RoleList.slice(0, RoleList.indexOf(currUser.title) + 1),
     user: {
       ...user,
       projects: user.projects.map(({ project }) => project.id)

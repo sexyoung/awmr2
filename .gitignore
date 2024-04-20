@@ -4,3 +4,4 @@ build
 .cache
 public/avatar/*
 public/record/*
+dump.rdb

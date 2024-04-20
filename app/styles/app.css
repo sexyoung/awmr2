@@ -209,6 +209,10 @@ select {
   flex: 2;
 }
 
+.fx3 {
+  flex: 3;
+}
+
 .wsn {
   white-space: nowrap;
 }
@@ -271,8 +275,10 @@ select {
 .Page > .block > .search-form input {
   padding: 10px;
   outline: none;
-  border: 1px solid #ddd;
   width: -webkit-fill-available;
+}
+.Page > .block > .search-form input:disabled {
+  opacity: .4;
 }
 
 .Page > .block > .wrap {
@@ -305,6 +311,10 @@ select {
 
 .w300 {
   width: 300px;
+}
+
+.h300 {
+  height: 300px;
 }
 
 .bgsc {
@@ -624,6 +634,12 @@ label.avatar .img {
 .btn:hover {
   cursor: pointer;
   filter: brightness(0.85);
+}
+
+.btn.error {
+  border: none;
+  color: #fff;
+  background-color: var(--color-error);
 }
 
 .btn.primary {

@@ -16,7 +16,7 @@ LogRocket.init('minteai/awmr2');
 export const links: LinksFunction = () => {
   return [
     { rel: "preconnect", href: "https://fonts.googleapis.com" },
-    { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "1" },
+    { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
     { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" },
     { rel: "stylesheet", href: stylesUrl }
   ]

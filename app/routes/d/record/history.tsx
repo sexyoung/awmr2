@@ -1,12 +1,14 @@
 import { format } from "date-fns";
 import { Meter, Record, Role, User } from "@prisma/client";
-import { LoaderFunction, MetaFunction } from "@remix-run/node";
+import { LinksFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
 import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 import { Pagination, Props as PaginationProps } from "~/component/Pagination";
 import { NotRecordReasonMap, Status } from "~/consts/reocrd";
 import { getUser } from "~/api/user";
+
+import stylesUrl from "~/styles/history-page.css";
 
 export { action } from "../meter/action";
 
@@ -29,6 +31,10 @@ type LoadData = {
 export const meta: MetaFunction = () => ({
   title: TITLE,
 });
+
+export const links: LinksFunction = () => {
+  return [{ rel: "stylesheet", href: stylesUrl }];
+};
 
 export const loader: LoaderFunction = async ({ request }) => {
   const user = await getUser(request);
