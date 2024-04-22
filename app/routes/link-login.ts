@@ -8,7 +8,7 @@ export const loader: LoaderFunction = async ({request}) => {
   const url = new URL(request.url);
   const hash = url.searchParams.get("hash") || "";
   const userList = await db.user.findMany({ where: {isActive: true} });
-  const user = userList.find(user => hash === `${md5(`${formatYmd()}${user.id}${user.name}${user.createdAt}`)}`);
+  const user = userList.find(user => hash === `${md5(`${formatYmd()}${user.id}${user.name}${+user.createdAt}`)}`);
   if(!user) return redirect('/logout');
   return createUserSession(user.id, '/d');
 }

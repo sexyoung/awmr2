@@ -60,7 +60,7 @@ async function handleEvent(event: WebhookEvent) {
     }
     return client.replyMessage(event.replyToken, {
       type: 'text',
-      text: `${process.env.DOMAIN}/link-login?hash=${md5(`${formatYmd()}${user.id}${user.name}${user.createdAt}`)}`
+      text: `${process.env.DOMAIN}/link-login?hash=${md5(`${formatYmd()}${user.id}${user.name}${+user.createdAt}`)}`
     });
   }
 }
