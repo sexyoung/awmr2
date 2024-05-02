@@ -1,0 +1,21 @@
+name: restart prd
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'prd'
+
+jobs:
+  restart-prd:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 重啟 awmr-2
+        uses: appleboy/ssh-action@master
+        with:
+          HOST: ${{secrets.HOST}}
+          USERNAME: ${{secrets.USER}}
+          PORT: 22
+          KEY: ${{ secrets.KEY }}
+          script: pm2 restart awmr-2
