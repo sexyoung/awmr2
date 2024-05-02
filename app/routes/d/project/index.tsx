@@ -69,7 +69,7 @@ export default () => {
               <input type="hidden" name="_method" value="create" />
               <input className="input" type="text" name="name" placeholder="標案名稱" required />
               <input className="input" type="text" name="code" placeholder="標案代號" required />
-              <label>啟用<input type="checkbox" name="isActive" value="1" defaultChecked /></label>
+              <label style={{display: 'none'}}>啟用<input type="checkbox" name="isActive" value="1" defaultChecked /></label>
               <button className="btn primary f1r">新增</button>
               <div id="form-error-message">
                 {actionData?.formError && <p>{actionData.formError}</p>}
